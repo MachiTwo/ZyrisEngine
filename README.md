@@ -1,45 +1,73 @@
 # Zyris Engine
 
-[![Godot Version](https://img.shields.io/badge/Godot-4.6--stable-blue.svg)](https://github.com/godotengine/godot)
-[![Zyris Version](https://img.shields.io/badge/4.6.0-zyris.1-orange.svg)](https://github.com/Kaffyn/ZyrisEngine/tree/Zyris)
+[![Zyris Version](https://img.shields.io/badge/Zyris-1.3--AbilitySystem-blue.svg)](https://github.com/godotengine/godot)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.txt)
 
 > [!TIP]
 > **Leia isto em outros idiomas / Read this in other languages:**
 > [**English**](README.en.md) | [**Português**](README.md)
 
-> [!NOTE]
-> **Por que o README principal está em Português?**
-> O Zyris é uma iniciativa do **MachiTwo** e brasileiros estão contribuindo diretamente com ele. Por isso, decidimos manter o README principal em português enquanto o projeto for pequeno. Assim que o Zyris crescer e atrair mais colaboradores internacionais, passaremos a utilizar o Inglês como idioma principal.
+Zyris é uma engine open source orientada a sistemas e arquitetura de produção.
 
-**Zyris** é uma poderosa distribuição de game engine baseada na [Godot Engine](https://godotengine.org), desenvolvida por **MachiTwo** e contribuidores. Nossa missão é expandir os limites do desenvolvimento de jogos de código aberto, implementando recursos avançados e otimizações que rivalizam com engines líderes da indústria como Unreal Engine e Unity.
+Projetada para oferecer controle estrutural, previsibilidade e escalabilidade,
+Zyris integra o mesmo ecossistema de engines profissionais como Godot, Unreal Engine e Unity.
 
-## Visão
+---
 
-O Zyris não é um fork destinado a contribuições upstream para a Godot Engine. Em vez disso, somos uma **distribuição paralela** que:
+## Origem Tecnológica
 
-- **Estende as capacidades da Godot** com recursos de ponta
-- **Otimiza a performance** para o desenvolvimento de jogos de alto nível
-- **Implementa inovações proprietárias** mantendo os princípios de código aberto
-- **Foca em fluxos de trabalho e ferramentas de produção AAA**
+Zyris é um fork da Godot Engine
+
+Isso significa que:
+
+- Projetos feitos na Godot podem ser abertos no Zyris
+- Seu conhecimento em GDScript continua válido
+- O fluxo de trabalho permanece familiar
+
+Zyris mantém compatibilidade com a base Godot,
+mas possui governança própria de commits e roadmap.
+
+As atualizações upstream não são aplicadas automaticamente.
+Cada mudança é analisada, filtrada e integrada de forma controlada.
+
+---
+
+## Filosofia
+
+Zyris é uma engine **intencionalmente opinada**. Acreditamos que liberdade absoluta sem direção gera código caótico, retrabalho estrutural e sistemas inconsistentes ao longo do tempo.
+
+Por isso, o Zyris estabelece **convenções claras**, arquiteturas recomendadas e sistemas integrados como padrão. Essas convenções não removem liberdade — elas reduzem a necessidade de reinventar soluções fundamentais.
+
+Você ainda pode desenvolver da forma que preferir, mas, por padrão, o Zyris oferece:
+
+- **Estruturas previsíveis**
+- **Sistemas persistentes integrados**
+- **Gerenciamento determinístico de estados**
+- **Base arquitetural consistente** para IA e gameplay
+
+Nosso objetivo não é limitar criatividade, mas **eliminar complexidade desnecessária**. Zyris evolui como uma engine orientada a produção, focada em coerência sistêmica, longevidade de projeto e maturidade técnica.
+
+### Princípios de Evolução
+
+Cada sistema introduzido no Zyris deve integrar-se nativamente ao núcleo, aderir a princípios determinísticos e priorizar estabilidade de produção.
+
+A engine evolui de forma **curada**. Atualizações externas não são adotadas automaticamente; cada mudança é avaliada sob a ótica de coerência estrutural e maturidade técnica. Nosso foco é construir uma base sólida para projetos escaláveis e preparados para longevidade e evolução contínua.
 
 Todo o crédito para a engine base vai para o [repositório official da Godot Engine](https://github.com/godotengine/godot) e sua incrível comunidade de contribuidores.
 
-## Versionamento e Política de Sincronização
+## Comunicação Oficial
 
-O Zyris realiza rebase manual apenas em versões maiores da Godot (ex: `4.5 → 4.6`).
+O desenvolvimento e anúncios oficiais do Zyris são comunicados através de:
 
-Atualizações menores não são acompanhadas.
+🎥 [Machi](https://www.youtube.com/@machiatodev)
+🎥 [Alen](https://www.youtube.com/@yatsuragames)
 
-### Formato de Versão
+Esses canais são responsáveis por:
 
-**Formato de Versão Zyris** - `Godot-X.Y.Z-zyris.N`
-
-- **X.Y.Z** - Versão official da Godot Engine (ex: `4.6.0`)
-
-- **N** - Incremento de subversão do Zyris (ex: `zyris.1`, `zyris.2`)
-
-**Versão Atual** - `4.6.0-zyris.1`
+- Atualizações da engine
+- Explicações técnicas
+- Demonstrações de sistemas
+- Tutoriais oficiais
 
 ## Roadmap
 
@@ -60,10 +88,9 @@ O Zyris está implementando um conjunto abrangente de sistemas. Abaixo está nos
 
     **Recursos Principais:**
 
-- **Integração de Feedback Háptico** - Suporte a vibração para dispositivos móveis e gamepads
 - **Rastreamento de Dispositivo de Entrada** - API `LastInputType` detecta e rastreia automaticamente o método de entrada ativo (Toque, Teclado/Mouse, Gamepad)
 - **Adaptação de UI Dinâmica** - Controles virtuais aparecem/ocultam automaticamente com base no dispositivo detectado
-- **Modos de Visibilidade** - `ALWAYS`, `TOUCHSCREEN_ONLY`, `WHEN_PAUSED` para comportamento flexível de UI
+- **Modos de Visibilidade** - `ALWAYS`, `TOUCHSCREEN_ONLY` para comportamento flexível de UI
 - **Mapeamento de Ações** - Integração direta com o sistema InputMap da Godot
 - **Sistema de Entrada Polimórfico** - A classe base `InputEvent` agora usa métodos virtuais para correspondência de ações e comparação de eventos, permitindo que eventos virtuais customizados se integrem perfeitamente ao core da engine como cidadãos de primeira classe.
 - **Integração com o Editor** - Suporte total no inspetor com configuração visual
@@ -86,39 +113,48 @@ O Zyris está implementando um conjunto abrangente de sistemas. Abaixo está nos
 
 ### Em Desenvolvimento
 
-- [ ] **Library (Bottom Panel)** - Gerenciador de conteúdo baseado em Grid
-  - **Coexistência Nativa** - Funciona como um painel adicional ao FileSystem tradicional, focado em produtividade sem alterar a estrutura de arquivos.
-  - **Visualização em Grid** - Exibição direta de conteúdo organizada por abas especializadas (Resources, Scenes, Scripts, Assets), eliminando a navegação profunda em pastas.
-  - **Focagem por Contexto** - Filtragem inteligente que exibe apenas o que é relevante para o momento de desenvolvimento.
+- [ ] **Ability System** - Framework de Gameplay Orientado a Dados
 
-- [ ] **Level Streaming System (LSS)** - Orquestração de Mundo e Estados
-  - **GSM (Game State Machine)** - O `LSSServer` gerencia o ciclo de vida da aplicação através de estados determinísticos (`BOOT`, `MENU`, `LOADING`, `GAMEPLAY`, `TRANSITION`).
-  - **StreamingZone** - Sistema de volumes espaciais que gerenciam o carregamento assíncrono de chunks do mundo com base na posição do jogador.
-  - **Arquitetura Super Node** - O `LSSRoot` permite a coexistência de múltiplos mundos ou "universos" isolados, facilitando transições de mapa sem interrupção de lógica core.
-  - **State Hydration** - Integrado ao Save Server para garantir que zonas carregadas recuperem seu estado exato instantaneamente.
+    Uma implementação nativa de alto desempenho projetada para escalar de mecânicas simples a sistemas de combate RPG complexos.
 
-- [ ] **Gameplay Ability System (GAS)** - Framework de Gameplay Orientado a Dados
+    **Sistemas Centrais:**
+  - `AbilitySystem` - Singleton global que gerencia o registry de Gameplay Tags e as configurações do projeto.
+  - `AbilitySystemComponent` - O processador central anexado a entidades (Player, Inimigos). Orquestra habilidades, efeitos, atributos e cues.
+  - `AbilitySystemAbilityContainer` - Recurso de arquétipo que define a configuração base de uma entidade (Habilidades, Atributos Iniciais, Efeitos Inatos, Cues).
+  - `AbilitySystemAttributeSet` - Container que gerencia coleções de AbilitySystemAttribute Resources com validação de limites e valores runtime.
+  - `AbilitySystemAttribute` - Define estatísticas vitais (HP, Mana, Stamina, Level) com suporte a `BaseValue` e `CurrentValue` (com buffs/debuffs).
+  - `AbilitySystemAbility` - Lógica modular de habilidades (Pular, Atirar, Magia) com **Costs & Cooldowns** e ciclo de vida `can_activate → activate → end`.
+  - `AbilitySystemEffect` - Regras de alteração de atributos (Dano, Cura, Buffs/Debuffs) com políticas de duração (Instantâneo, Duração, Infinito).
+  - `AbilitySystemTask` - Ações assíncronas para habilidades complexas (ex: aguardar input, mover para posição, spawnar projéteis).
+  - `AbilitySystemTag` - Tag hierárquica nomeada (ex: `state.buff.speed`) para filtros e validações de habilidades.
+  - `AbilitySystemCue` - Feedback visual/sonoro (VFX, SFX, screen shake) disparado por efeitos ou habilidades.
 
-    Uma implementação nativa de alto desempenho do padrão GAS, projetada para escalar de mecânicas simples a sistemas de combate RPG complexos.
+    **Sistemas de Runtime (Specs):**
 
-    **Arquitetura:**
-  - `AbilitySystemComponent`: O processador central anexado a entidades (Player, Inimigos).
-  - `AttributeSet`: Define estatísticas vitais (HP, Mana, Stamina) com replicação e cálculos de modificadores.
-  - `GameplayAbility`: Lógica modular de habilidades (Pular, Atirar, Magia).
-  - `GameplayEffect`: Regras de alteração de atributos (Dano, Cura, Buffs/Debuffs).
+    Os *Specs* são instâncias de runtime que envolvem um Resource de definição com o contexto de execução necessário. Permitem que habilidades, efeitos e cues acessem dados dinâmicos (quem atacou, qual a magnitude calculada, duração restante) sem poluir o Resource compartilhado.
+  - `AbilitySystemAbilitySpec` - Instância de runtime de uma `AbilitySystemAbility` concedida ao ASC. Armazena nível e estado ativo.
+  - `AbilitySystemEffectSpec` - Instância de runtime de um `AbilitySystemEffect` aplicado. Armazena duração restante, magnitudes dinâmicas e referência ao ASC fonte/alvo.
+  - `AbilitySystemCueSpec` - Contexto de execução de uma `AbilitySystemCue`. Carrega ASC fonte/alvo, o `AbilitySystemEffectSpec` que disparou a cue e a magnitude calculada.
 
-    **Integração com Editor (EditorPlugin):**
-    O GAS utiliza um **Editor Modal (Popup)** acionado via Inspector, similar ao sistema `AudioStreamInteractive`.
-  - **Janela Flutuante de Grafo** - Habilidades são editadas em uma janela dedicada sobreposta, permitindo acesso visual rápido sem perder o contexto da cena principal 3D/2D.
-  - **Botão de Edição** - O inspetor fornece acesso direto ao editor visual quando um Resource de habilidade é selecionado.
-  - **Tag Management** - Seletor visual de `GameplayTags` para definir interações complexas (ex: "Stun" cancela "Casting") sem hard-coding.
-  - **Live Debug** - Visualização em tempo real do fluxo de execução de habilidades e pilhas de efeitos.
+    **Sistemas Auxiliares:**
+  - `AbilitySystemMagnitudeCalculation` - Classe base para cálculos customizados de magnitude (MMC). Permite escalar dano por atributos (Força, Inteligência) ou curvas.
+  - `AbilitySystemTagContainer` - Container otimizado de tags para consultas e modificações em runtime (add, remove, has, get_all).
+  - `AbilitySystemTargetData` - Pipeline de validação e filtragem de alvos. Suporta Line Trace, Sphere Overlap, Box e shapes customizados.
 
-    **Diferenciais:**
-  - **Determinismo** - Otimizado para jogos multiplayer com previsão e reconciliação.
-  - **Data-Driven** - Designers podem criar variações de habilidades inteiras apenas alterando configurações no Editor.
+    **Recursos Principais:**
+- **Performance Bruta:** Cálculos de modificadores e processamento de tags em C++.
+- **Data-Driven:** Habilidades e efeitos são `Resource`, permitindo que designers criem mecânicas sem tocar em código.
+- **Desacoplamento:** A lógica de "como um dano é calculado" é separada de "quem causa o dano".
+- **Integração Nativa:** Cache automático de nós irmãos (AnimationPlayer, AudioStreamPlayer, etc.) para performance otimizada.
+- **Sinais Reativos:** `attribute_changed`, `tag_changed` para UI e feedback em tempo real.
+- **Gameplay Tasks:** Sistema assíncrono para operações de longa duração dentro de habilidades.
+- **Magnitude Calculation (MMC):** Cálculos complexos de magnitude para efeitos com curvas de dano e escala por atributos.
+- **Ferramentas do Editor:** Inspector customizado para seletores especializados de Tags e Atributos.
+- **Sincronização e Persistência:** Integrado nativamente com o `SaveServer` para persistência automática.
 
-- [ ] **Behavior Tree System** - IA Modular e Reativa
+### Em Planejamento
+
+- [ ] **Behavior Tree** - IA Modular e Reativa
 
     Uma implementação robusta de IA baseada em nós, focada em criar comportamentos complexos através de lógica visual simples e reutilizável.
 
@@ -138,17 +174,113 @@ O Zyris está implementando um conjunto abrangente de sistemas. Abaixo está nos
   - **Nativo & GAS** - Projetado para disparar `GameplayAbilities` diretamente via nós de ação.
   - **Performance** - Travessia de árvore em C++ puro, eliminando gargalos de script em IAs densas.
 
+    **Casos de Uso:**
+- **NPCs de RPG** - Comportamentos complexos de combate, diálogo e exploração.
+- **Inimigos de FPS** - Táticas de squad, cobertura e patrulhamento.
+- **IA de Estratégia** - Tomada de decisão em nível macro e microgerenciamento.
+
 - [ ] **Inventory System** - Gestão de Items e Transações
   - **InventoryServer** - Singleton autoritativo que valida todas as movimentações de items, prevenindo estados inconsistentes ou trapaças.
   - **Equipment Bridge (GAS)** - Ao equipar um item, o sistema injeta/remove automaticamente *Gameplay Abilities* e *Effects* no componente do portador, sem scripts manuais.
   - **Smart UI Nodes** - Conjunto de nós `Control` (`InventoryGrid`, `EquipmentSlot`) que gerenciam drag-and-drop e sincronização automática com o servidor.
   - **Loot Tables** - Geração procedural integrada ao sistema de sorte e tags do GAS.
 
+    **Arquitetura:**
+- **Server-Side Authority** - Todas as transações validadas no servidor.
+- **Client Prediction** - Interface responsiva com validação posterior.
+- **Data-Driven** - Items definidos como Resources com propriedades e comportamentos.
+
+    **Recursos Técnicos:**
+- **Stack Management** - Gerenciamento automático de stacks e quantidades.
+- **Slot Validation** - Validação de regras de equipamento (classe, nível, etc.).
+- **Transaction Rollback** - Reversão automática de transações inválidas.
+- **Network Sync** - Sincronização eficiente de mudanças de inventário.
+
+    **Casos de Uso:**
+- **RPGs** - Inventários complexos com equipamento e consumíveis.
+- **Survival** - Crafting e gestão de recursos limitados.
+- **MMOs** - Economia virtual e prevenção de trapaças.
+
 - [ ] **Camera System (vCam)** - Arbitragem Cinematográfica
   - **Virtual Camera Resources** - Perfis de câmera definidos como Resources, contendo FOV, Follow Target, LookAt e restrições.
-  - **Priority Arbiter** - O `CameraServer` avalia em tempo real qual vCam possui a maior prioridade para assumir o controle da viewport principal com blends configuráveis.
+  - **Priority Arbiter** - O `vCamServer` avalia em tempo real qual vCam possui a maior prioridade para assumir o controle da viewport principal com blends configuráveis.
   - **Procedural Shake** - Sistema de trauma baseado em ruído de Perlin, onde os perfis de tremor são Resources editáveis e acumulativos.
   - **Integração com Viewport** - Utiliza **Gizmos 3D Customizados** para desenhar e ajustar visualmente zonas de transição, caminhos de tracking e volumes de influência diretamente na cena.
+
+    **Arquitetura:**
+- **vCamServer** - Singleton central que gerencia todas as câmeras virtuais do sistema Zyris.
+- **Priority System** - Sistema de prioridades dinâmicas com blends suaves.
+- **Resource-Based** - Configurações salvas como Resources para reutilização.
+- **Non-Intrusive** - Interage com o sistema de câmera existente da Godot sem modificá-lo.
+
+    **Recursos Técnicos:**
+- **Dynamic Blending** - Transições suaves entre câmeras com curvas customizáveis.
+- **Dead Zones** - Áreas mortas para evitar movimentação excessiva.
+- **Aim Tracking** - Seguimento automático de alvos com previsão.
+- **Cinematic Sequences** - Suporte a sequências cinematográficas pré-definidas.
+
+    **Casos de Uso:**
+- **Jogos de Ação** - Câmeras dinâmicas que respondem ao gameplay.
+- **Cinematics** - Sequências de câmera complexas e dramáticas.
+- **RPGs** - Câmeras over-the-shoulder com comportamento contextual.
+
+- [ ] **Multiplayer Update** - Replicação de Próxima Geração e Predição
+
+     Uma atualização sistêmica que injeta lógica de predição e replicação performática em todos os módulos centrais da engine.
+
+     **Recursos Principais:**
+
+- **Replicação por Camadas (Network LOD)** - Gerenciamento inteligente de banda baseado em prioridade e proximidade.
+- **Predição e Reconciliação** - Framework nativo para mitigar latência com suporte a rollback autoritativo.
+- **IA Autoritativa (Behavior Tree)** - Processamento da árvore de comportamento no servidor com sincronização de estados.
+- **Multiplayer GAS** - Integração do Ability System com rede autoritativa e predição de atributos.
+- **Debugger de Rede** - Monitoramento visual de largura de banda e latência por objeto diretamente no Editor.
+
+     **API e Configuração:**
+- **Configurações de Rede** - Server Tick Rate, Client Prediction, Relevance Distance, Bandwidth Limit via Project Settings.
+- **Prioridades de Replicação** - CRITICAL, HIGH, LOW, NONE para controle granular de banda.
+- **Predição de Movimento** - Input buffers, state buffers e reconciliação suave.
+- **Validação Autoritativa** - Verificação de ações no servidor com broadcast de resultados.
+
+     **Casos de Uso:**
+- **FPS Multiplayer** - Movement prediction, hit registration, weapon sync.
+- **RPG Multiplayer** - Ability system, inventory sync, world state persistente.
+- **Jogos de Estratégia** - AI authority, unit commands, resource management autoritativo.
+
+     **Performance e Otimização:**
+- **Latency Compensation** - Compensação automática de latência.
+- **Packet Loss Recovery** - Recuperação de pacotes perdidos.
+- **Bandwidth Optimization** - Uso eficiente de banda com delta compression e bit-packing nativo.
+- **Debug Tools** - Network Visualizer, Latency Graph, State Inspector.
+
+  - [ ] **Cloud Providers** - Serviços de Nuvem e Abstração de Plataforma
+
+     O módulo unificado para integração com serviços externos (Steam, EOS, Mobile), consolidando o sistema de salvamento remoto, contas e sessões de descoberta.
+
+     **Recursos Principais:**
+
+- **Abstração de Provedores (CloudProvider)** - Interface polimórfica que unifica Steam, Epic Online Services e PlayFab sob uma única API.
+- **Sincronização de Save (Cloud Save)** - Upload/Download assíncrono de snapshots totalmente integrado ao `SaveServer`.
+- **Lobbies e Discovery Nativo** - Gerenciamento de salas e matchmaking integrado diretamente às APIs dos provedores.
+- **Single Sign-On (SSO)** - Autenticação transparente e gerenciamento de perfis persistentes.
+- **Gestão de SDKs (EditorSDKManager)** - Interface no Editor para configuração e validação de SDKs de terceiros (Steamworks, GDK, etc).
+
+     **Arquitetura de Provedores:**
+- **SteamProvider** - Integração completa com Steam Cloud, Auth e Networking.
+- **EOSProvider** - Suporte a Epic Online Services (Save, Friends, Sessions).
+- **CustomHTTPProvider** - Backend genérico via REST para infraestrutura própria.
+- **GooglePlayProvider** - Integração com Google Play Games Services.
+
+     **Recursos Técnicos:**
+- **Resolução de Conflitos** - Baseado em timestamps e checksums SHA-256.
+- **Sincronização Incremental** - Apenas mudanças são transferidas.
+- **Relay Networking** - Transporte de pacotes sem necessidade de Port Forwarding.
+- **Lobby Management** - Criação, descoberta e metadados customizáveis.
+
+     **Casos de Uso:**
+- **Jogos Multiplayer** - Matchmaking, cross-platform, persistência na nuvem.
+- **Jogos Single-Player com Cloud** - Progresso universal, backup automático, conquistas.
+- **Aplicações Corporativas** - Backend custom, autenticação enterprise, analytics.
 
 - [ ] **Melhorias no Audio System**
 
@@ -182,21 +314,6 @@ O Zyris está implementando um conjunto abrangente de sistemas. Abaixo está nos
 
     Essas melhorias elevam o áudio do Zyris a um nível moderno, reativo e escalável, mantendo compatibilidade conceitual com a engine base.
 
-- [ ] **Sounds Engine** - Audio Middleware & Design
-
-    Solução de middleware nativa que revoluciona o fluxo de trabalho de áudio, substituindo a reprodução direta de arquivos ("Play Sound") por uma arquitetura baseada em **Eventos Lógicos**, similar ao FMOD Studio e Wwise.
-
-    **Filosofia do Sistema:**
-    Ao invés do programador escolher *qual* arquivo tocar, ele apenas sinaliza *o que* aconteceu (ex: `PlayEvent("Passos")`). O Sounds Engine decide o resultado sonoro baseado em lógica pré-configurada pelo Sound Designer.
-
-    **Funcionalidades Principais:**
-  - **Lógica Probabilística e Condicional** - O som muda dinamicamente dependendo de parâmetros do jogo (ex: Superfície do chão, vida do jogador, velocidade do vento) sem código extra.
-  - **Variação Automática** - Sistema de randomização de Pitch, Volume e Containers para evitar o "efeito metralhadora" (repetição robótica) em sons repetitivos.
-  - **Mixagem Hierárquica** - Sistema de Buses (Grupos) e VCAs profissionais com Sidechaining (ex: baixar o volume da música quando alguém fala) e snapshots de mixagem.
-  - **Profiler em Tempo Real** - Conecte o editor ao jogo rodando para ajustar curvas de volume, efeitos e visualizar o consumo de vozes ao vivo.
-
-    Isso garante total independência para a equipe de áudio e um código de gameplay agnóstico à implementação sonora.
-
 - [ ] **AOT Export System** - Arquitetura baseada em SDK
 
     O AOT Export System é um dos pilares centrais da visão do Zyris, projetado para entregar execução nativa de alto desempenho sem alterar o fluxo de desenvolvimento da Godot.
@@ -217,48 +334,6 @@ O Zyris está implementando um conjunto abrangente de sistemas. Abaixo está nos
   - Arquitetura alinhada ao modelo de SDKs profissionais (Android SDK, NDK)
 
     O SDK utiliza Python como camada de orquestração, responsável por coordenar pipelines complexos de compilação, transformação de IR e integração com toolchains nativas.
-
-## Vitrine de Projetos (Showcase)
-
-Para demonstrar o poder total da Zyris Engine, mantemos um conjunto de projetos que servem tanto para testes de estresse quanto como vitrine das tecnologias implementadas. Nossa estratégia segue o ciclo: **Prototipagem em GDScript → Validação → Implementação Nativa em C++ → Refatoração do Jogo.**
-
-### 1. NeonShooter (2D GAS Showcase)
-
-**Status:** Funcional (Implementação GAS Lite)
-
-- **Tecnologias:** GAS Lite (GDScript), SaveServer, Virtual Input Devices, Screen Shake System.
-- **Destaque:** Demonstra como sistemas complexos de habilidades e persistência podem ser integrados de forma fluida em um ambiente 2D de alta velocidade.
-
-### 2. Horizon Zero (3D Cyber-Movement Shooter)
-
-**Status:** Planejado / Em Desenvolvimento
-
-- **Tecnologias:** Jolt Physics, 3D GAS, Behavior Tree (IA), vCam (Câmera Virtual), Particle Stress Test.
-- **Destaque:** Focado em validar a performance da movimentação baseada em física (Wall-run, momentum) e IAs reativas complexas, explorando o máximo do renderizador Forward+.
-
-## Contribuição
-
-O Zyris recebe contribuições de desenvolvedores que compartilham nossa visão de criar uma engine de jogo de classe mundial.
-
-### Filosofia de Desenvolvimento
-
-Seguimos o **"Godot Way"** para o desenvolvimento do core da engine:
-
-- Adesão estrita às diretrizes de estilo C++ da Godot
-- Uso de tipos da engine (`Vector<T>`, `String`, `Ref<T>`)
-- Abordagem focada em performance com otimização de localidade de cache
-- Documentação abrangente para todas as APIs públicas
-
-Veja nosso [Manifesto de Desenvolvimento](.github/DEVELOPMENT.md) para diretrizes detalhadas.
-
-### Pré-requisitos
-
-Para contribuir com o desenvolvimento da engine, você precisará das seguintes ferramentas instaladas:
-
-- **Git**: Para controle de versão.
-- **Python 3.x**: Necessário para o sistema de build (SCons).
-- **SCons**: Sistema de construção utilizado.
-- **Pre-commit**: Para garantir a formatação e estilo do código antes do commit.
 
 ## Licença
 
