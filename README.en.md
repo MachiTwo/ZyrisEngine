@@ -1,45 +1,73 @@
 # Zyris Engine
 
-[![Godot Version](https://img.shields.io/badge/Godot-4.6.0--stable-blue.svg)](https://github.com/godotengine/godot)
-[![Zyris Version](https://img.shields.io/badge/4.6.0-zyris.1-orange.svg)](https://github.com/Kaffyn/ZyrisEngine/tree/Zyris)
+[![Zyris Version](https://img.shields.io/badge/Zyris-1.3--AbilitySystem-blue.svg)](https://github.com/godotengine/godot)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.txt)
 
 > [!TIP]
 > **Read this in other languages / Leia isto em outros idiomas:**
 > [**English**](README.en.md) | [**Português**](README.md)
 
-> [!NOTE]
-> **Why is the main README in Portuguese?**
-> Zyris is an initiative by **MachiTwo** and Brazilians are directly contributing to it. Therefore, we decided to keep the main README in Portuguese while the project is small. As Zyris grows and attracts more international contributors, we will switch to using English as the main language.
+Zyris is an open-source engine oriented towards systems and production architecture.
 
-**Zyris** is a powerful game engine distribution based on the [Godot Engine](https://godotengine.org), developed by **MachiTwo** and contributors. Our mission is to expand the boundaries of open-source game development by implementing advanced features and optimizations that rival industry-leading engines like Unreal Engine and Unity.
+Designed to offer structural control, predictability, and scalability,
+Zyris positions itself in the same ecosystem as engines like Godot, Unreal Engine, and Unity.
 
-## Vision
+---
 
-Zyris is not a fork intended for upstream contributions to the Godot Engine. Instead, we are a **parallel distribution** that:
+## Technological Origin
 
-- **Extends Godot's capabilities** with cutting-edge features
-- **Optimizes performance** for high-level game development
-- **Implements proprietary innovations** while maintaining open-source principles
-- **Focuses on AAA production workflows and tools**
+Zyris is a fork of the Godot Engine.
+
+This means that:
+
+- Projects made in Godot can be opened in Zyris
+- Your knowledge in GDScript remains valid
+- The workflow remains familiar
+
+Zyris maintains compatibility with the Godot base,
+but has its own governance of commits and roadmap.
+
+Upstream updates are not applied automatically.
+Every change is analyzed, filtered, and integrated in a controlled manner.
+
+---
+
+## Philosophy
+
+Zyris is an **intentionally opinionated** engine. We believe that absolute freedom without direction leads to chaotic code, structural rework, and inconsistent systems over time.
+
+Therefore, Zyris establishes **clear conventions**, recommended architectures, and integrated systems as standard. These conventions do not remove freedom—they reduce the need to reinvent fundamental solutions.
+
+You can still develop however you prefer, but by default, Zyris offers:
+
+- **Predictable structures**
+- **Integrated persistent systems**
+- **Deterministic state management**
+- **Consistent architectural base** for AI and gameplay
+
+Our goal is not to limit creativity, but to **eliminate unnecessary complexity**. Zyris evolves as a production-oriented engine, focused on systemic coherence, project longevity, and technical maturity.
+
+### Evolution Principles
+
+Every system introduced in Zyris must integrate natively into the core, adhere to deterministic principles, and prioritize production stability.
+
+The engine evolves in a **curated** manner. External updates are not adopted automatically; every change is evaluated through the lens of structural coherence and technical maturity. Our focus is to build a solid foundation for scalable projects prepared for longevity and continuous evolution.
 
 All credit for the base engine goes to the [official Godot Engine repository](https://github.com/godotengine/godot) and its incredible community of contributors.
 
-## Versioning and Synchronization Policy
+## Official Communication
 
-Zyris performs manual rebases only on major Godot versions (e.g., `4.5 → 4.6`).
+Zyris development and official announcements are communicated through:
 
-Minor updates are not tracked.
+🎥 [Machi](https://www.youtube.com/@machiatodev)
+🎥 [Alen](https://www.youtube.com/@yatsuragames)
 
-### Version Format
+These channels are responsible for:
 
-**Zyris Version Format** - `Godot-X.Y.Z-zyris.N`
-
-- **X.Y.Z** - Official Godot Engine version (e.g., `4.6.0`)
-
-- **N** - Zyris subversion increment (e.g., `zyris.1`, `zyris.2`)
-
-**Current Version** - `4.6.0-zyris.1`
+- Engine updates
+- Technical explanations
+- System demonstrations
+- Official tutorials
 
 ## Roadmap
 
@@ -52,20 +80,21 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
     A complete virtual input system integrated directly into the engine core, providing fluid touch controls for mobile and hybrid devices.
 
     **Interface Nodes:**
-  - `VirtualButton` - Configurable touch button with visual feedback and action mapping
-  - `VirtualJoystick` - Analog control with customizable deadzones and sensitivity
-  - `VirtualDPad` - Directional pad with support for 4 and 8 directions
-  - `VirtualTouchPad` - Multi-touch gesture area for camera and viewport control
+
+- `VirtualButton` - Configurable touch button with visual feedback and action mapping
+- `VirtualJoystick` - Analog control with customizable deadzones and sensitivity
+- `VirtualDPad` - Directional pad with support for 4 and 8 directions
+- `VirtualTouchPad` - Multi-touch gesture area for camera and viewport control
 
     **Key Features:**
-  - **Haptic Feedback Integration** - Vibration support for mobile devices and gamepads
-  - **Input Device Tracking** - `LastInputType` API automatically detects and tracks the active input method (Touch, Keyboard/Mouse, Gamepad)
-  - **Dynamic UI Adaptation** - Virtual controls automatically appear/hide based on the detected device
-  - **Visibility Modes** - `ALWAYS`, `TOUCHSCREEN_ONLY`, `WHEN_PAUSED` for flexible UI behavior
-  - **Action Mapping** - Direct integration with Godot's InputMap system
-  - **Polymorphic Input System** - The `InputEvent` base class now uses virtual methods for action matching and event comparison, allowing custom virtual events to integrate seamlessly into the engine core as first-class citizens.
-  - **Editor Integration** - Full inspector support with visual configuration
-  - **Performance Optimized** - Minimal overhead with efficient event handling
+
+- **Input Device Tracking** - `LastInputType` API automatically detects and tracks the active input method (Touch, Keyboard/Mouse, Gamepad)
+- **Dynamic UI Adaptation** - Virtual controls automatically appear/hide based on the detected device
+- **Visibility Modes** - `ALWAYS`, `TOUCHSCREEN_ONLY` for flexible UI behavior
+- **Action Mapping** - Direct integration with Godot's InputMap system
+- **Polymorphic Input System** - The `InputEvent` base class now uses virtual methods for action matching and event comparison, allowing custom virtual events to integrate seamlessly into the engine core as first-class citizens.
+- **Editor Integration** - Full inspector support with visual configuration
+- **Performance Optimized** - Minimal overhead with efficient event handling
 
 - [x] **Save Server** - Persistence and Serialization Orchestrator
 
@@ -84,39 +113,37 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
 
 ### In Development
 
-- [ ] **Library (Bottom Panel)** - Grid-based Content Manager
-  - **Native Coexistence** - Functions as an additional panel to the traditional FileSystem, focused on productivity without altering the file structure.
-  - **Grid View** - Direct content display organized by specialized tabs (Resources, Scenes, Scripts, Assets), eliminating deep folder navigation.
-  - **Context Focusing** - Intelligent filtering that displays only what is relevant to the current development moment.
+- [ ] **Ability System** - Data-Oriented Gameplay Framework
 
-- [ ] **Level Streaming System (LSS)** - World and State Orchestration
-  - **GSM (Game State Machine)** - The `LSSServer` manages the application lifecycle through deterministic states (`BOOT`, `MENU`, `LOADING`, `GAMEPLAY`, `TRANSITION`).
-  - **StreamingZone** - System of spatial volumes that manage asynchronous loading of world chunks based on player position.
-  - **Super Node Architecture** - The `LSSRoot` allows the coexistence of multiple worlds or isolated "universes", facilitating map transitions without interrupting core logic.
-  - **State Hydration** - Integrated with the Save Server to ensure loaded zones recover their exact state instantly.
+    A high-performance native implementation designed to scale from simple mechanics to complex RPG combat systems.
 
-- [ ] **Gameplay Ability System (GAS)** - Data-Oriented Gameplay Framework
+    **Core Systems:**
+  - `AbilitySystem` - Global singleton managing the Gameplay Tag registry and project settings.
+  - `AbilitySystemComponent` - The central processor attached to entities (Player, Enemies). Orchestrates abilities, effects, attributes, and cues.
+  - `AbilitySystemAbilityContainer` - Archetype resource defining the base configuration of an entity (Abilities, Initial Attributes, Innate Effects, Cues).
+  - `AbilitySystemAttributeSet` - Container that manages collections of AbilitySystemAttribute Resources with limit validation and runtime values.
+  - `AbilitySystemAttribute` - Defines a single attribute with `BaseValue` and `CurrentValue` (with buffs/debuffs).
+  - `AbilitySystemAbility` - Modular ability logic (Jump, Shoot, Magic) with **Costs & Cooldowns** and lifecycle `can_activate → activate → end`.
+  - `AbilitySystemEffect` - Attribute alteration rules (Damage, Healing, Buffs/Debuffs) with duration policies (Instant, Duration, Infinite).
+  - `AbilitySystemTask` - Asynchronous actions for complex abilities (e.g., waiting for input, moving to position, spawning projectiles).
+  - `AbilitySystemTag` - Hierarchical named tag (e.g., `state.buff.speed`) for ability filtering and validation.
+  - `AbilitySystemCue` - Visual/audio feedback (VFX, SFX, screen shake) triggered by effects or abilities.
 
-    A high-performance native implementation of the GAS pattern, designed to scale from simple mechanics to complex RPG combat systems.
+    **Runtime Systems (Specs):**
 
-    **Architecture:**
-  - `AbilitySystemComponent`: The central processor attached to entities (Player, Enemies).
-  - `AttributeSet`: Defines vital statistics (HP, Mana, Stamina) with replication and modifier calculations.
-  - `GameplayAbility`: Modular ability logic (Jump, Shoot, Magic).
-  - `GameplayEffect`: Attribute alteration rules (Damage, Healing, Buffs/Debuffs).
+    *Specs* are runtime instances that wrap a definition Resource with the execution context needed. They allow abilities, effects, and cues to access dynamic data (who attacked, what magnitude was calculated, remaining duration) without polluting the shared Resource.
+  - `AbilitySystemAbilitySpec` - Runtime instance of a granted `AbilitySystemAbility`. Stores level and active state.
+  - `AbilitySystemEffectSpec` - Runtime instance of an applied `AbilitySystemEffect`. Stores remaining duration, dynamic magnitudes, and references to source/target ASC.
+  - `AbilitySystemCueSpec` - Execution context for an `AbilitySystemCue`. Carries source/target ASC, the triggering `AbilitySystemEffectSpec`, and calculated magnitude.
 
-    **Editor Integration (EditorPlugin):**
-    GAS uses a **Modal Editor (Popup)** triggered via Inspector, similar to the `AudioStreamInteractive` system.
-  - **Floating Graph Window** - Abilities are edited in a dedicated overlaid window, allowing quick visual access without losing the context of the main 3D/2D scene.
-  - **Edit Button** - The inspector provides direct access to the visual editor when an ability Resource is selected.
-  - **Tag Management** - Visual `GameplayTags` selector to define complex interactions (e.g., "Stun" cancels "Casting") without hard-coding.
-  - **Live Debug** - Real-time visualization of ability execution flow and effect stacks.
+    **Auxiliary Systems:**
+  - `AbilitySystemMagnitudeCalculation` - Base class for custom magnitude calculations (MMC). Enables scaling damage by attributes (Strength, Intelligence) or curves.
+  - `AbilitySystemTagContainer` - Optimized tag container for runtime queries and modifications (add, remove, has, get_all).
+  - `AbilitySystemTargetData` - Target validation and filtering pipeline. Supports Line Trace, Sphere Overlap, Box and custom shapes.
 
-    **Differentials:**
-  - **Determinism** - Optimized for multiplayer games with prediction and reconciliation.
-  - **Data-Driven** - Designers can create entire ability variations just by changing configurations in the Editor.
+### In Planning
 
-- [ ] **Behavior Tree System** - Modular and Reactive AI
+- [ ] **Behavior Tree** - Modular and Reactive AI
 
     A robust node-based AI implementation, focused on creating complex behaviors through simple and reusable visual logic.
 
@@ -136,17 +163,113 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
   - **Native & GAS** - Designed to trigger `GameplayAbilities` directly via action nodes.
   - **Performance** - Tree traversal in pure C++, eliminating script bottlenecks in dense AIs.
 
+    **Use Cases:**
+- **RPG NPCs** - Complex combat, dialogue, and exploration behaviors.
+- **FPS Enemies** - Squad tactics, cover, and patrolling.
+- **Strategy AI** - Macro and micro-level decision making.
+
 - [ ] **Inventory System** - Item and Transaction Management
   - **InventoryServer** - Authoritative singleton that validates all item movements, preventing inconsistent states or cheating.
   - **Equipment Bridge (GAS)** - When equipping an item, the system automatically injects/removes *Gameplay Abilities* and *Effects* on the bearer's component, without manual scripts.
   - **Smart UI Nodes** - Set of `Control` nodes (`InventoryGrid`, `EquipmentSlot`) that manage drag-and-drop and automatic synchronization with the server.
   - **Loot Tables** - Procedural generation integrated with the GAS luck and tag system.
 
+    **Architecture:**
+- **Server-Side Authority** - All transactions validated on the server.
+- **Client Prediction** - Responsive interface with subsequent validation.
+- **Data-Driven** - Items defined as Resources with properties and behaviors.
+
+    **Technical Features:**
+- **Stack Management** - Automatic stack and quantity management.
+- **Slot Validation** - Equipment rule validation (class, level, etc.).
+- **Transaction Rollback** - Automatic reversal of invalid transactions.
+- **Network Sync** - Efficient synchronization of inventory changes.
+
+    **Use Cases:**
+- **RPGs** - Complex inventories with equipment and consumables.
+- **Survival** - Crafting and limited resource management.
+- **MMOs** - Virtual economy and cheating prevention.
+
 - [ ] **Camera System (vCam)** - Cinematographic Arbitration
   - **Virtual Camera Resources** - Camera profiles defined as Resources, containing FOV, Follow Target, LookAt, and constraints.
-  - **Priority Arbiter** - The `CameraServer` evaluates in real-time which vCam has the highest priority to take control of the main viewport with configurable blends.
+  - **Priority Arbiter** - The `vCamServer` evaluates in real-time which vCam has the highest priority to take control of the main viewport with configurable blends.
   - **Procedural Shake** - Trauma system based on Perlin noise, where shake profiles are editable and cumulative Resources.
   - **Viewport Integration** - Uses **Custom 3D Gizmos** to draw and visually adjust transition zones, tracking paths, and influence volumes directly in the scene.
+
+    **Architecture:**
+- **vCamServer** - Central singleton that manages all virtual cameras in the Zyris system.
+- **Priority System** - Dynamic priority system with smooth blends.
+- **Resource-Based** - Configurations saved as Resources for reusability.
+- **Non-Intrusive** - Interacts with Godot's existing camera system without modifying it.
+
+    **Technical Features:**
+- **Dynamic Blending** - Smooth transitions between cameras with customizable curves.
+- **Dead Zones** - Dead zones to prevent excessive movement.
+- **Aim Tracking** - Automatic target following with prediction.
+- **Cinematic Sequences** - Support for predefined cinematic sequences.
+
+    **Use Cases:**
+- **Action Games** - Dynamic cameras that respond to gameplay.
+- **Cinematics** - Complex and dramatic camera sequences.
+- **RPGs** - Over-the-shoulder cameras with contextual behavior.
+
+- [ ] **Multiplayer Update** - Next-Gen Replication and Prediction
+
+     A systemic update that injects performance-driven prediction and replication logic into all core engine modules.
+
+     **Key Features:**
+
+- **Layered Replication (Network LOD)** - Intelligent bandwidth management based on priority and proximity.
+- **Prediction and Reconciliation** - Native framework to mitigate latency with authoritative rollback support.
+- **Authoritative AI (Behavior Tree)** - Behavior tree processing on the server with state synchronization.
+- **Multiplayer GAS** - Ability System integration with authoritative networking and attribute prediction.
+- **Network Debugger** - Visual monitoring of bandwidth and latency per object directly in the Editor.
+
+     **API and Configuration:**
+- **Network Settings** - Server Tick Rate, Client Prediction, Relevance Distance, Bandwidth Limit via Project Settings.
+- **Replication Priorities** - CRITICAL, HIGH, LOW, NONE for granular bandwidth control.
+- **Movement Prediction** - Input buffers, state buffers, and smooth reconciliation.
+- **Authoritative Validation** - Server-side action verification with result broadcasting.
+
+     **Use Cases:**
+- **FPS Multiplayer** - Movement prediction, hit registration, weapon sync.
+- **RPG Multiplayer** - Ability system, inventory sync, persistent world state.
+- **Strategy Games** - AI authority, unit commands, authoritative resource management.
+
+     **Performance and Optimization:**
+- **Latency Compensation** - Automatic latency compensation.
+- **Packet Loss Recovery** - Recovery from lost packets.
+- **Bandwidth Optimization** - Efficient bandwidth usage with delta compression and native bit-packing.
+- **Debug Tools** - Network Visualizer, Latency Graph, State Inspector.
+
+- [ ] **Cloud Providers** - Cloud Services and Platform Abstraction
+
+     A unified module for integration with external services (Steam, EOS, Mobile), consolidating remote saving, accounts, and discovery sessions.
+
+     **Key Features:**
+
+- **Provider Abstraction (CloudProvider)** - Polymorphic interface that unifies Steam, Epic Online Services, and PlayFab under a single API.
+- **Save Synchronization (Cloud Save)** - Asynchronous upload/download of snapshots fully integrated into the `SaveServer`.
+- **Native Lobbies and Discovery** - Room management and matchmaking integrated directly with active provider APIs.
+- **Single Sign-On (SSO)** - Transparent authentication and persistent profile management.
+- **SDK Management (EditorSDKManager)** - Dedicated Editor interface for configuration and validation of third-party SDKs (Steamworks, GDK, etc).
+
+     **Provider Architecture:**
+- **SteamProvider** - Complete integration with Steam Cloud, Auth, and Networking.
+- **EOSProvider** - Support for Epic Online Services (Save, Friends, Sessions).
+- **CustomHTTPProvider** - Generic backend via REST for proprietary infrastructure.
+- **GooglePlayProvider** - Integration with Google Play Games Services.
+
+     **Technical Features:**
+- **Conflict Resolution** - Based on timestamps and SHA-256 checksums.
+- **Incremental Synchronization** - Only changes are transferred.
+- **Relay Networking** - Packet transport without Port Forwarding.
+- **Lobby Management** - Creation, discovery, and customizable metadata.
+
+     **Use Cases:**
+- **Multiplayer Games** - Matchmaking, cross-platform, cloud persistence.
+- **Single-Player Games with Cloud** - Universal progress, automatic backup, achievements.
+- **Enterprise Applications** - Custom backend, enterprise authentication, analytics.
 
 - [ ] **Audio System Improvements**
 
@@ -180,21 +303,6 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
 
     These improvements elevate Zyris audio to a modern, reactive, and scalable level, maintaining conceptual compatibility with the base engine.
 
-- [ ] **Sounds Engine** - Audio Middleware & Design
-
-    Native middleware solution that revolutionizes the audio workflow, replacing direct file playback ("Play Sound") with an architecture based on **Logical Events**, similar to FMOD Studio and Wwise.
-
-    **System Philosophy:**
-    Instead of the programmer choosing *which* file to play, they only signal *what* happened (e.g., `PlayEvent("Footsteps")`). The Sounds Engine decides the auditory result based on logic pre-configured by the Sound Designer.
-
-    **Key Features:**
-  - **Probabilistic and Conditional Logic** - Sound changes dynamically depending on game parameters (e.g., Floor surface, player health, wind speed) without extra code.
-  - **Automatic Variation** - Pitch, Volume, and Container randomization system to avoid the "machine gun effect" (robotic repetition) in repetitive sounds.
-  - **Hierarchical Mixing** - Professional Bus (Group) and VCA systems with Sidechaining (e.g., lowering music volume when someone speaks) and mixing snapshots.
-  - **Real-Time Profiler** - Connect the editor to the running game to adjust volume curves, effects, and visualize voice consumption live.
-
-    This ensures total independence for the audio team and gameplay code agnostic to sound implementation.
-
 - [ ] **AOT Export System** - SDK-based Architecture
 
     The AOT Export System is one of the central pillars of the Zyris vision, designed to deliver high-performance native execution without altering Godot's development flow.
@@ -215,48 +323,6 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
   - Architecture aligned with professional SDK models (Android SDK, NDK)
 
     The SDK uses Python as an orchestration layer, responsible for coordinating complex compilation pipelines, IR transformation, and integration with native toolchains.
-
-## Project Showcase
-
-To demonstrate the full power of the Zyris Engine, we maintain a set of projects that serve both as stress tests and as a showcase of the implemented technologies. Our strategy follows the cycle: **GDScript Prototyping → Validation → Native C++ Implementation → Game Refactoring.**
-
-### 1. NeonShooter (2D GAS Showcase)
-
-**Status:** Functional (GAS Lite Implementation)
-
-- **Technologies:** GAS Lite (GDScript), SaveServer, Virtual Input Devices, Screen Shake System.
-- **Highlight:** Demonstrates how complex ability and persistence systems can be seamlessly integrated into a high-speed 2D environment.
-
-### 3. Horizon Zero (3D Cyber-Movement Shooter)
-
-**Status:** Planned / In Development
-
-- **Technologies:** Jolt Physics, 3D GAS, Behavior Tree (AI), vCam (Virtual Camera), Particle Stress Test.
-- **Highlight:** Focused on validating the performance of physics-based movement (Wall-run, momentum) and complex reactive AIs, exploring the full potential of the Forward+ renderer.
-
-## Contribution
-
-Zyris welcomes contributions from developers who share our vision of creating a world-class game engine.
-
-### Development Philosophy
-
-We follow the **"Godot Way"** for engine core development:
-
-- Strict adherence to Godot's C++ style guidelines
-- Use of engine types (`Vector<T>`, `String`, `Ref<T>`)
-- Performance-focused approach with cache locality optimization
-- Comprehensive documentation for all public APIs
-
-See our [Development Manifesto](.github/DEVELOPMENT.md) for detailed guidelines.
-
-### Prerequisites
-
-To contribute to engine development, you will need the following tools installed:
-
-- **Git**: For version control.
-- **Python 3.x**: Required for the build system (SCons).
-- **SCons**: Build system used.
-- **Pre-commit**: To ensure code formatting and style before commit.
 
 ## License
 

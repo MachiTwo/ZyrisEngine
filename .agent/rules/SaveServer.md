@@ -1,4 +1,8 @@
-# Sistema Central de Persistência (Zyris v2)
+---
+trigger: always_on
+---
+
+# Sistema Central de Persistência
 
 ## 1. Contexto da Engine
 
@@ -170,7 +174,7 @@ O comportamento do `SaveServer` é controlado via `Project Settings > Applicatio
 - **Localização**: Geralmente armazenado em `user://saves/`.
 - **Extensões**: `.tres` para modo texto e `.data` para modo binário.
 
-### 4.5 Segurança de Dados (Shutdown Flush)
+### 4.6 Segurança de Dados (Shutdown Flush)
 
 O `SaveServer` garante integridade total dos dados mesmo se o jogo for fechado abruptamente enquanto salvamentos estão pendentes. O destrutor do servidor força o processamento (Flush) de qualquer tarefa de salvamento restante na fila antes de encerrar o processo.
 
