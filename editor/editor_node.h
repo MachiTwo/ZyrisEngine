@@ -92,6 +92,7 @@ class EditorSettingsDialog;
 class EditorTitleBar;
 class ExportTemplateManager;
 class EditorQuickOpenDialog;
+class EditorSDKManager;
 class FBXImporterManager;
 class FileSystemDock;
 class HistoryDock;
@@ -190,6 +191,7 @@ public:
 		EDITOR_OPEN_CONFIG_FOLDER,
 		EDITOR_MANAGE_FEATURE_PROFILES,
 		EDITOR_MANAGE_EXPORT_TEMPLATES,
+		EDITOR_MANAGE_SDKS,
 		EDITOR_CONFIGURE_FBX_IMPORTER,
 
 		LAYOUT_SAVE,
@@ -400,6 +402,7 @@ private:
 	PopupMenu *vcs_actions_menu = nullptr;
 	EditorFileDialog *file = nullptr;
 	ExportTemplateManager *export_template_manager = nullptr;
+	EditorSDKManager *sdk_manager = nullptr;
 	EditorFeatureProfileManager *feature_profile_manager = nullptr;
 	EditorBuildProfileManager *build_profile_manager = nullptr;
 	EditorFileDialog *file_templates = nullptr;

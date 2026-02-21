@@ -1039,6 +1039,12 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	_initial_set("export/ssh/ssh", "");
 	_initial_set("export/ssh/scp", "");
 
+	// Third-party SDKs
+	EDITOR_SETTING(Variant::STRING, PROPERTY_HINT_GLOBAL_DIR, "export/sdks/steamworks_sdk_path", "");
+	EDITOR_SETTING(Variant::STRING, PROPERTY_HINT_GLOBAL_DIR, "export/sdks/gpg_sdk_path", "");
+	EDITOR_SETTING(Variant::STRING, PROPERTY_HINT_GLOBAL_DIR, "export/sdks/xbox_gdk_path", "");
+	EDITOR_SETTING(Variant::STRING, PROPERTY_HINT_GLOBAL_DIR, "export/sdks/playstation_sdk_path", "");
+
 	/* Run */
 
 	// Window placement
