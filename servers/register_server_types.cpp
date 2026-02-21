@@ -146,6 +146,7 @@ void register_server_types() {
 	save_server = memnew(SaveServer);
 
 	GDREGISTER_CLASS(SaveServer);
+	GDREGISTER_VIRTUAL_CLASS(CloudSaveProvider);
 
 	GDREGISTER_CLASS(TextServerManager);
 	GDREGISTER_ABSTRACT_CLASS(TextServer);

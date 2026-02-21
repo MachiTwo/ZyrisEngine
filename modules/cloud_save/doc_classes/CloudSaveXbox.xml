@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="CloudSaveXbox" inherits="CloudSaveProvider" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Cloud save provider for Xbox.
+	</brief_description>
+	<description>
+		[CloudSaveXbox] implements [CloudSaveProvider] using the Xbox GDK XGameSaveFiles API.
+		It provides a transparent filesystem folder that is automatically synchronized with the cloud by the OS.
+	</description>
+	<tutorials>
+	</tutorials>
+</class>

@@ -1,45 +1,73 @@
 # Zyris Engine
 
-[![Godot Version](https://img.shields.io/badge/Godot-4.6.0--stable-blue.svg)](https://github.com/godotengine/godot)
-[![Zyris Version](https://img.shields.io/badge/4.6.0-zyris.1-orange.svg)](https://github.com/Kaffyn/ZyrisEngine/tree/Zyris)
+[![Zyris Version](https://img.shields.io/badge/Zyris-1.3--AbilitySystem-blue.svg)](https://github.com/godotengine/godot)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.txt)
 
 > [!TIP]
 > **Read this in other languages / Leia isto em outros idiomas:**
 > [**English**](README.en.md) | [**Português**](README.md)
 
-> [!NOTE]
-> **Why is the main README in Portuguese?**
-> Zyris is an initiative by **MachiTwo** and Brazilians are directly contributing to it. Therefore, we decided to keep the main README in Portuguese while the project is small. As Zyris grows and attracts more international contributors, we will switch to using English as the main language.
+Zyris is an open-source engine oriented towards systems and production architecture.
 
-**Zyris** is a powerful game engine distribution based on the [Godot Engine](https://godotengine.org), developed by **MachiTwo** and contributors. Our mission is to expand the boundaries of open-source game development by implementing advanced features and optimizations that rival industry-leading engines like Unreal Engine and Unity.
+Designed to offer structural control, predictability, and scalability,
+Zyris positions itself in the same ecosystem as engines like Godot, Unreal Engine, and Unity.
 
-## Vision
+---
 
-Zyris is not a fork intended for upstream contributions to the Godot Engine. Instead, we are a **parallel distribution** that:
+## Technological Origin
 
-- **Extends Godot's capabilities** with cutting-edge features
-- **Optimizes performance** for high-level game development
-- **Implements proprietary innovations** while maintaining open-source principles
-- **Focuses on AAA production workflows and tools**
+Zyris is a fork of the Godot Engine.
+
+This means that:
+
+- Projects made in Godot can be opened in Zyris
+- Your knowledge in GDScript remains valid
+- The workflow remains familiar
+
+Zyris maintains compatibility with the Godot base,
+but has its own governance of commits and roadmap.
+
+Upstream updates are not applied automatically.
+Every change is analyzed, filtered, and integrated in a controlled manner.
+
+---
+
+## Philosophy
+
+Zyris is an **intentionally opinionated** engine. We believe that absolute freedom without direction leads to chaotic code, structural rework, and inconsistent systems over time.
+
+Therefore, Zyris establishes **clear conventions**, recommended architectures, and integrated systems as standard. These conventions do not remove freedom—they reduce the need to reinvent fundamental solutions.
+
+You can still develop however you prefer, but by default, Zyris offers:
+
+- **Predictable structures**
+- **Integrated persistent systems**
+- **Deterministic state management**
+- **Consistent architectural base** for AI and gameplay
+
+Our goal is not to limit creativity, but to **eliminate unnecessary complexity**. Zyris evolves as a production-oriented engine, focused on systemic coherence, project longevity, and technical maturity.
+
+### Evolution Principles
+
+Every system introduced in Zyris must integrate natively into the core, adhere to deterministic principles, and prioritize production stability.
+
+The engine evolves in a **curated** manner. External updates are not adopted automatically; every change is evaluated through the lens of structural coherence and technical maturity. Our focus is to build a solid foundation for scalable projects prepared for longevity and continuous evolution.
 
 All credit for the base engine goes to the [official Godot Engine repository](https://github.com/godotengine/godot) and its incredible community of contributors.
 
-## Versioning and Synchronization Policy
+## Official Communication
 
-Zyris performs manual rebases only on major Godot versions (e.g., `4.5 → 4.6`).
+Zyris development and official announcements are communicated through:
 
-Minor updates are not tracked.
+🎥 [Machi](https://www.youtube.com/@machiatodev)
+🎥 [Alen](https://www.youtube.com/@yatsuragames)
 
-### Version Format
+These channels are responsible for:
 
-**Zyris Version Format** - `Godot-X.Y.Z-zyris.N`
-
-- **X.Y.Z** - Official Godot Engine version (e.g., `4.6.0`)
-
-- **N** - Zyris subversion increment (e.g., `zyris.1`, `zyris.2`)
-
-**Current Version** - `4.6.0-zyris.1`
+- Engine updates
+- Technical explanations
+- System demonstrations
+- Official tutorials
 
 ## Roadmap
 
@@ -52,20 +80,22 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
     A complete virtual input system integrated directly into the engine core, providing fluid touch controls for mobile and hybrid devices.
 
     **Interface Nodes:**
-  - `VirtualButton` - Configurable touch button with visual feedback and action mapping
-  - `VirtualJoystick` - Analog control with customizable deadzones and sensitivity
-  - `VirtualDPad` - Directional pad with support for 4 and 8 directions
-  - `VirtualTouchPad` - Multi-touch gesture area for camera and viewport control
+
+- `VirtualButton` - Configurable touch button with visual feedback and action mapping
+- `VirtualJoystick` - Analog control with customizable deadzones and sensitivity
+- `VirtualDPad` - Directional pad with support for 4 and 8 directions
+- `VirtualTouchPad` - Multi-touch gesture area for camera and viewport control
 
     **Key Features:**
-  - **Haptic Feedback Integration** - Vibration support for mobile devices and gamepads
-  - **Input Device Tracking** - `LastInputType` API automatically detects and tracks the active input method (Touch, Keyboard/Mouse, Gamepad)
-  - **Dynamic UI Adaptation** - Virtual controls automatically appear/hide based on the detected device
-  - **Visibility Modes** - `ALWAYS`, `TOUCHSCREEN_ONLY`, `WHEN_PAUSED` for flexible UI behavior
-  - **Action Mapping** - Direct integration with Godot's InputMap system
-  - **Polymorphic Input System** - The `InputEvent` base class now uses virtual methods for action matching and event comparison, allowing custom virtual events to integrate seamlessly into the engine core as first-class citizens.
-  - **Editor Integration** - Full inspector support with visual configuration
-  - **Performance Optimized** - Minimal overhead with efficient event handling
+
+- **Haptic Feedback Integration** - Vibration support for mobile devices and gamepads
+- **Input Device Tracking** - `LastInputType` API automatically detects and tracks the active input method (Touch, Keyboard/Mouse, Gamepad)
+- **Dynamic UI Adaptation** - Virtual controls automatically appear/hide based on the detected device
+- **Visibility Modes** - `ALWAYS`, `TOUCHSCREEN_ONLY`, `WHEN_PAUSED` for flexible UI behavior
+- **Action Mapping** - Direct integration with Godot's InputMap system
+- **Polymorphic Input System** - The `InputEvent` base class now uses virtual methods for action matching and event comparison, allowing custom virtual events to integrate seamlessly into the engine core as first-class citizens.
+- **Editor Integration** - Full inspector support with visual configuration
+- **Performance Optimized** - Minimal overhead with efficient event handling
 
 - [x] **Save Server** - Persistence and Serialization Orchestrator
 
@@ -81,29 +111,30 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
 - **Global ID Registry (persistence_id)** - Hierarchy abstraction that detaches data from NodePaths, preventing save breakage if nodes are renamed or moved.
 - **Data Evolution (Migrations)** - Versioning system that allows registering data transformations (`register_migration`) to maintain compatibility with legacy saves.
 - **Safety and Integrity** - Rotative backup system, SHA-256 checksum validation, and *Flush* mechanism on shutdown to prevent data corruption.
+- **Multi-Platform Cloud Save** - Native cloud synchronization pipeline with support for Steam Cloud, Google Play Games, Xbox Live Connected Storage, and custom HTTP endpoints. After each local save, the snapshot is automatically uploaded to the configured platform. On load, the cloud version takes priority, with automatic fallback to local disk and backups if unavailable.
 
-### In Development
-
-- [ ] **Gameplay Ability System (GAS)** - Data-Oriented Gameplay Framework
+- [x] **Ability System (GAS)** - Data-Oriented Gameplay Framework
 
     A high-performance native implementation of the GAS pattern, designed to scale from simple mechanics to complex RPG combat systems.
 
-    **Architecture:**
-  - `AbilitySystemComponent`: The central processor attached to entities (Player, Enemies).
-  - `AttributeSet`: Defines vital statistics (HP, Mana, Stamina) with replication and modifier calculations.
-  - `GameplayAbility`: Modular ability logic (Jump, Shoot, Magic).
-  - `GameplayEffect`: Attribute alteration rules (Damage, Healing, Buffs/Debuffs).
+    **Core Components:**
+  - `AbilitySystemComponent` - The central processor attached to entities (Player, Enemies).
+  - `AbilitySystemAbilityContainer` - Archetype resource defining the base configuration of an entity (Abilities, Attributes, Effects).
+  - `AbilitySystemAttributeSet` - Defines vital statistics (HP, Mana, Stamina) with replication and modifier calculations.
+  - `AbilitySystemAbility` - Modular ability logic (Jump, Shoot, Magic) with **Costs & Cooldowns**.
+  - `AbilitySystemEffect` - Attribute alteration rules (Damage, Healing, Buffs/Debuffs).
+  - `AbilitySystemCue` - Visual/audio feedback system (VFX, SFX, screen shake).
 
-    **Editor Integration (EditorPlugin):**
-    GAS uses a **Modal Editor (Popup)** triggered via Inspector, similar to the `AudioStreamInteractive` system.
-  - **Floating Graph Window** - Abilities are edited in a dedicated overlaid window, allowing quick visual access without losing the context of the main 3D/2D scene.
-  - **Edit Button** - The inspector provides direct access to the visual editor when an ability Resource is selected.
-  - **Tag Management** - Visual `GameplayTags` selector to define complex interactions (e.g., "Stun" cancels "Casting") without hard-coding.
-  - **Live Debug** - Real-time visualization of ability execution flow and effect stacks.
+    **Key Features:**
+  - **Native Multiplayer** - Client prediction and server Net State correction (Robust Netcode).
+  - **Editor Workflow** - Specialized selectors for `GameplayTags` and Attributes integrated directly into the Inspector.
+  - **Data-Driven Design** - Designers can create entire ability variations just by changing configurations in the Editor.
+  - **Gameplay Tasks** - Asynchronous actions for complex abilities (e.g., waiting for input, projectiles).
+  - **Target Data Pipeline** - Complete targeting validation between client and server.
+  - **Advanced Math (MMC/GEE)** - Dynamic mathematical calculations for attribute modification.
+  - **Global Tag System** - Centralized tag management via Project Settings.
 
-    **Differentials:**
-  - **Determinism** - Optimized for multiplayer games with prediction and reconciliation.
-  - **Data-Driven** - Designers can create entire ability variations just by changing configurations in the Editor.
+### In Development
 
 - [ ] **Behavior Tree** - Modular and Reactive AI
 
@@ -189,30 +220,6 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
   - Architecture aligned with professional SDK models (Android SDK, NDK)
 
     The SDK uses Python as an orchestration layer, responsible for coordinating complex compilation pipelines, IR transformation, and integration with native toolchains.
-
-## Contribution
-
-Zyris welcomes contributions from developers who share our vision of creating a world-class game engine.
-
-### Development Philosophy
-
-We follow the **"Godot Way"** for engine core development:
-
-- Strict adherence to Godot's C++ style guidelines
-- Use of engine types (`Vector<T>`, `String`, `Ref<T>`)
-- Performance-focused approach with cache locality optimization
-- Comprehensive documentation for all public APIs
-
-See our [Development Manifesto](.github/DEVELOPMENT.md) for detailed guidelines.
-
-### Prerequisites
-
-To contribute to engine development, you will need the following tools installed:
-
-- **Git**: For version control.
-- **Python 3.x**: Required for the build system (SCons).
-- **SCons**: Build system used.
-- **Pre-commit**: To ensure code formatting and style before commit.
 
 ## License
 

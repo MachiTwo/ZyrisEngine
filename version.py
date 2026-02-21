@@ -4,6 +4,7 @@ major = 4
 minor = 6
 patch = 0
 status = "stable"
+build = "CloudSave"
 module_config = ""
 website = "https://zyrisengine.com"
 docs = "4.6"

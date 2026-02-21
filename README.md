@@ -1,45 +1,73 @@
 # Zyris Engine
 
-[![Godot Version](https://img.shields.io/badge/Godot-4.6--stable-blue.svg)](https://github.com/godotengine/godot)
-[![Zyris Version](https://img.shields.io/badge/4.6.0-zyris.2-orange.svg)](https://github.com/Kaffyn/ZyrisEngine/tree/Zyris)
+[![Zyris Version](https://img.shields.io/badge/Zyris-1.3--AbilitySystem-blue.svg)](https://github.com/godotengine/godot)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.txt)
 
 > [!TIP]
 > **Leia isto em outros idiomas / Read this in other languages:**
 > [**English**](README.en.md) | [**Português**](README.md)
 
-> [!NOTE]
-> **Por que o README principal está em Português?**
-> O Zyris é uma iniciativa do **MachiTwo** e brasileiros estão contribuindo diretamente com ele. Por isso, decidimos manter o README principal em português enquanto o projeto for pequeno. Assim que o Zyris crescer e atrair mais colaboradores internacionais, passaremos a utilizar o Inglês como idioma principal.
+Zyris é uma engine open source orientada a sistemas e arquitetura de produção.
 
-**Zyris** é uma poderosa distribuição de game engine baseada na [Godot Engine](https://godotengine.org), desenvolvida por **MachiTwo** e contribuidores. Nossa missão é expandir os limites do desenvolvimento de jogos de código aberto, implementando recursos avançados e otimizações que rivalizam com engines líderes da indústria como Unreal Engine e Unity.
+Projetada para oferecer controle estrutural, previsibilidade e escalabilidade,
+Zyris integra o mesmo ecossistema de engines profissionais como Godot, Unreal Engine e Unity.
 
-## Visão
+---
 
-O Zyris não é um fork destinado a contribuições upstream para a Godot Engine. Em vez disso, somos uma **distribuição paralela** que:
+## Origem Tecnológica
 
-- **Estende as capacidades da Godot** com recursos de ponta
-- **Otimiza a performance** para o desenvolvimento de jogos de alto nível
-- **Implementa inovações proprietárias** mantendo os princípios de código aberto
-- **Foca em fluxos de trabalho e ferramentas de produção AAA**
+Zyris é um fork da Godot Engine
+
+Isso significa que:
+
+- Projetos feitos na Godot podem ser abertos no Zyris
+- Seu conhecimento em GDScript continua válido
+- O fluxo de trabalho permanece familiar
+
+Zyris mantém compatibilidade com a base Godot,
+mas possui governança própria de commits e roadmap.
+
+As atualizações upstream não são aplicadas automaticamente.
+Cada mudança é analisada, filtrada e integrada de forma controlada.
+
+---
+
+## Filosofia
+
+Zyris é uma engine **intencionalmente opinada**. Acreditamos que liberdade absoluta sem direção gera código caótico, retrabalho estrutural e sistemas inconsistentes ao longo do tempo.
+
+Por isso, o Zyris estabelece **convenções claras**, arquiteturas recomendadas e sistemas integrados como padrão. Essas convenções não removem liberdade — elas reduzem a necessidade de reinventar soluções fundamentais.
+
+Você ainda pode desenvolver da forma que preferir, mas, por padrão, o Zyris oferece:
+
+- **Estruturas previsíveis**
+- **Sistemas persistentes integrados**
+- **Gerenciamento determinístico de estados**
+- **Base arquitetural consistente** para IA e gameplay
+
+Nosso objetivo não é limitar criatividade, mas **eliminar complexidade desnecessária**. Zyris evolui como uma engine orientada a produção, focada em coerência sistêmica, longevidade de projeto e maturidade técnica.
+
+### Princípios de Evolução
+
+Cada sistema introduzido no Zyris deve integrar-se nativamente ao núcleo, aderir a princípios determinísticos e priorizar estabilidade de produção.
+
+A engine evolui de forma **curada**. Atualizações externas não são adotadas automaticamente; cada mudança é avaliada sob a ótica de coerência estrutural e maturidade técnica. Nosso foco é construir uma base sólida para projetos escaláveis e preparados para longevidade e evolução contínua.
 
 Todo o crédito para a engine base vai para o [repositório official da Godot Engine](https://github.com/godotengine/godot) e sua incrível comunidade de contribuidores.
 
-## Versionamento e Política de Sincronização
+## Comunicação Oficial
 
-O Zyris realiza rebase manual apenas em versões maiores da Godot (ex: `4.5 → 4.6`).
+O desenvolvimento e anúncios oficiais do Zyris são comunicados através de:
 
-Atualizações menores não são acompanhadas.
+🎥 [Machi](https://www.youtube.com/@machiatodev)
+🎥 [Alen](https://www.youtube.com/@yatsuragames)
 
-### Formato de Versão
+Esses canais são responsáveis por:
 
-**Formato de Versão Zyris** - `Godot-X.Y.Z-zyris.N`
-
-- **X.Y.Z** - Versão official da Godot Engine (ex: `4.6.0`)
-
-- **N** - Incremento de subversão do Zyris (ex: `zyris.1`, `zyris.2`)
-
-**Versão Atual** - `4.6.0-zyris.2`
+- Atualizações da engine
+- Explicações técnicas
+- Demonstrações de sistemas
+- Tutoriais oficiais
 
 ## Roadmap
 
@@ -83,29 +111,30 @@ O Zyris está implementando um conjunto abrangente de sistemas. Abaixo está nos
 - **Global ID Registry (persistence_id)** - Abstração de hierarquia que desvincula os dados de NodePaths, impedindo que saves quebrem se nós forem renomeados ou movidos.
 - **Evolução de Dados (Migrações)** - Sistema de versionamento que permite registrar transformações de dados (`register_migration`) para manter compatibilidade com saves antigos.
 - **Segurança e Integridade** - Sistema de backups rotativos, validação por checksum SHA-256 e mecanismo de *Flush* no encerramento para evitar corrupção de dados.
+- **Cloud Save Multi-Plataforma** - Pipeline nativo de sincronização em nuvem com suporte a Steam Cloud, Google Play Games, Xbox Live Connected Storage e endpoints HTTP customizados. Após cada save local, o snapshot é automaticamente enviado para a plataforma configurada. No carregamento, a versão da nuvem tem prioridade, com fallback automático para disco local e backups caso indisponível.
 
-### Em Desenvolvimento
-
-- [ ] **Gameplay Ability System (GAS)** - Framework de Gameplay Orientado a Dados
+- [x] **Ability System (GAS)** - Framework de Gameplay Orientado a Dados
 
     Uma implementação nativa de alto desempenho do padrão GAS, projetada para escalar de mecânicas simples a sistemas de combate RPG complexos.
 
-    **Arquitetura:**
-  - `AbilitySystemComponent`: O processador central anexado a entidades (Player, Inimigos).
-  - `AttributeSet`: Define estatísticas vitais (HP, Mana, Stamina) com replicação e cálculos de modificadores.
-  - `GameplayAbility`: Lógica modular de habilidades (Pular, Atirar, Magia).
-  - `GameplayEffect`: Regras de alteração de atributos (Dano, Cura, Buffs/Debuffs).
+    **Componentes Centrais:**
+  - `AbilitySystemComponent` - O processador central anexado a entidades (Player, Inimigos).
+  - `AbilitySystemAbilityContainer` - Recurso de arquétipo que define a configuração base de uma entidade (Habilidades, Atributos, Efeitos).
+  - `AbilitySystemAttributeSet` - Define estatísticas vitais (HP, Mana, Stamina) com replicação e cálculos de modificadores.
+  - `AbilitySystemAbility` - Lógica modular de habilidades (Pular, Atirar, Magia) com **Costs & Cooldowns**.
+  - `AbilitySystemEffect` - Regras de alteração de atributos (Dano, Cura, Buffs/Debuffs).
+  - `AbilitySystemCue` - Sistema de feedback visual/sonoro (VFX, SFX, screen shake).
 
-    **Integração com Editor (EditorPlugin):**
-    O GAS utiliza um **Editor Modal (Popup)** acionado via Inspector, similar ao sistema `AudioStreamInteractive`.
-  - **Janela Flutuante de Grafo** - Habilidades são editadas em uma janela dedicada sobreposta, permitindo acesso visual rápido sem perder o contexto da cena principal 3D/2D.
-  - **Botão de Edição** - O inspetor fornece acesso direto ao editor visual quando um Resource de habilidade é selecionado.
-  - **Tag Management** - Seletor visual de `GameplayTags` para definir interações complexas (ex: "Stun" cancela "Casting") sem hard-coding.
-  - **Live Debug** - Visualização em tempo real do fluxo de execução de habilidades e pilhas de efeitos.
+    **Recursos Principais:**
+  - **Multiplayer Nativo** - Predição do cliente e correção de Net State pelo servidor (Netcode robusto).
+  - **Fluxo de Editor** - Seletores especializados para `GameplayTags` e Atributos integrados diretamente ao Inspector.
+  - **Design Orientado a Dados** - Designers podem criar variações de habilidades inteiras apenas alterando configurações no Editor.
+  - **Gameplay Tasks** - Ações assíncronas para habilidades complexas (ex: aguardar input, projéteis).
+  - **Pipeline de Target Data** - Validação completa de alvos entre cliente e servidor.
+  - **Cálculos Avançados (MMC/GEE)** - Cálculos matemáticos dinâmicos para modificação de atributos.
+  - **Sistema Global de Tags** - Gerenciamento centralizado de tags através das Configurações do Projeto.
 
-    **Diferenciais:**
-  - **Determinismo** - Otimizado para jogos multiplayer com previsão e reconciliação.
-  - **Data-Driven** - Designers podem criar variações de habilidades inteiras apenas alterando configurações no Editor.
+### Em Desenvolvimento
 
 - [ ] **Behavior Tree** - IA Modular e Reativa
 

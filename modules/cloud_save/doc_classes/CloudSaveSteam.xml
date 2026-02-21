@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="CloudSaveSteam" inherits="CloudSaveProvider" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Cloud save provider for Steam.
+	</brief_description>
+	<description>
+		[CloudSaveSteam] implements [CloudSaveProvider] using the Steamworks [code]ISteamRemoteStorage[/code] API.
+		It handles conflict resolution by comparing modification timestamps.
+	</description>
+	<tutorials>
+	</tutorials>
+</class>

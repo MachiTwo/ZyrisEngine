@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="CloudSaveGPlay" inherits="CloudSaveProvider" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Cloud save provider for Google Play Games Services.
+	</brief_description>
+	<description>
+		[CloudSaveGPlay] implements [CloudSaveProvider] using the Google Play Games Snapshots API for Android.
+		It allows storing game data in the player's Google Drive Application Data Folder.
+	</description>
+	<tutorials>
+	</tutorials>
+</class>

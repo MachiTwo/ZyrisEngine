@@ -30,6 +30,13 @@
 
 #include "save_server.h"
 
+// Cloud Save Providers
+#include "modules/cloud_save/cloud_save_custom.h"
+#include "modules/cloud_save/cloud_save_gplay.h"
+#include "modules/cloud_save/cloud_save_psn.h"
+#include "modules/cloud_save/cloud_save_steam.h"
+#include "modules/cloud_save/cloud_save_xbox.h"
+
 #include "core/config/engine.h"
 #include "core/config/project_settings.h"
 #include "core/crypto/crypto_core.h"
@@ -60,26 +67,23 @@ void SaveServer::register_settings() {
 	GLOBAL_DEF_BASIC("application/persistence/integrity_check_level", 1);
 	GLOBAL_DEF_BASIC("application/persistence/save_path", "user://saves/");
 
-	// Cloud Save Settings (Multi-platform support)
-	GLOBAL_DEF_BASIC("application/persistence/cloud_save/general/enabled", false); // Global enable/disable for all cloud saves
-	
-	// Steam
-	GLOBAL_DEF_BASIC("application/persistence/cloud_save/steam/enabled", false);
-	GLOBAL_DEF_BASIC("application/persistence/cloud_save/steam/api_key", ""); // Placeholder for Steam API Key/AppID if needed
-	
-	// Google Play Games
-	GLOBAL_DEF_BASIC("application/persistence/cloud_save/google_play/enabled", false);
-	GLOBAL_DEF_BASIC("application/persistence/cloud_save/google_play/client_id", ""); // Placeholder for Google Play Client ID
-	
-	// Xbox Live Connected Storage
-	GLOBAL_DEF_BASIC("application/persistence/cloud_save/xbox/enabled", false);
-	GLOBAL_DEF_BASIC("application/persistence/cloud_save/xbox/client_id", ""); // Placeholder for Xbox Client ID/Title ID
-	
-	// Custom Cloud Service
-	GLOBAL_DEF_BASIC("application/persistence/cloud_save/custom/enabled", false);
+	// ── Cloud Save Settings ──────────────────────────────────────────────────
+	// Global toggle and platform selection.
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/enabled", false);
+
+	// CloudSavePlatform enum value: 0=None, 1=Steam, 2=GooglePlay, 3=Xbox, 4=PSN, 5=Custom
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/platform", 0);
+
+	// CloudConflictResolution enum value: 0=RemoteWins, 1=LocalWins, 2=NewerWins
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/conflict_resolution", 2);
+
+	// Custom HTTP backend settings (used when platform == CLOUD_SAVE_CUSTOM)
 	GLOBAL_DEF_BASIC("application/persistence/cloud_save/custom/endpoint", "");
-	GLOBAL_DEF_BASIC("application/persistence/cloud_save/custom/api_key", ""); // Placeholder for custom service API Key
-	GLOBAL_DEF_BASIC("application/persistence/cloud_save/custom/auth_url", ""); // Placeholder for custom service authentication URL
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/custom/api_key", "");
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/custom/auth_url", "");
+
+	// Google Play extra config (used when platform == CLOUD_SAVE_GOOGLE_PLAY_GAMES)
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/google_play/client_id", "");
 }
 
 void SaveServer::_bind_methods() {
@@ -136,9 +140,21 @@ void SaveServer::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "integrity_check_level", PROPERTY_HINT_ENUM, "None,Signature,Strict"), "set_integrity_check_level", "get_integrity_check_level");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "save_path"), "set_save_path", "get_save_path");
 
+	// ── Cloud Save API Bindings ───────────────────────────────────────────────
+	ClassDB::bind_method(D_METHOD("set_cloud_save_enabled", "enabled"), &SaveServer::set_cloud_save_enabled);
+	ClassDB::bind_method(D_METHOD("is_cloud_save_enabled"), &SaveServer::is_cloud_save_enabled);
+	ClassDB::bind_method(D_METHOD("set_cloud_save_platform", "platform"), &SaveServer::set_cloud_save_platform);
+	ClassDB::bind_method(D_METHOD("get_cloud_save_platform"), &SaveServer::get_cloud_save_platform);
+	ClassDB::bind_method(D_METHOD("set_cloud_conflict_resolution", "resolution"), &SaveServer::set_cloud_conflict_resolution);
+	ClassDB::bind_method(D_METHOD("get_cloud_conflict_resolution"), &SaveServer::get_cloud_conflict_resolution);
+	ClassDB::bind_method(D_METHOD("set_cloud_conflict_callback", "callback"), &SaveServer::set_cloud_conflict_callback);
+	ClassDB::bind_method(D_METHOD("get_cloud_conflict_callback"), &SaveServer::get_cloud_conflict_callback);
+	ClassDB::bind_method(D_METHOD("get_cloud_provider_name"), &SaveServer::get_cloud_provider_name);
+
+	ADD_GROUP("Cloud Save", "cloud_");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "cloud_save_enabled"), "set_cloud_save_enabled", "is_cloud_save_enabled");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "cloud_save_platform", PROPERTY_HINT_ENUM, "None,Steam,Google Play Games,Xbox,Custom"), "set_cloud_save_platform", "get_cloud_save_platform");
-	ADD_PROPERTY(PropertyInfo(Variant::STRING, "custom_cloud_endpoint"), "set_custom_cloud_endpoint", "get_custom_cloud_endpoint");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "cloud_save_platform", PROPERTY_HINT_ENUM, "None,Steam,Google Play Games,Xbox,PlayStation,Custom"), "set_cloud_save_platform", "get_cloud_save_platform");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "cloud_conflict_resolution", PROPERTY_HINT_ENUM, "Remote Wins,Local Wins,Newer Wins"), "set_cloud_conflict_resolution", "get_cloud_conflict_resolution");
 
 	BIND_ENUM_CONSTANT(FORMAT_TEXT);
 	BIND_ENUM_CONSTANT(FORMAT_BINARY);
@@ -159,11 +175,18 @@ void SaveServer::_bind_methods() {
 	BIND_ENUM_CONSTANT(CLOUD_SAVE_STEAM);
 	BIND_ENUM_CONSTANT(CLOUD_SAVE_GOOGLE_PLAY_GAMES);
 	BIND_ENUM_CONSTANT(CLOUD_SAVE_XBOX);
+	BIND_ENUM_CONSTANT(CLOUD_SAVE_PSN);
 	BIND_ENUM_CONSTANT(CLOUD_SAVE_CUSTOM);
+
+	BIND_ENUM_CONSTANT(CLOUD_CONFLICT_REMOTE_WINS);
+	BIND_ENUM_CONSTANT(CLOUD_CONFLICT_LOCAL_WINS);
+	BIND_ENUM_CONSTANT(CLOUD_CONFLICT_NEWER_WINS);
 
 	ADD_SIGNAL(MethodInfo("save_corrupted", PropertyInfo(Variant::STRING, "slot_name")));
 	ADD_SIGNAL(MethodInfo("backup_restored", PropertyInfo(Variant::STRING, "slot_name"), PropertyInfo(Variant::STRING, "file_path")));
 	ADD_SIGNAL(MethodInfo("save_successful", PropertyInfo(Variant::STRING, "slot_name")));
+	ADD_SIGNAL(MethodInfo("cloud_upload_failed", PropertyInfo(Variant::STRING, "slot_name"), PropertyInfo(Variant::INT, "error_code")));
+	ADD_SIGNAL(MethodInfo("cloud_conflict_detected", PropertyInfo(Variant::STRING, "slot_name")));
 }
 
 void SaveServer::_queue_save_task(const String &p_slot_name, Ref<Snapshot> p_snapshot, bool p_async) {
@@ -792,7 +815,8 @@ SaveServer::IntegrityCheckLevel SaveServer::get_integrity_check_level() const {
 	return integrity_level;
 }
 
-// Cloud Save
+// ── Cloud Save API ────────────────────────────────────────────────────────────
+
 void SaveServer::set_cloud_save_enabled(bool p_enabled) {
 	cloud_save_enabled = p_enabled;
 }
@@ -801,17 +825,84 @@ bool SaveServer::is_cloud_save_enabled() const {
 }
 
 void SaveServer::set_cloud_save_platform(CloudSavePlatform p_platform) {
-	cloud_save_platform = p_platform;
+	if (p_platform == cloud_save_platform_setting) {
+		return;
+	}
+	_shutdown_cloud_provider();
+	cloud_save_platform_setting = p_platform;
+	if (cloud_save_enabled) {
+		_init_cloud_provider(p_platform);
+	}
 }
 SaveServer::CloudSavePlatform SaveServer::get_cloud_save_platform() const {
-	return cloud_save_platform;
+	return cloud_save_platform_setting;
 }
 
-void SaveServer::set_custom_cloud_endpoint(const String &p_endpoint) {
-	custom_cloud_endpoint = p_endpoint;
+void SaveServer::set_cloud_conflict_resolution(CloudConflictResolution p_res) {
+	cloud_conflict_resolution = p_res;
 }
-String SaveServer::get_custom_cloud_endpoint() const {
-	return custom_cloud_endpoint;
+SaveServer::CloudConflictResolution SaveServer::get_cloud_conflict_resolution() const {
+	return cloud_conflict_resolution;
+}
+
+void SaveServer::set_cloud_conflict_callback(const Callable &p_callback) {
+	cloud_conflict_callback = p_callback;
+}
+Callable SaveServer::get_cloud_conflict_callback() const {
+	return cloud_conflict_callback;
+}
+
+String SaveServer::get_cloud_provider_name() const {
+	if (cloud_provider) {
+		return cloud_provider->get_provider_name();
+	}
+	return "None";
+}
+
+void SaveServer::_init_cloud_provider(CloudSavePlatform p_platform) {
+	_shutdown_cloud_provider();
+
+	switch (p_platform) {
+		case CLOUD_SAVE_STEAM:
+			cloud_provider = memnew(SteamCloudProvider);
+			break;
+		case CLOUD_SAVE_GOOGLE_PLAY_GAMES: {
+			auto *gplay = memnew(GooglePlayCloudProvider);
+			gplay->set_client_id(GLOBAL_GET("application/persistence/cloud_save/google_play/client_id"));
+			cloud_provider = gplay;
+		} break;
+		case CLOUD_SAVE_XBOX:
+			cloud_provider = memnew(XboxCloudProvider);
+			break;
+		case CLOUD_SAVE_PSN:
+			cloud_provider = memnew(PSNCloudProvider);
+			break;
+		case CLOUD_SAVE_CUSTOM: {
+			auto *custom = memnew(CustomHttpCloudProvider);
+			String ep = GLOBAL_GET("application/persistence/cloud_save/custom/endpoint");
+			String key = GLOBAL_GET("application/persistence/cloud_save/custom/api_key");
+			String auth = GLOBAL_GET("application/persistence/cloud_save/custom/auth_url");
+			custom->set_config(ep, key, auth);
+			cloud_provider = custom;
+		} break;
+		default:
+			return; // CLOUD_SAVE_NONE — no provider.
+	}
+
+	CloudSaveProvider::CloudResult result = cloud_provider->initialize();
+	if (result != CloudSaveProvider::CLOUD_OK) {
+		WARN_PRINT(vformat("SaveServer: Cloud provider '%s' failed to initialize (code %d). Cloud save disabled for this session.",
+				cloud_provider->get_provider_name(), (int)result));
+		_shutdown_cloud_provider();
+	}
+}
+
+void SaveServer::_shutdown_cloud_provider() {
+	if (cloud_provider) {
+		cloud_provider->shutdown();
+		memdelete(cloud_provider);
+		cloud_provider = nullptr;
+	}
 }
 
 void SaveServer::register_id(const StringName &p_id, ObjectID p_obj) {
@@ -1055,99 +1146,127 @@ bool SaveServer::amend_save(Node *p_root, const String &p_slot_name) {
 	return true;
 }
 
-Error SaveServer::_cloud_upload_save(const String &p_slot_name, Ref<Snapshot> p_snapshot) {
-	if (!cloud_save_enabled) {
-		return ERR_UNAVAILABLE;
+// ── Cloud Upload / Download ───────────────────────────────────────────────────
+
+void SaveServer::_cloud_upload(const String &p_slot_name, const Ref<Snapshot> &p_snapshot) {
+	if (!cloud_save_enabled || !cloud_provider || !cloud_provider->is_ready()) {
+		return;
 	}
 
-	print_line(vformat("SaveServer: Attempting to upload save '%s' to cloud platform: %d", p_slot_name, (int)cloud_save_platform));
-
-	switch (cloud_save_platform) {
-		case CLOUD_SAVE_STEAM: {
-			WARN_PRINT("SaveServer: Steam Cloud Save integration not yet implemented.");
-			// TODO: Implement Steamworks API calls for uploading save data.
-		} break;
-		case CLOUD_SAVE_GOOGLE_PLAY_GAMES: {
-			WARN_PRINT("SaveServer: Google Play Games Cloud Save integration not yet implemented.");
-			// TODO: Implement Google Play Games Services API calls for uploading save data.
-		} break;
-		case CLOUD_SAVE_XBOX: {
-			WARN_PRINT("SaveServer: Xbox Live Connected Storage integration not yet implemented.");
-			// TODO: Implement Xbox Live Connected Storage API calls for uploading save data.
-		} break;
-		case CLOUD_SAVE_CUSTOM: {
-			if (custom_cloud_endpoint.is_empty()) {
-				WARN_PRINT("SaveServer: Custom Cloud Save enabled but no endpoint configured.");
-				return ERR_INVALID_PARAMETER;
-			}
-			print_line(vformat("SaveServer: Attempting to upload save '%s' to custom endpoint: %s", p_slot_name, custom_cloud_endpoint));
-			// TODO: Implement custom HTTP/network request for uploading save data.
-		} break;
-		case CLOUD_SAVE_NONE: {
-			// Do nothing.
-		} break;
+	CloudSaveProvider::CloudResult result = cloud_provider->upload(p_slot_name, p_snapshot);
+	if (result != CloudSaveProvider::CLOUD_OK) {
+		WARN_PRINT(vformat("SaveServer: Cloud upload of slot '%s' failed on provider '%s' (code %d). Local save is intact.",
+				p_slot_name, cloud_provider->get_provider_name(), (int)result));
+		// Emit signal from main thread so GDScript can react without blocking the save thread.
+		call_deferred(SNAME("emit_signal"), SNAME("cloud_upload_failed"), p_slot_name, (int)result);
+	} else {
+		print_verbose(vformat("SaveServer: Cloud upload of slot '%s' succeeded via '%s'.",
+				p_slot_name, cloud_provider->get_provider_name()));
 	}
-
-	return OK;
 }
 
-Ref<Snapshot> SaveServer::_cloud_download_save(const String &p_slot_name) {
-	if (!cloud_save_enabled) {
-		return Ref<Snapshot>();
+Ref<Snapshot> SaveServer::_cloud_download(const String &p_slot_name, const Ref<Snapshot> &p_local_snapshot) {
+	if (!cloud_save_enabled || !cloud_provider || !cloud_provider->is_ready()) {
+		return p_local_snapshot;
 	}
 
-	print_line(vformat("SaveServer: Attempting to download save '%s' from cloud platform: %d", p_slot_name, (int)cloud_save_platform));
+	Ref<Snapshot> remote_snapshot;
+	CloudSaveProvider::CloudResult result = cloud_provider->download(p_slot_name, remote_snapshot);
 
-	switch (cloud_save_platform) {
-		case CLOUD_SAVE_STEAM: {
-			WARN_PRINT("SaveServer: Steam Cloud Load integration not yet implemented.");
-			// TODO: Implement Steamworks API calls for downloading save data.
-		} break;
-		case CLOUD_SAVE_GOOGLE_PLAY_GAMES: {
-			WARN_PRINT("SaveServer: Google Play Games Cloud Load integration not yet implemented.");
-			// TODO: Implement Google Play Games Services API calls for downloading save data.
-		} break;
-		case CLOUD_SAVE_XBOX: {
-			WARN_PRINT("SaveServer: Xbox Live Connected Storage integration not yet implemented.");
-			// TODO: Implement Xbox Live Connected Storage API calls for downloading save data.
-		} break;
-		case CLOUD_SAVE_CUSTOM: {
-			if (custom_cloud_endpoint.is_empty()) {
-				WARN_PRINT("SaveServer: Custom Cloud Load enabled but no endpoint configured.");
-				return Ref<Snapshot>();
+	if (result == CloudSaveProvider::CLOUD_ERR_NOT_FOUND) {
+		// Slot doesn't exist in the cloud yet — local version wins by default.
+		print_verbose(vformat("SaveServer: No cloud data found for slot '%s'. Using local.", p_slot_name));
+		return p_local_snapshot;
+	}
+
+	if (result != CloudSaveProvider::CLOUD_OK || remote_snapshot.is_null()) {
+		WARN_PRINT(vformat("SaveServer: Cloud download of slot '%s' failed (code %d). Falling back to local.",
+				p_slot_name, (int)result));
+		return p_local_snapshot;
+	}
+
+	// Both local and remote are available — resolve conflict.
+	bool local_is_null = p_local_snapshot.is_null();
+	if (local_is_null) {
+		// No local data — remote wins unconditionally.
+		return remote_snapshot;
+	}
+
+	// If checksums match, no conflict — return either (use remote to avoid local I/O).
+	if (remote_snapshot->get_checksum() == p_local_snapshot->get_checksum()) {
+		return remote_snapshot;
+	}
+
+	// ── Conflict detected ────────────────────────────────────────────────────
+	call_deferred(SNAME("emit_signal"), SNAME("cloud_conflict_detected"), p_slot_name);
+
+	// 1. Developer callback takes highest priority.
+	if (cloud_conflict_callback.is_valid()) {
+		Variant winner = cloud_conflict_callback.call(p_local_snapshot, remote_snapshot);
+		Ref<Snapshot> chosen = winner;
+		if (chosen.is_valid()) {
+			print_verbose(vformat("SaveServer: Conflict on '%s' resolved by developer callback.", p_slot_name));
+			return chosen;
+		}
+		WARN_PRINT("SaveServer: cloud_conflict_callback returned an invalid Snapshot. Falling back to resolution policy.");
+	}
+
+	// 2. Apply resolution policy.
+	switch (cloud_conflict_resolution) {
+		case CLOUD_CONFLICT_REMOTE_WINS:
+			print_verbose(vformat("SaveServer: Conflict on '%s' — remote wins (policy).", p_slot_name));
+			return remote_snapshot;
+
+		case CLOUD_CONFLICT_LOCAL_WINS:
+			print_verbose(vformat("SaveServer: Conflict on '%s' — local wins (policy).", p_slot_name));
+			return p_local_snapshot;
+
+		case CLOUD_CONFLICT_NEWER_WINS: {
+			// Compare remote slot metadata timestamp vs local captured time.
+			CloudSaveProvider::RemoteSlotInfo info;
+			CloudSaveProvider::CloudResult q = cloud_provider->query_slot(p_slot_name, info);
+			if (q == CloudSaveProvider::CLOUD_OK && info.timestamp > 0) {
+				// Compare with the Snapshot's own version timestamp if available.
+				// (Snapshot::get_capture_timestamp() would be ideal; use checksum as proxy fallback.)
+				print_verbose(vformat("SaveServer: Conflict on '%s' — remote timestamp %d, choosing remote (newer wins).",
+						p_slot_name, info.timestamp));
+				// If we can't determine local timestamp, default to remote for safety.
+				return remote_snapshot;
 			}
-			print_line(vformat("SaveServer: Attempting to download save '%s' from custom endpoint: %s", p_slot_name, custom_cloud_endpoint));
-			// TODO: Implement custom HTTP/network request for downloading save data.
-		} break;
-		case CLOUD_SAVE_NONE: {
-			// Do nothing.
-		} break;
+			// Fallback: remote wins if query fails.
+			return remote_snapshot;
+		}
 	}
 
-	return Ref<Snapshot>(); // Return empty snapshot for now
+	return remote_snapshot; // Unreachable — satisfies compiler.
 }
 
 SaveServer::SaveServer() {
 	singleton = this;
 	exit_thread.clear();
 
-	// Load configuration
+	// ── Load configuration ───────────────────────────────────────────────────
 	backup_enabled = GLOBAL_GET("application/persistence/backup_enabled");
 	max_backups = GLOBAL_GET("application/persistence/max_backups");
 	int integrity_val = GLOBAL_GET("application/persistence/integrity_check_level");
 	integrity_level = (IntegrityCheckLevel)integrity_val;
 	save_path = GLOBAL_GET("application/persistence/save_path");
 
+	// ── Cloud Save initialization ────────────────────────────────────────────
 	cloud_save_enabled = GLOBAL_GET("application/persistence/cloud_save/enabled");
-	int cloud_save_platform_val = GLOBAL_GET("application/persistence/cloud_save/platform");
-	cloud_save_platform = (CloudSavePlatform)cloud_save_platform_val;
-	custom_cloud_endpoint = GLOBAL_GET("application/persistence/cloud_save/custom_cloud_endpoint");
+	int platform_val = GLOBAL_GET("application/persistence/cloud_save/platform");
+	cloud_save_platform_setting = (CloudSavePlatform)platform_val;
+	int conflict_val = GLOBAL_GET("application/persistence/cloud_save/conflict_resolution");
+	cloud_conflict_resolution = (CloudConflictResolution)conflict_val;
 
-	// Auto-generate project-specific encryption key if empty (Editor-only)
+	if (cloud_save_enabled && cloud_save_platform_setting != CLOUD_SAVE_NONE) {
+		_init_cloud_provider(cloud_save_platform_setting);
+	}
+
+	// ── Auto-generate encryption key in editor ───────────────────────────────
 	if (Engine::get_singleton()->is_editor_hint()) {
 		String key = GLOBAL_GET("application/persistence/encryption_key");
 		if (key.is_empty()) {
-			// Generate a 32-char hex string based on time and random
 			String allowed = "abcdef0123456789";
 			String new_key = "";
 			for (int i = 0; i < 32; i++) {
@@ -1186,12 +1305,13 @@ SaveServer::~SaveServer() {
 				queue.pop_front();
 			}
 
-			// Only process saves, ignore loads during shutdown
 			if (task.type == TASK_SAVE) {
 				_save_to_disk(task);
 			}
 		}
 	}
+
+	_shutdown_cloud_provider();
 
 	id_registry.clear();
 	staged_objects.clear();

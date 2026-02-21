@@ -1,4 +1,8 @@
-# Implementação de Dispositivos de Entrada Virtual (Zyris v1)
+---
+trigger: always_on
+---
+
+# Implementação de Dispositivos de Entrada Virtual
 
 Este documento descreve a implementação do sistema de **Virtual Input Devices** (Dispositivos de Entrada Virtual), que compõe a **v1** da Zyris Engine. Este sistema fornece uma camada de abstração polimórfica de alto desempenho para entradas baseadas em toque, integrando-as como cidadãs de primeira classe ao lado das entradas de teclado, mouse e gamepad.
 

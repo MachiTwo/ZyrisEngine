@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="CloudSaveProvider" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Abstract base class for cloud save platform backends.
+	</brief_description>
+	<description>
+		[CloudSaveProvider] is an abstract interface for cloud save platform backends. Each platform (Steam, Xbox, PlayStation, Google Play, Custom HTTP) implements this contract.
+		The [SaveServer] remains agnostic of the underlying SDK by delegating all network I/O through a provider.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="initialize">
+			<return type="int" enum="CloudSaveProvider.CloudResult" />
+			<description>
+				Called once by [SaveServer] on startup. Implementations should validate credentials and prepare any SDK handles.
+			</description>
+		</method>
+		<method name="shutdown">
+			<return type="void" />
+			<description>
+				Called once by [SaveServer] on shutdown.
+			</description>
+		</method>
+		<method name="is_ready" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if the provider is ready to accept upload/download calls.
+			</description>
+		</method>
+		<method name="upload">
+			<return type="int" enum="CloudSaveProvider.CloudResult" />
+			<param index="0" name="slot_name" type="String" />
+			<param index="1" name="snapshot" type="Snapshot" />
+			<description>
+				Serializes [param snapshot] to bytes and uploads it to the cloud under [param slot_name].
+			</description>
+		</method>
+		<method name="download">
+			<return type="int" enum="CloudSaveProvider.CloudResult" />
+			<param index="0" name="slot_name" type="String" />
+			<param index="1" name="snapshot" type="Snapshot" />
+			<description>
+				Downloads the cloud snapshot for [param slot_name]. Populates [param snapshot] on success.
+			</description>
+		</method>
+		<method name="query_slot">
+			<return type="int" enum="CloudSaveProvider.CloudResult" />
+			<param index="0" name="slot_name" type="String" />
+			<param index="1" name="info" type="Dictionary" />
+			<description>
+				Returns remote metadata for a slot without downloading the full blob. Meta is populated into the [param info] dictionary.
+			</description>
+		</method>
+		<method name="delete_slot">
+			<return type="int" enum="CloudSaveProvider.CloudResult" />
+			<param index="0" name="slot_name" type="String" />
+			<description>
+				Deletes a slot from the cloud.
+			</description>
+		</method>
+		<method name="get_provider_name" qualifiers="const">
+			<return type="String" />
+			<description>
+				Returns the human-readable name for logging and UI (e.g. "Steam", "Xbox").
+			</description>
+		</method>
+	</methods>
+	<constants>
+		<constant name="CLOUD_OK" value="0" enum="CloudResult">
+			Operation completed successfully.
+		</constant>
+		<constant name="CLOUD_ERR_NOT_INITIALIZED" value="1" enum="CloudResult">
+			initialize() was not called or failed.
+		</constant>
+		<constant name="CLOUD_ERR_NOT_AUTHENTICATED" value="2" enum="CloudResult">
+			User is not signed in.
+		</constant>
+		<constant name="CLOUD_ERR_QUOTA_EXCEEDED" value="3" enum="CloudResult">
+			Cloud storage quota reached.
+		</constant>
+		<constant name="CLOUD_ERR_NETWORK" value="4" enum="CloudResult">
+			Generic network / connectivity failure.
+		</constant>
+		<constant name="CLOUD_ERR_CONFLICT" value="5" enum="CloudResult">
+			A conflict was detected and could not be resolved.
+		</constant>
+		<constant name="CLOUD_ERR_NOT_FOUND" value="6" enum="CloudResult">
+			Requested slot does not exist in the cloud.
+		</constant>
+		<constant name="CLOUD_ERR_UNAVAILABLE" value="7" enum="CloudResult">
+			Platform service temporarily unavailable.
+		</constant>
+		<constant name="CLOUD_ERR_INVALID_CONFIG" value="8" enum="CloudResult">
+			Required credentials or endpoint not set.
+		</constant>
+		<constant name="CLOUD_ERR_UNKNOWN" value="9" enum="CloudResult">
+			An unknown error occurred.
+		</constant>
+	</constants>
+</class>

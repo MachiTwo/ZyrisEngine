@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="CloudSavePSN" inherits="CloudSaveProvider" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Cloud save provider for PlayStation Network.
+	</brief_description>
+	<description>
+		[CloudSavePSN] implements [CloudSaveProvider] using the PlayStation Save Data Management API.
+		Similar to Xbox, it works by writing to a system-provided mount point that is synced to PS Plus by the OS.
+	</description>
+	<tutorials>
+	</tutorials>
+</class>

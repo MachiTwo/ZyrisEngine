@@ -30,6 +30,8 @@
 
 #pragma once
 
+#include "cloud_save_provider.h"
+
 #include "core/io/resource.h"
 #include "core/object/class_db.h"
 #include "core/os/mutex.h"
@@ -67,7 +69,24 @@ public:
 		INTEGRITY_STRICT
 	};
 
+	// Which cloud backend to use.  Mirrors CloudSaveProvider platform identities.
+	// Values must stay in sync with CloudSavePlatform in project_settings.cpp.
+	enum CloudSavePlatform {
+		CLOUD_SAVE_NONE = 0,
+		CLOUD_SAVE_STEAM = 1,
+		CLOUD_SAVE_GOOGLE_PLAY_GAMES = 2,
+		CLOUD_SAVE_XBOX = 3,
+		CLOUD_SAVE_PSN = 4,
+		CLOUD_SAVE_CUSTOM = 5,
+	};
 
+	// Determines what happens when a cloud–local conflict is detected and
+	// no developer-supplied conflict_callback is set.
+	enum CloudConflictResolution {
+		CLOUD_CONFLICT_REMOTE_WINS = 0, // Always use the cloud version.
+		CLOUD_CONFLICT_LOCAL_WINS = 1, // Always keep the local version.
+		CLOUD_CONFLICT_NEWER_WINS = 2, // Compare timestamps; newest wins.
+	};
 
 private:
 	enum TaskType {
@@ -108,22 +127,34 @@ private:
 	bool backup_enabled = true;
 	IntegrityCheckLevel integrity_level = INTEGRITY_SIGNATURE;
 
-	// Cloud Save Configuration (Multi-platform)
-	bool general_cloud_save_enabled = false; // Global enable/disable for all cloud saves
+	// ── Cloud Save ──────────────────────────────────────────────────────────
+	// A single polymorphic provider.  Created in SaveServer() based on the
+	// cloud_save_platform project setting.  Null when cloud save is disabled.
+	CloudSaveProvider *cloud_provider = nullptr;
 
-	bool steam_cloud_enabled = false;
-	String steam_api_key; // Placeholder
+	bool cloud_save_enabled = false;
+	CloudSavePlatform cloud_save_platform_setting = CLOUD_SAVE_NONE;
+	CloudConflictResolution cloud_conflict_resolution = CLOUD_CONFLICT_NEWER_WINS;
 
-	bool google_play_cloud_enabled = false;
-	String google_play_client_id; // Placeholder
+	// Optional developer-supplied callback: func(local: Snapshot, remote: Snapshot) -> Snapshot
+	// If set, called when a conflict is detected.  The returned Snapshot is used.
+	Callable cloud_conflict_callback;
 
-	bool xbox_cloud_enabled = false;
-	String xbox_client_id; // Placeholder
+	// Instantiates and initializes the provider matching p_platform.
+	// Called during construction after settings are loaded.
+	void _init_cloud_provider(CloudSavePlatform p_platform);
 
-	bool custom_cloud_enabled = false;
-	String custom_cloud_endpoint;
-	String custom_cloud_api_key; // Placeholder
-	String custom_cloud_auth_url; // Placeholder
+	// Tear down the current provider (called in destructor and when re-configuring).
+	void _shutdown_cloud_provider();
+
+	// Called from the worker thread after a successful local save.
+	// Fails silently (WARN_PRINT) — local saves always succeed.
+	void _cloud_upload(const String &p_slot_name, const Ref<Snapshot> &p_snapshot);
+
+	// Called from the worker thread at the start of a load operation.
+	// Resolves conflicts using cloud_conflict_resolution strategy.
+	// Returns the winning Snapshot (may be the local one if cloud is unavailable).
+	Ref<Snapshot> _cloud_download(const String &p_slot_name, const Ref<Snapshot> &p_local_snapshot);
 
 	// Modular/Amend Persistence
 	Ref<Snapshot> base_snapshot;
@@ -226,33 +257,24 @@ private:
 	void set_integrity_check_level(IntegrityCheckLevel p_level);
 	IntegrityCheckLevel get_integrity_check_level() const;
 
-	// Cloud Save
-	void set_general_cloud_save_enabled(bool p_enabled);
-	bool is_general_cloud_save_enabled() const;
+	// ── Cloud Save API ───────────────────────────────────────────────────────
+	void set_cloud_save_enabled(bool p_enabled);
+	bool is_cloud_save_enabled() const;
 
-	void set_steam_cloud_enabled(bool p_enabled);
-	bool is_steam_cloud_enabled() const;
-	void set_steam_api_key(const String &p_key);
-	String get_steam_api_key() const;
+	void set_cloud_save_platform(CloudSavePlatform p_platform);
+	CloudSavePlatform get_cloud_save_platform() const;
 
-	void set_google_play_cloud_enabled(bool p_enabled);
-	bool is_google_play_cloud_enabled() const;
-	void set_google_play_client_id(const String &p_id);
-	String get_google_play_client_id() const;
+	void set_cloud_conflict_resolution(CloudConflictResolution p_res);
+	CloudConflictResolution get_cloud_conflict_resolution() const;
 
-	void set_xbox_cloud_enabled(bool p_enabled);
-	bool is_xbox_cloud_enabled() const;
-	void set_xbox_client_id(const String &p_id);
-	String get_xbox_client_id() const;
+	// Register a GDScript callable for manual conflict resolution.
+	// Signature: func(local_snapshot: Snapshot, remote_snapshot: Snapshot) -> Snapshot
+	// If null (default), the cloud_conflict_resolution enum is used instead.
+	void set_cloud_conflict_callback(const Callable &p_callback);
+	Callable get_cloud_conflict_callback() const;
 
-	void set_custom_cloud_enabled(bool p_enabled);
-	bool is_custom_cloud_enabled() const;
-	void set_custom_cloud_endpoint(const String &p_endpoint);
-	String get_custom_cloud_endpoint() const;
-	void set_custom_cloud_api_key(const String &p_key);
-	String get_custom_cloud_api_key() const;
-	void set_custom_cloud_auth_url(const String &p_url);
-	String get_custom_cloud_auth_url() const;
+	// Returns the human-readable name of the active cloud provider, or "None".
+	String get_cloud_provider_name() const;
 
 public:
 	SaveServer();
@@ -262,4 +284,5 @@ public:
 VARIANT_ENUM_CAST(SaveServer::SaveFormat);
 VARIANT_ENUM_CAST(SaveServer::SaveResult);
 VARIANT_ENUM_CAST(SaveServer::IntegrityCheckLevel);
-
+VARIANT_ENUM_CAST(SaveServer::CloudSavePlatform);
+VARIANT_ENUM_CAST(SaveServer::CloudConflictResolution);

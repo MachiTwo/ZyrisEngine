@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="SaveServer" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../class.xsd">
 	<brief_description>
-		High-performance persistence backend.
+		High-performance persistence backend with optional cloud save support.
 	</brief_description>
 	<description>
 		[SaveServer] is a singleton responsible for managing data storage on disk for the Godot Engine. It abstracts I/O complexity in separate threads (non-blocking).
 		It ensures that game state snapshots are persisted asynchronously as [Snapshot] resources in [code].tres[/code] format, allowing for easy inspection, version control integration, and automatic game version tracking.
+		[b]Cloud Save:[/b] After a successful local write, the server automatically attempts to upload the snapshot to the configured cloud platform via [code]_cloud_upload_save()[/code]. On load, it first tries to fetch the canonical version from the cloud via [code]_cloud_download_save()[/code], falling back to local disk and backups if unavailable.
 	</description>
 	<tutorials>
 	</tutorials>
@@ -167,13 +168,13 @@
 			The base directory within the [code]user://[/code] path where [SaveServer] stores snapshot files.
 		</member>
 		<member name="cloud_save_enabled" type="bool" setter="set_cloud_save_enabled" getter="is_cloud_save_enabled" default="false">
-			If [code]true[/code], enables cloud saving functionality.
+			If [code]true[/code], enables cloud saving functionality. After each successful local save, the server will attempt to upload the snapshot to the active cloud platform. On load, the server will first attempt to fetch from the cloud before falling back to local disk.
 		</member>
 		<member name="cloud_save_platform" type="int" setter="set_cloud_save_platform" getter="get_cloud_save_platform" enum="SaveServer.CloudSavePlatform" default="0">
-			The cloud platform to use for save synchronization.
+			The cloud platform to use for save synchronization. Corresponds to the [code]application/persistence/cloud_save/platform[/code] project setting. Set to [constant CLOUD_SAVE_NONE] to disable cloud synchronization.
 		</member>
 		<member name="custom_cloud_endpoint" type="String" setter="set_custom_cloud_endpoint" getter="get_custom_cloud_endpoint" default="&quot;&quot;">
-			The endpoint URL for custom cloud save services.
+			The endpoint URL for custom cloud save services. Required when [member cloud_save_platform] is set to [constant CLOUD_SAVE_CUSTOM].
 		</member>
 	</members>
 	<signals>
@@ -236,7 +237,7 @@
 		</constant>
 
 		<constant name="CLOUD_SAVE_NONE" value="0" enum="CloudSavePlatform">
-			No cloud save enabled.
+			No cloud save platform active. Saves and loads operate exclusively on local disk.
 		</constant>
 		<constant name="CLOUD_SAVE_STEAM" value="1" enum="CloudSavePlatform">
 			Steam Cloud Save. Requires Steamworks SDK integration.

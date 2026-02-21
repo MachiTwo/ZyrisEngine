@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="CloudSaveCustom" inherits="CloudSaveProvider" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Cloud save provider for custom HTTP backends.
+	</brief_description>
+	<description>
+		[CloudSaveCustom] implements [CloudSaveProvider] for self-hosted REST APIs.
+		It supports Bearer token authentication, SHA-256 checksum validation, and timestamp-based conflict resolution.
+	</description>
+	<tutorials>
+	</tutorials>
+</class>
