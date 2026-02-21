@@ -111,7 +111,20 @@ O Zyris está implementando um conjunto abrangente de sistemas. Abaixo está nos
 - **Global ID Registry (persistence_id)** - Abstração de hierarquia que desvincula os dados de NodePaths, impedindo que saves quebrem se nós forem renomeados ou movidos.
 - **Evolução de Dados (Migrações)** - Sistema de versionamento que permite registrar transformações de dados (`register_migration`) para manter compatibilidade com saves antigos.
 - **Segurança e Integridade** - Sistema de backups rotativos, validação por checksum SHA-256 e mecanismo de *Flush* no encerramento para evitar corrupção de dados.
-- **Cloud Save Multi-Plataforma** - Pipeline nativo de sincronização em nuvem com suporte a Steam Cloud, Google Play Games, Xbox Live Connected Storage e endpoints HTTP customizados. Após cada save local, o snapshot é automaticamente enviado para a plataforma configurada. No carregamento, a versão da nuvem tem prioridade, com fallback automático para disco local e backups caso indisponível.
+
+- [x] **Cloud Save** - Sincronização e Abstração de Plataforma
+
+     Um pipeline nativo de alta performance para sincronização de progresso entre dispositivos, totalmente integrado ao fluxo do `SaveServer`.
+
+     **Recursos Principais:**
+
+- **Abstração de Provedores (CloudSaveProvider)** - Interface polimórfica que unifica Steam Cloud, Google Play Games, Xbox Connected Storage e PlayStation sob uma única API nativa.
+- **Gerenciamento de SDKs (EditorSDKManager)** - Interface dedicada no Editor para configuração, download e validação de caminhos de SDKs de terceiros (Steamworks, GDK, etc).
+- **Sincronização Assíncrona** - Uploads e downloads processados em threads de background, garantindo que o gameplay não sofra travamentos durante a sincronização.
+- **Resolução de Conflitos Inteligente** - Sistema baseado em timestamps e checksums SHA-256, com suporte a diálogos de escolha do usuário ou resolução automática via código.
+- **Fallback Automático & Redundância** - Mecanismo de segurança que prioriza a nuvem mas alterna instantaneamente para o disco local em caso de falha de conexão ou indisponibilidade do serviço.
+- **Provedor HTTP Customizado** - Suporte a backends REST genéricos com autenticação via Bearer Token, permitindo infraestrutura de nuvem própria e independente de plataforma.
+- **Determinismo Cross-Platform** - Garante que o estado serializado seja idêntico em todas as plataformas através de hashes de integridade, facilitando o cross-save.
 
 - [x] **Ability System (GAS)** - Framework de Gameplay Orientado a Dados
 

@@ -111,7 +111,20 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
 - **Global ID Registry (persistence_id)** - Hierarchy abstraction that detaches data from NodePaths, preventing save breakage if nodes are renamed or moved.
 - **Data Evolution (Migrations)** - Versioning system that allows registering data transformations (`register_migration`) to maintain compatibility with legacy saves.
 - **Safety and Integrity** - Rotative backup system, SHA-256 checksum validation, and *Flush* mechanism on shutdown to prevent data corruption.
-- **Multi-Platform Cloud Save** - Native cloud synchronization pipeline with support for Steam Cloud, Google Play Games, Xbox Live Connected Storage, and custom HTTP endpoints. After each local save, the snapshot is automatically uploaded to the configured platform. On load, the cloud version takes priority, with automatic fallback to local disk and backups if unavailable.
+
+- [x] **Cloud Save** - Synchronization and Platform Abstraction
+
+     A high-performance native pipeline for progress synchronization across devices, fully integrated into the `SaveServer` flow.
+
+     **Key Features:**
+
+- **Provider Abstraction (CloudSaveProvider)** - Polymorphic interface that unifies Steam Cloud, Google Play Games, Xbox Connected Storage, and PlayStation under a single native API.
+- **SDK Management (EditorSDKManager)** - Dedicated Editor interface for configuration, download, and validation of third-party SDK paths (Steamworks, GDK, etc.).
+- **Asynchronous Synchronization** - Background-threaded uploads and downloads, ensuring gameplay remains smooth during synchronization.
+- **Intelligent Conflict Resolution** - System based on timestamps and SHA-256 checksums, supporting user choice dialogs or automatic code-based resolution.
+- **Automatic Fallback & Redundancy** - Safety mechanism that prioritizes the cloud but instantly switches to local disk in case of connection failure or service unavailability.
+- **Custom HTTP Provider** - Support for generic REST backends with Bearer Token authentication, allowing for private and platform-independent cloud infrastructure.
+- **Cross-Platform Determinism** - Ensures serialized state is identical across all platforms via integrity hashes, making cross-save seamless.
 
 - [x] **Ability System (GAS)** - Data-Oriented Gameplay Framework
 
