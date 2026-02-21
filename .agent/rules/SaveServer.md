@@ -169,37 +169,12 @@ O comportamento do `SaveServer` é controlado via `Project Settings > Applicatio
   - `SIGNATURE`: Verifica se o Checksum corresponde ao conteúdo.
   - `STRICT`: Valida Checksum e Versionamento.
 
-#### 4.4.1 Cloud Save Settings
-
-O `project_settings.cpp` registra configurações **granulares por plataforma** sob `application/persistence/cloud_save/`:
-
-- **`general/enabled`** — Chave mestre global (habilita/desabilita o subsistema inteiro).
-- **`steam/enabled`** + **`steam/api_key`** — Integração Steam Cloud.
-- **`google_play/enabled`** + **`google_play/client_id`** — Google Play Saved Games.
-- **`xbox/enabled`** + **`xbox/client_id`** — Xbox Live Connected Storage.
-- **`custom/enabled`** + **`custom/endpoint`** + **`custom/api_key`** + **`custom/auth_url`** — Serviço HTTP customizado.
-
-O runtime do `SaveServer` consome essas configurações via:
-
-- `application/persistence/cloud_save/enabled` → habilitação global
-- `application/persistence/cloud_save/platform` → plataforma ativa (`None=0, Steam=1, GooglePlay=2, Xbox=3, Custom=4`)
-- `application/persistence/cloud_save/custom_cloud_endpoint` → endpoint do serviço customizado
-
-**Comportamento do fluxo cloud:**
-
-- **Salvamento:** Após persistir localmente com sucesso, o servidor chama `_cloud_upload_save()` para sincronizar com a plataforma configurada. Falhas no upload são registradas via `WARN_PRINT` mas não invalidam o save local.
-- **Carregamento:** Tenta primeiro `_cloud_download_save()` para obter a versão canonica da nuvem. Caso a plataforma seja inacessível, o sistema faz **fallback automático** para o disco local e, em seguida, para backups.
-
-**Enum `CloudSavePlatform`** (exposto via `ClassDB`):
-
-- `CLOUD_SAVE_NONE = 0`, `CLOUD_SAVE_STEAM = 1`, `CLOUD_SAVE_GOOGLE_PLAY_GAMES = 2`, `CLOUD_SAVE_XBOX = 3`, `CLOUD_SAVE_CUSTOM = 4`
-
 ### 4.5 Persistência em Disco
 
 - **Localização**: Geralmente armazenado em `user://saves/`.
 - **Extensões**: `.tres` para modo texto e `.data` para modo binário.
 
-### 4.5 Segurança de Dados (Shutdown Flush)
+### 4.6 Segurança de Dados (Shutdown Flush)
 
 O `SaveServer` garante integridade total dos dados mesmo se o jogo for fechado abruptamente enquanto salvamentos estão pendentes. O destrutor do servidor força o processamento (Flush) de qualquer tarefa de salvamento restante na fila antes de encerrar o processo.
 
