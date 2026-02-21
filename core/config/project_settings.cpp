@@ -1895,6 +1895,27 @@ ProjectSettings::ProjectSettings() {
 	GLOBAL_DEF_BASIC("application/persistence/backup_enabled", true);
 	GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "application/persistence/integrity_check_level", PROPERTY_HINT_ENUM, "None,Signature,Strict"), 1);
 	GLOBAL_DEF_BASIC("application/persistence/save_path", "user://saves/");
+
+	// Cloud Save Settings (Multi-platform support)
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/general/enabled", false); // Global enable/disable for all cloud saves
+
+	// Steam
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/steam/enabled", false);
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/steam/api_key", ""); // Placeholder for Steam API Key/AppID if needed
+
+	// Google Play Games
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/google_play/enabled", false);
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/google_play/client_id", ""); // Placeholder for Google Play Client ID
+
+	// Xbox Live Connected Storage
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/xbox/enabled", false);
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/xbox/client_id", ""); // Placeholder for Xbox Client ID/Title ID
+
+	// Custom Cloud Service
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/custom/enabled", false);
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/custom/endpoint", "");
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/custom/api_key", ""); // Placeholder for custom service API Key
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/custom/auth_url", ""); // Placeholder for custom service authentication URL
 }
 
 ProjectSettings::ProjectSettings(const String &p_path) {

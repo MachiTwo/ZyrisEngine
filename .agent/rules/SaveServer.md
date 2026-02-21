@@ -160,6 +160,17 @@ O comportamento do `SaveServer` é controlado via `Project Settings > Applicatio
 
 - **`save_path`**: Diretório base para armazenamento dos saves (padrão: `user://saves/`). Permite organizar saves em subpastas customizadas.
 
+- **`cloud_save/enabled`**: Ativa a sincronização automática com serviços de nuvem.
+
+- **`cloud_save/platform`**:
+  - `None (0)`: Sem sincronização externa.
+  - `Steam (1)`: Integração com Steam Cloud.
+  - `Google Play Games (2)`: Integração com Google Play Saved Games.
+  - `Xbox (3)`: Integração com Xbox Live Connected Storage.
+  - `Custom (4)`: Usa um serviço de nuvem customizado definido pelo usuário (requer endpoint).
+
+- **`cloud_save/custom_cloud_endpoint`**: URL base para o serviço de nuvem customizado.
+
 - **`integrity_check_level`**:
   - `NONE`: Carregamento rápido sem validação.
   - `SIGNATURE`: Verifica se o Checksum corresponde ao conteúdo.

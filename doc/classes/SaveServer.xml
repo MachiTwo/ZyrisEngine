@@ -166,6 +166,15 @@
 		<member name="save_path" type="String" setter="set_save_path" getter="get_save_path" default="&quot;user://saves/&quot;">
 			The base directory within the [code]user://[/code] path where [SaveServer] stores snapshot files.
 		</member>
+		<member name="cloud_save_enabled" type="bool" setter="set_cloud_save_enabled" getter="is_cloud_save_enabled" default="false">
+			If [code]true[/code], enables cloud saving functionality.
+		</member>
+		<member name="cloud_save_platform" type="int" setter="set_cloud_save_platform" getter="get_cloud_save_platform" enum="SaveServer.CloudSavePlatform" default="0">
+			The cloud platform to use for save synchronization.
+		</member>
+		<member name="custom_cloud_endpoint" type="String" setter="set_custom_cloud_endpoint" getter="get_custom_cloud_endpoint" default="&quot;&quot;">
+			The endpoint URL for custom cloud save services.
+		</member>
 	</members>
 	<signals>
 		<signal name="backup_restored">
@@ -224,6 +233,22 @@
 		</constant>
 		<constant name="SAVE_ERR_VERSION_MISMATCH" value="6" enum="SaveResult">
 			Snapshot version incompatible with current game version.
+		</constant>
+
+		<constant name="CLOUD_SAVE_NONE" value="0" enum="CloudSavePlatform">
+			No cloud save enabled.
+		</constant>
+		<constant name="CLOUD_SAVE_STEAM" value="1" enum="CloudSavePlatform">
+			Steam Cloud Save. Requires Steamworks SDK integration.
+		</constant>
+		<constant name="CLOUD_SAVE_GOOGLE_PLAY_GAMES" value="2" enum="CloudSavePlatform">
+			Google Play Games Cloud Save. Requires Google Play Games Services SDK integration.
+		</constant>
+		<constant name="CLOUD_SAVE_XBOX" value="3" enum="CloudSavePlatform">
+			Xbox Live Connected Storage. Requires Xbox Live SDK integration.
+		</constant>
+		<constant name="CLOUD_SAVE_CUSTOM" value="4" enum="CloudSavePlatform">
+			Custom user-defined cloud save service. Requires [member custom_cloud_endpoint] to be set.
 		</constant>
 	</constants>
 </class>

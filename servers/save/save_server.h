@@ -67,6 +67,8 @@ public:
 		INTEGRITY_STRICT
 	};
 
+
+
 private:
 	enum TaskType {
 		TASK_SAVE,
@@ -105,6 +107,23 @@ private:
 	bool compression_enabled = true;
 	bool backup_enabled = true;
 	IntegrityCheckLevel integrity_level = INTEGRITY_SIGNATURE;
+
+	// Cloud Save Configuration (Multi-platform)
+	bool general_cloud_save_enabled = false; // Global enable/disable for all cloud saves
+
+	bool steam_cloud_enabled = false;
+	String steam_api_key; // Placeholder
+
+	bool google_play_cloud_enabled = false;
+	String google_play_client_id; // Placeholder
+
+	bool xbox_cloud_enabled = false;
+	String xbox_client_id; // Placeholder
+
+	bool custom_cloud_enabled = false;
+	String custom_cloud_endpoint;
+	String custom_cloud_api_key; // Placeholder
+	String custom_cloud_auth_url; // Placeholder
 
 	// Modular/Amend Persistence
 	Ref<Snapshot> base_snapshot;
@@ -207,6 +226,34 @@ private:
 	void set_integrity_check_level(IntegrityCheckLevel p_level);
 	IntegrityCheckLevel get_integrity_check_level() const;
 
+	// Cloud Save
+	void set_general_cloud_save_enabled(bool p_enabled);
+	bool is_general_cloud_save_enabled() const;
+
+	void set_steam_cloud_enabled(bool p_enabled);
+	bool is_steam_cloud_enabled() const;
+	void set_steam_api_key(const String &p_key);
+	String get_steam_api_key() const;
+
+	void set_google_play_cloud_enabled(bool p_enabled);
+	bool is_google_play_cloud_enabled() const;
+	void set_google_play_client_id(const String &p_id);
+	String get_google_play_client_id() const;
+
+	void set_xbox_cloud_enabled(bool p_enabled);
+	bool is_xbox_cloud_enabled() const;
+	void set_xbox_client_id(const String &p_id);
+	String get_xbox_client_id() const;
+
+	void set_custom_cloud_enabled(bool p_enabled);
+	bool is_custom_cloud_enabled() const;
+	void set_custom_cloud_endpoint(const String &p_endpoint);
+	String get_custom_cloud_endpoint() const;
+	void set_custom_cloud_api_key(const String &p_key);
+	String get_custom_cloud_api_key() const;
+	void set_custom_cloud_auth_url(const String &p_url);
+	String get_custom_cloud_auth_url() const;
+
 public:
 	SaveServer();
 	~SaveServer();
@@ -215,3 +262,4 @@ public:
 VARIANT_ENUM_CAST(SaveServer::SaveFormat);
 VARIANT_ENUM_CAST(SaveServer::SaveResult);
 VARIANT_ENUM_CAST(SaveServer::IntegrityCheckLevel);
+

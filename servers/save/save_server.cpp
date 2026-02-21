@@ -59,6 +59,27 @@ void SaveServer::register_settings() {
 	GLOBAL_DEF_BASIC("application/persistence/max_backups", 2);
 	GLOBAL_DEF_BASIC("application/persistence/integrity_check_level", 1);
 	GLOBAL_DEF_BASIC("application/persistence/save_path", "user://saves/");
+
+	// Cloud Save Settings (Multi-platform support)
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/general/enabled", false); // Global enable/disable for all cloud saves
+	
+	// Steam
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/steam/enabled", false);
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/steam/api_key", ""); // Placeholder for Steam API Key/AppID if needed
+	
+	// Google Play Games
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/google_play/enabled", false);
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/google_play/client_id", ""); // Placeholder for Google Play Client ID
+	
+	// Xbox Live Connected Storage
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/xbox/enabled", false);
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/xbox/client_id", ""); // Placeholder for Xbox Client ID/Title ID
+	
+	// Custom Cloud Service
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/custom/enabled", false);
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/custom/endpoint", "");
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/custom/api_key", ""); // Placeholder for custom service API Key
+	GLOBAL_DEF_BASIC("application/persistence/cloud_save/custom/auth_url", ""); // Placeholder for custom service authentication URL
 }
 
 void SaveServer::_bind_methods() {
@@ -115,6 +136,10 @@ void SaveServer::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "integrity_check_level", PROPERTY_HINT_ENUM, "None,Signature,Strict"), "set_integrity_check_level", "get_integrity_check_level");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "save_path"), "set_save_path", "get_save_path");
 
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "cloud_save_enabled"), "set_cloud_save_enabled", "is_cloud_save_enabled");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "cloud_save_platform", PROPERTY_HINT_ENUM, "None,Steam,Google Play Games,Xbox,Custom"), "set_cloud_save_platform", "get_cloud_save_platform");
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "custom_cloud_endpoint"), "set_custom_cloud_endpoint", "get_custom_cloud_endpoint");
+
 	BIND_ENUM_CONSTANT(FORMAT_TEXT);
 	BIND_ENUM_CONSTANT(FORMAT_BINARY);
 
@@ -129,6 +154,12 @@ void SaveServer::_bind_methods() {
 	BIND_ENUM_CONSTANT(SAVE_ERR_INVALID_DATA);
 	BIND_ENUM_CONSTANT(SAVE_ERR_CHECKSUM_MISMATCH);
 	BIND_ENUM_CONSTANT(SAVE_ERR_VERSION_MISMATCH);
+
+	BIND_ENUM_CONSTANT(CLOUD_SAVE_NONE);
+	BIND_ENUM_CONSTANT(CLOUD_SAVE_STEAM);
+	BIND_ENUM_CONSTANT(CLOUD_SAVE_GOOGLE_PLAY_GAMES);
+	BIND_ENUM_CONSTANT(CLOUD_SAVE_XBOX);
+	BIND_ENUM_CONSTANT(CLOUD_SAVE_CUSTOM);
 
 	ADD_SIGNAL(MethodInfo("save_corrupted", PropertyInfo(Variant::STRING, "slot_name")));
 	ADD_SIGNAL(MethodInfo("backup_restored", PropertyInfo(Variant::STRING, "slot_name"), PropertyInfo(Variant::STRING, "file_path")));
@@ -420,6 +451,17 @@ Error SaveServer::_save_to_disk(const SaveTask &p_task) {
 			p_task.slot_name, end_time - start_time, file_size / 1024));
 #endif
 
+	// Upload to cloud if enabled
+	if (cloud_save_enabled && cloud_save_platform != CLOUD_SAVE_NONE) {
+		Error cloud_err = _cloud_upload_save(p_task.slot_name, snapshot_res);
+		if (cloud_err != OK) {
+			WARN_PRINT(vformat("SaveServer: Failed to upload save '%s' to cloud. Error: %d", p_task.slot_name, cloud_err));
+			// Decide if local save should still be considered successful despite cloud failure
+			// For now, we'll let local save succeed but log the cloud error.
+			// return cloud_err; // Uncomment this if cloud save failure should fail the entire save operation.
+		}
+	}
+
 	return OK;
 }
 
@@ -438,7 +480,25 @@ void SaveServer::_merge_dictionaries_recursive(Dictionary &p_target, const Dicti
 }
 
 Dictionary SaveServer::_load_from_disk(const String &p_slot_name) {
-	Ref<Snapshot> snapshot_res = _read_snapshot_from_disk(p_slot_name);
+	Ref<Snapshot> snapshot_res;
+
+	// Attempt to load from cloud first if enabled
+	if (cloud_save_enabled && cloud_save_platform != CLOUD_SAVE_NONE) {
+		print_line(vformat("SaveServer: Attempting to load '%s' from cloud.", p_slot_name));
+		snapshot_res = _cloud_download_save(p_slot_name);
+		if (snapshot_res.is_valid()) {
+			print_line(vformat("SaveServer: Successfully loaded '%s' from cloud.", p_slot_name));
+			// If cloud load is successful, then local backup/integrity checks are not needed
+			// The cloud version is considered the canonical one.
+		} else {
+			WARN_PRINT(vformat("SaveServer: Failed to load '%s' from cloud. Falling back to local disk.", p_slot_name));
+		}
+	}
+
+	// If not loaded from cloud, or cloud load failed, try local disk
+	if (!snapshot_res.is_valid()) {
+		snapshot_res = _read_snapshot_from_disk(p_slot_name);
+	}
 
 	// Restore from backup if needed
 	if (snapshot_res.is_null() && backup_enabled) {
@@ -732,6 +792,28 @@ SaveServer::IntegrityCheckLevel SaveServer::get_integrity_check_level() const {
 	return integrity_level;
 }
 
+// Cloud Save
+void SaveServer::set_cloud_save_enabled(bool p_enabled) {
+	cloud_save_enabled = p_enabled;
+}
+bool SaveServer::is_cloud_save_enabled() const {
+	return cloud_save_enabled;
+}
+
+void SaveServer::set_cloud_save_platform(CloudSavePlatform p_platform) {
+	cloud_save_platform = p_platform;
+}
+SaveServer::CloudSavePlatform SaveServer::get_cloud_save_platform() const {
+	return cloud_save_platform;
+}
+
+void SaveServer::set_custom_cloud_endpoint(const String &p_endpoint) {
+	custom_cloud_endpoint = p_endpoint;
+}
+String SaveServer::get_custom_cloud_endpoint() const {
+	return custom_cloud_endpoint;
+}
+
 void SaveServer::register_id(const StringName &p_id, ObjectID p_obj) {
 	MutexLock lock(staged_mutex);
 	if (id_registry.has(p_id)) {
@@ -973,6 +1055,78 @@ bool SaveServer::amend_save(Node *p_root, const String &p_slot_name) {
 	return true;
 }
 
+Error SaveServer::_cloud_upload_save(const String &p_slot_name, Ref<Snapshot> p_snapshot) {
+	if (!cloud_save_enabled) {
+		return ERR_UNAVAILABLE;
+	}
+
+	print_line(vformat("SaveServer: Attempting to upload save '%s' to cloud platform: %d", p_slot_name, (int)cloud_save_platform));
+
+	switch (cloud_save_platform) {
+		case CLOUD_SAVE_STEAM: {
+			WARN_PRINT("SaveServer: Steam Cloud Save integration not yet implemented.");
+			// TODO: Implement Steamworks API calls for uploading save data.
+		} break;
+		case CLOUD_SAVE_GOOGLE_PLAY_GAMES: {
+			WARN_PRINT("SaveServer: Google Play Games Cloud Save integration not yet implemented.");
+			// TODO: Implement Google Play Games Services API calls for uploading save data.
+		} break;
+		case CLOUD_SAVE_XBOX: {
+			WARN_PRINT("SaveServer: Xbox Live Connected Storage integration not yet implemented.");
+			// TODO: Implement Xbox Live Connected Storage API calls for uploading save data.
+		} break;
+		case CLOUD_SAVE_CUSTOM: {
+			if (custom_cloud_endpoint.is_empty()) {
+				WARN_PRINT("SaveServer: Custom Cloud Save enabled but no endpoint configured.");
+				return ERR_INVALID_PARAMETER;
+			}
+			print_line(vformat("SaveServer: Attempting to upload save '%s' to custom endpoint: %s", p_slot_name, custom_cloud_endpoint));
+			// TODO: Implement custom HTTP/network request for uploading save data.
+		} break;
+		case CLOUD_SAVE_NONE: {
+			// Do nothing.
+		} break;
+	}
+
+	return OK;
+}
+
+Ref<Snapshot> SaveServer::_cloud_download_save(const String &p_slot_name) {
+	if (!cloud_save_enabled) {
+		return Ref<Snapshot>();
+	}
+
+	print_line(vformat("SaveServer: Attempting to download save '%s' from cloud platform: %d", p_slot_name, (int)cloud_save_platform));
+
+	switch (cloud_save_platform) {
+		case CLOUD_SAVE_STEAM: {
+			WARN_PRINT("SaveServer: Steam Cloud Load integration not yet implemented.");
+			// TODO: Implement Steamworks API calls for downloading save data.
+		} break;
+		case CLOUD_SAVE_GOOGLE_PLAY_GAMES: {
+			WARN_PRINT("SaveServer: Google Play Games Cloud Load integration not yet implemented.");
+			// TODO: Implement Google Play Games Services API calls for downloading save data.
+		} break;
+		case CLOUD_SAVE_XBOX: {
+			WARN_PRINT("SaveServer: Xbox Live Connected Storage integration not yet implemented.");
+			// TODO: Implement Xbox Live Connected Storage API calls for downloading save data.
+		} break;
+		case CLOUD_SAVE_CUSTOM: {
+			if (custom_cloud_endpoint.is_empty()) {
+				WARN_PRINT("SaveServer: Custom Cloud Load enabled but no endpoint configured.");
+				return Ref<Snapshot>();
+			}
+			print_line(vformat("SaveServer: Attempting to download save '%s' from custom endpoint: %s", p_slot_name, custom_cloud_endpoint));
+			// TODO: Implement custom HTTP/network request for downloading save data.
+		} break;
+		case CLOUD_SAVE_NONE: {
+			// Do nothing.
+		} break;
+	}
+
+	return Ref<Snapshot>(); // Return empty snapshot for now
+}
+
 SaveServer::SaveServer() {
 	singleton = this;
 	exit_thread.clear();
@@ -983,6 +1137,11 @@ SaveServer::SaveServer() {
 	int integrity_val = GLOBAL_GET("application/persistence/integrity_check_level");
 	integrity_level = (IntegrityCheckLevel)integrity_val;
 	save_path = GLOBAL_GET("application/persistence/save_path");
+
+	cloud_save_enabled = GLOBAL_GET("application/persistence/cloud_save/enabled");
+	int cloud_save_platform_val = GLOBAL_GET("application/persistence/cloud_save/platform");
+	cloud_save_platform = (CloudSavePlatform)cloud_save_platform_val;
+	custom_cloud_endpoint = GLOBAL_GET("application/persistence/cloud_save/custom_cloud_endpoint");
 
 	// Auto-generate project-specific encryption key if empty (Editor-only)
 	if (Engine::get_singleton()->is_editor_hint()) {
