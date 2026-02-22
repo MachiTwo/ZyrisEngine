@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AbilitySystemMagnitudeCalculation" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Custom magnitude calculation logic (MMC).
+	</brief_description>
+	<description>
+		[AbilitySystemMagnitudeCalculation] allows overriding the [method _calculate_magnitude] method in script to provide complex formulas for effect magnitudes.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="_calculate_magnitude" qualifiers="virtual const">
+			<return type="float" />
+			<param index="0" name="spec" type="AbilitySystemEffectSpec" />
+			<description>
+				Virtual method to implement custom magnitude calculation logic.
+			</description>
+		</method>
+		<method name="get_source_attribute_value" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="spec" type="AbilitySystemEffectSpec" />
+			<param index="1" name="attribute" type="StringName" />
+			<description>
+				Returns the attribute value from the source component of the effect spec.
+			</description>
+		</method>
+		<method name="get_target_attribute_value" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="spec" type="AbilitySystemEffectSpec" />
+			<param index="1" name="attribute" type="StringName" />
+			<description>
+				Returns the attribute value from the target component of the effect spec.
+			</description>
+		</method>
+	</methods>
+</class>

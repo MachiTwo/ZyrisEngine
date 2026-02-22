@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AbilitySystemComponent" inherits="Node" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Core component for managing abilities, attributes, and effects on an actor.
+	</brief_description>
+	<description>
+		The [AbilitySystemComponent] (ASC) is the central hub for all logic on an actor. It manages abilities, attributes, and effects.
+		[b]CRITICAL REQUIREMENT:[/b] This component [b]MUST[/b] be a child of [CharacterBody2D] or [CharacterBody3D]. The component will show an error and disable itself if placed under any other node type. The CharacterBody parent is automatically detected and cached.
+		[b]Example Usage:[/b]
+		[codeblock]
+		func _ready():
+			asc.try_activate_ability(fireball_resource)
+		[/codeblock]
+		[b]Node References:[/b] The ASC does [b]NOT[/b] cache sibling nodes automatically. Developers should use [code]@onready[/code] variables in their Actor scripts to cache nodes like [AnimationPlayer] and pass them directly to the execution methods ([method play_montage], [method play_sound], etc.).
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="add_attribute_set">
+			<return type="void" />
+			<param index="0" name="set" type="AbilitySystemAttributeSet" />
+			<description>
+				Adds an attribute set to this component. This allows the component to track and manipulate the attributes defined in the set.
+			</description>
+		</method>
+		<method name="add_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Adds a tag to this actor. This can be used to trigger logic or modify behavior based on the presence of the tag.
+			</description>
+		</method>
+		<method name="apply_ability_container">
+			<return type="void" />
+			<param index="0" name="container" type="AbilitySystemAbilityContainer" />
+			<param index="1" name="level" type="int" default="1" />
+			<description>
+				Initializes the component using an [AbilitySystemAbilityContainer]. This process registers the container's [AbilitySystemAttributeSet], sets initial attribute values, grants pre-unlocked abilities, and applies effects and tags.
+			</description>
+		</method>
+		<method name="apply_effect_spec_to_self">
+			<return type="void" />
+			<param index="0" name="spec" type="AbilitySystemEffectSpec" />
+			<description>
+				Applies an effect specification to this actor. The spec contains the calculated magnitudes and duration logic.
+			</description>
+		</method>
+		<method name="apply_effect_spec_to_target">
+			<return type="void" />
+			<param index="0" name="spec" type="AbilitySystemEffectSpec" />
+			<param index="1" name="target" type="AbilitySystemComponent" />
+			<description>
+				Applies an effect specification instantiated from this actor's catalog to another target's [AbilitySystemComponent].
+			</description>
+		</method>
+		<method name="execute_cue">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<param index="1" name="data" type="Dictionary" default="{}" />
+			<description>
+				Triggers a cue associated with the given tag. Cues are used for visual and audio feedback.
+			</description>
+		</method>
+		<method name="get_active_effects_debug" qualifiers="const">
+			<return type="AbilitySystemEffectSpec[]" />
+			<description>
+				Returns a list of all currently active effect specifications. Primarily used for debugging.
+			</description>
+		</method>
+		<method name="get_animation_player" qualifiers="const">
+			<return type="Node" />
+			<description>
+				Returns the default animation node.
+			</description>
+		</method>
+		<method name="get_attribute_value" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="attribute_name" type="StringName" />
+			<description>
+				Returns the current value of the specified attribute.
+			</description>
+		</method>
+		<method name="get_audio_player" qualifiers="const">
+			<return type="Node" />
+			<description>
+				Returns the default audio node.
+			</description>
+		</method>
+		<method name="get_cue_resource" qualifiers="const">
+			<return type="AbilitySystemCue" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns the resource registered for the given cue tag.
+			</description>
+		</method>
+		<method name="get_granted_abilities_debug" qualifiers="const">
+			<return type="AbilitySystemAbilitySpec[]" />
+			<description>
+				Returns a list of all currently granted ability specifications. Primarily used for debugging.
+			</description>
+		</method>
+		<method name="get_node_ptr" qualifiers="const">
+			<return type="Node" />
+			<param index="0" name="name" type="StringName" />
+			<description>
+				Returns the node pointer registered under the given name, or [code]null[/code] if not found.
+			</description>
+		</method>
+		<method name="get_owned_tags" qualifiers="const">
+			<return type="AbilitySystemTagSpec" />
+			<description>
+				Returns the container holding all tags currently owned by this actor.
+			</description>
+		</method>
+		<method name="give_ability">
+			<return type="void" />
+			<param index="0" name="ability" type="AbilitySystemAbility" />
+			<param index="1" name="level" type="int" default="1" />
+			<description>
+				Grants a new ability to the actor.
+			</description>
+		</method>
+		<method name="has_tag" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns [code]true[/code] if the actor currently possesses the specified tag.
+			</description>
+		</method>
+		<method name="is_montage_playing" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="name" type="StringName" />
+			<param index="1" name="target" type="Node" default="null" />
+			<description>
+				Returns [code]true[/code] if the specified montage (animation) is currently playing on the given [param target] node. If [param target] is [code]null[/code], it uses the default animation player set via [method set_animation_player]. Supports [AnimationPlayer], [AnimatedSprite2D], and [AnimatedSprite3D].
+			</description>
+		</method>
+		<method name="make_outgoing_spec">
+			<return type="AbilitySystemEffectSpec" />
+			<param index="0" name="effect" type="AbilitySystemEffect" />
+			<param index="1" name="level" type="float" default="1.0" />
+			<description>
+				Creates a new effect specification from a resource.
+				[b]Blueprint Validation:[/b] Validates that the effect is formally registered in the [b]AbilitySystemAbilityContainer[/b] of this component. Outgoing effects (attacks, buffs, debuffs) must be part of the archetype contract to be instantiated.
+			</description>
+		</method>
+		<method name="play_montage">
+			<return type="void" />
+			<param index="0" name="name" type="StringName" />
+			<param index="1" name="target" type="Node" default="null" />
+			<description>
+				Plays a montage (animation) on the specified [param target] node. If [param target] is [code]null[/code], it uses the default animation player set via [method set_animation_player]. Supports [AnimationPlayer], [AnimatedSprite2D], and [AnimatedSprite3D].
+			</description>
+		</method>
+		<method name="play_sound">
+			<return type="void" />
+			<param index="0" name="sound" type="AudioStream" />
+			<param index="1" name="target" type="Node" default="null" />
+			<description>
+				Plays the specified [param sound] ([AudioStream]) on the [param target] node. If [param target] is [code]null[/code], it uses the default audio player set via [method set_audio_player]. Supports [AudioStreamPlayer], [AudioStreamPlayer2D], and [AudioStreamPlayer3D].
+			</description>
+		</method>
+		<method name="register_cue_resource">
+			<return type="void" />
+			<param index="0" name="cue" type="AbilitySystemCue" />
+			<description>
+				Registers a cue resource to be used for visual or audio effects when a specific tag is triggered.
+			</description>
+		</method>
+		<method name="register_node">
+			<return type="void" />
+			<param index="0" name="name" type="StringName" />
+			<param index="1" name="node" type="Node" />
+			<description>
+				Registers a node with a unique name to be used by the Cue system. This allows Cues to target specific nodes (like a "weapon_vfx" marker) without needing hardcoded paths.
+			</description>
+		</method>
+		<method name="register_task">
+			<return type="void" />
+			<param index="0" name="task" type="AbilitySystemTask" />
+			<description>
+				Registers an asynchronous task. Tasks are typically used within abilities to wait for events, delays, or animations.
+			</description>
+		</method>
+		<method name="remove_active_effect">
+			<return type="void" />
+			<param index="0" name="spec" type="AbilitySystemEffectSpec" />
+			<description>
+				Removes a specific active effect specification from the actor.
+			</description>
+		</method>
+		<method name="remove_granted_ability">
+			<return type="void" />
+			<param index="0" name="spec" type="AbilitySystemAbilitySpec" />
+			<description>
+				Removes a granted ability specification, effectively revoking the actor's ability to use it.
+			</description>
+		</method>
+		<method name="remove_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Removes a tag from the actor.
+			</description>
+		</method>
+		<method name="set_animation_player">
+			<return type="void" />
+			<param index="0" name="node" type="Node" />
+			<description>
+				Sets the default node used for playing animations. Used as fallback by [method play_montage].
+			</description>
+		</method>
+		<method name="set_attribute_base_value">
+			<return type="void" />
+			<param index="0" name="name" type="StringName" />
+			<param index="1" name="value" type="float" />
+			<description>
+				Directly sets the base value of an attribute. Current value will be updated accordingly.
+			</description>
+		</method>
+		<method name="set_audio_player">
+			<return type="void" />
+			<param index="0" name="node" type="Node" />
+			<description>
+				Sets the default node used for playing audio. Used as fallback by [method play_sound].
+			</description>
+		</method>
+		<method name="try_activate_ability">
+			<return type="bool" />
+			<param index="0" name="ability" type="AbilitySystemAbility" />
+			<description>
+				Attempts to activate the given ability. The ability must have been granted to this actor (e.g., via [method give_ability]) to be successful. Returns [code]true[/code] if successfully activated.
+			</description>
+		</method>
+		<method name="unregister_cue_resource">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Unregisters a cue resource associated with a tag.
+			</description>
+		</method>
+		<method name="unregister_node">
+			<return type="void" />
+			<param index="0" name="name" type="StringName" />
+			<description>
+				Unregisters a previously registered node.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="ability_container" type="AbilitySystemAbilityContainer" setter="set_ability_container" getter="get_ability_container">
+			The [AbilitySystemAbilityContainer] that defines the archetypal data for this actor.
+		</member>
+	</members>
+	<signals>
+		<signal name="ability_activated">
+			<param index="0" name="ability_spec" type="AbilitySystemAbilitySpec" />
+			<description>
+				Emitted when an ability starts.
+			</description>
+		</signal>
+		<signal name="ability_ended">
+			<param index="0" name="ability_spec" type="AbilitySystemAbilitySpec" />
+			<param index="1" name="was_cancelled" type="bool" />
+			<description>
+				Emitted when an ability ends.
+			</description>
+		</signal>
+		<signal name="ability_failed">
+			<param index="0" name="ability_name" type="StringName" />
+			<param index="1" name="reason" type="String" />
+			<description>
+				Emitted when an ability fails to activate.
+			</description>
+		</signal>
+		<signal name="attribute_changed">
+			<param index="0" name="attribute_name" type="StringName" />
+			<param index="1" name="old_value" type="float" />
+			<param index="2" name="new_value" type="float" />
+			<description>
+				Emitted when an attribute value changes.
+			</description>
+		</signal>
+		<signal name="cooldown_ended">
+			<param index="0" name="ability_tag" type="StringName" />
+			<description>
+				Emitted when a cooldown period ends.
+			</description>
+		</signal>
+		<signal name="cooldown_started">
+			<param index="0" name="ability_tag" type="StringName" />
+			<param index="1" name="duration" type="float" />
+			<description>
+				Emitted when a cooldown period starts.
+			</description>
+		</signal>
+		<signal name="effect_applied">
+			<param index="0" name="effect_spec" type="AbilitySystemEffectSpec" />
+			<description>
+				Emitted when an effect is applied.
+			</description>
+		</signal>
+		<signal name="effect_removed">
+			<param index="0" name="effect_spec" type="AbilitySystemEffectSpec" />
+			<description>
+				Emitted when an effect is removed.
+			</description>
+		</signal>
+		<signal name="tag_changed">
+			<param index="0" name="tag_name" type="StringName" />
+			<param index="1" name="is_present" type="bool" />
+			<description>
+				Emitted when a tag is added or removed.
+			</description>
+		</signal>
+		<signal name="tag_event_received">
+			<param index="0" name="event_tag" type="StringName" />
+			<param index="1" name="data" type="Dictionary" />
+			<description>
+				Emitted when a tag event or cue is received.
+			</description>
+		</signal>
+	</signals>
+</class>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AbilitySystemCue" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Resource for event activation and synchronization within the Ability System.
+	</brief_description>
+	<description>
+		[AbilitySystemCue] is the base class for resources that handle high-level event activation and synchronization, such as playing animations or sounds in response to effects and ability triggers.
+
+		For most use cases, use the specialized cue classes:
+		- [AbilitySystemCueAnimation] - For synchronizing animations.
+		- [AbilitySystemCueAudio] - For synchronizing audio effects.
+
+		You can extend this base class in GDScript for completely custom cue behavior:
+		[codeblock]
+		extends AbilitySystemCue
+
+		func _on_execute(spec: AbilitySystemCueSpec):
+			# Custom logic here
+			print("Custom cue triggered!")
+		[/codeblock]
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="_on_active" qualifiers="virtual">
+			<return type="void" />
+			<param index="0" name="spec" type="AbilitySystemCueSpec" />
+			<description>
+				Virtual method called when the cue becomes active.
+			</description>
+		</method>
+		<method name="_on_execute" qualifiers="virtual">
+			<return type="void" />
+			<param index="0" name="spec" type="AbilitySystemCueSpec" />
+			<description>
+				Virtual method called when the cue is executed instantly.
+			</description>
+		</method>
+		<method name="_on_remove" qualifiers="virtual">
+			<return type="void" />
+			<param index="0" name="spec" type="AbilitySystemCueSpec" />
+			<description>
+				Virtual method called when the cue is removed.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="cue_name" type="String" setter="set_cue_name" getter="get_cue_name" default="&quot;&quot;">
+			Unique name for this cue resource.
+		</member>
+		<member name="cue_tag" type="StringName" setter="set_cue_tag" getter="get_cue_tag" default="&amp;&quot;&quot;">
+			Unique tag identifying this cue.
+		</member>
+		<member name="event_type" type="int" setter="set_event_type" getter="get_event_type" enum="AbilitySystemCue.CueEventType" default="0">
+			Defines when the cue is triggered (OnExecute, OnActive, or OnRemove).
+		</member>
+		<member name="node_name" type="StringName" setter="set_node_name" getter="get_node_name" default="&amp;&quot;&quot;">
+			Optional name of a node registered in the [AbilitySystemComponent] via [method AbilitySystemComponent.register_node]. If set, the cue will target that specific node; otherwise, it will use the component's default nodes.
+		</member>
+	</members>
+	<constants>
+		<constant name="ON_EXECUTE" value="0" enum="CueEventType">
+			Triggered for instant effects (e.g., hit impact, explosion).
+		</constant>
+		<constant name="ON_ACTIVE" value="1" enum="CueEventType">
+			Triggered when an effect/ability becomes active.
+		</constant>
+		<constant name="ON_REMOVE" value="2" enum="CueEventType">
+			Triggered when an effect/ability ends.
+		</constant>
+	</constants>
+</class>

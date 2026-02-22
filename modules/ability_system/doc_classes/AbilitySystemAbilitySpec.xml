@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AbilitySystemAbilitySpec" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Runtime instance of an ability system ability.
+	</brief_description>
+	<description>
+		[AbilitySystemAbilitySpec] represents a granted ability with instance-specific data like level and active state.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_ability" qualifiers="const">
+			<return type="AbilitySystemAbility" />
+			<description>
+				Returns the ability resource associated with this spec.
+			</description>
+		</method>
+		<method name="get_is_active" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns whether this ability is currently active.
+			</description>
+		</method>
+		<method name="get_level" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the level of this ability spec.
+			</description>
+		</method>
+		<method name="init">
+			<return type="void" />
+			<param index="0" name="ability" type="AbilitySystemAbility" />
+			<param index="1" name="level" type="int" default="1" />
+			<description>
+				Initializes this spec with an ability resource and level.
+			</description>
+		</method>
+		<method name="set_is_active">
+			<return type="void" />
+			<param index="0" name="active" type="bool" />
+			<description>
+				Sets whether this ability is currently active.
+			</description>
+		</method>
+		<method name="set_level">
+			<return type="void" />
+			<param index="0" name="level" type="int" />
+			<description>
+				Sets the level of this ability spec.
+			</description>
+		</method>
+	</methods>
+</class>

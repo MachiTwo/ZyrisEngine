@@ -6,14 +6,15 @@ Sistema completo de entrada virtual para dispositivos móveis e híbridos, forne
 
 ## Recursos Principais
 
-### 1. Controles Virtuais Nativos
+### 1. Controles Virtuais Nativos ou Emulados
 
 Nós de UI otimizados para controle por toque:
 
-- **VirtualButton**: Botão configurável com feedback visual e mapeamento de ações
-- **VirtualJoystick**: Controle analógico com zonas mortas e sensibilidade customizáveis
+- **VirtualButton**: Botão configurável com suporte a texturas, ícones e mapeamento de index
+- **VirtualJoystick**: Controle analógico com modos Fixo e Dinâmico
+- **VirtualJoystickDynamic**: Extensão que permite o spawn do joystick na posição do toque
 - **VirtualDPad**: Direcional com suporte a 4 e 8 direções
-- **VirtualTouchPad**: Área de gestos multi-toque para controle de câmera e viewport
+- **VirtualTouchPad**: Área de gestos com rastro visual (Trace/Circle) e suporte a eixos virtuais
 
 ### 2. Detecção Automática de Dispositivo
 
@@ -39,16 +40,22 @@ action "ui_left" mapeado para:
 
 Arquitetura desenvolvida para alta performance:
 
-- **Eventos Atômicos**: Despacho direto para o InputMap da engine
+- **Arquitetura Híbrida**: Escolha entre Modo Nativo (eventos reais) ou Emulado (ações simples)
+- **Eventos Atômicos**: Despacho direto para o processador de input da engine
 - **Polimorfismo**: Funciona com `Input.is_action_pressed()` nativamente
-- **Cache Local**: Estado otimizado para consultas de alta frequência
+- **Cache Local**: Estado otimizado para consultas de alta frequência e baixa latência
 
 ## Configuração
 
 ### Modos de Visibilidade
 
 - **ALWAYS**: Controles sempre visíveis
-- **TOUCHSCREEN_ONLY**: Aparecem apenas em dispositivos touch
+- **TOUCHSCREEN_ONLY**: Ocultam-se automaticamente se o último input for Teclado/Mouse ou Gamepad
+
+### Modos de Entrada (Input Mode)
+
+- **NATIVE**: Emite eventos `InputEventVirtual*` tratados como dispositivos reais
+- **EMULATED**: Emula ações diretamente do `InputMap` (estilo TouchScreenButton)
 
 ### Configurações do Joystick
 
