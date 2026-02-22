@@ -1,0 +1,9 @@
+#!/usr/bin/env python
+from misc.utility.scons_hints import *
+
+Import("env")
+
+# Use our local builder script
+import builders
+
+env.CommandNoCache("templates.gen.h", Glob("*/*.gd") + Glob("*/*.cs"), env.Run(builders.make_templates))

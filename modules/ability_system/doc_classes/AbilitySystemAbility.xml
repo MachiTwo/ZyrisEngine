@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AbilitySystemAbility" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Base resource for defining abilities within the module.
+	</brief_description>
+	<description>
+		[AbilitySystemAbility] defines the logic and data for a specific action that can be performed by an actor.
+		[b]Example implementation:[/b]
+		[codeblock]
+		extends AbilitySystemAbility
+
+		func _can_activate_ability(owner):
+			return not owner.has_tag("state.stunned")
+
+		func _activate_ability(owner):
+			owner.play_montage("attack")
+			# Logic here
+			end_ability(owner)
+		[/codeblock]
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="_on_activate_ability" qualifiers="virtual">
+			<return type="void" />
+			<param index="0" name="owner" type="Object" />
+			<param index="1" name="spec" type="RefCounted" />
+			<description>
+				Virtual method to implement the ability's logic.
+			</description>
+		</method>
+		<method name="_on_can_activate_ability" qualifiers="virtual const">
+			<return type="bool" />
+			<param index="0" name="owner" type="Object" />
+			<param index="1" name="spec" type="RefCounted" />
+			<description>
+				Virtual method to implement custom activation requirements.
+			</description>
+		</method>
+		<method name="_on_end_ability" qualifiers="virtual">
+			<return type="void" />
+			<param index="0" name="owner" type="Object" />
+			<param index="1" name="spec" type="RefCounted" />
+			<description>
+				Virtual method called when the ability ends.
+			</description>
+		</method>
+		<method name="activate_ability">
+			<return type="void" />
+			<param index="0" name="owner" type="AbilitySystemComponent" />
+			<param index="1" name="spec" type="AbilitySystemAbilitySpec" default="null" />
+			<description>
+				Starts the ability execution.
+			</description>
+		</method>
+		<method name="can_activate_ability" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="owner" type="AbilitySystemComponent" />
+			<param index="1" name="spec" type="AbilitySystemAbilitySpec" default="null" />
+			<description>
+				Returns true if the ability can be activated by the pointer owner.
+			</description>
+		</method>
+		<method name="end_ability">
+			<return type="void" />
+			<param index="0" name="owner" type="AbilitySystemComponent" />
+			<param index="1" name="spec" type="AbilitySystemAbilitySpec" default="null" />
+			<description>
+				Ends the ability execution and cleans up tags.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="ability_name" type="String" setter="set_ability_name" getter="get_ability_name" default="&quot;&quot;">
+			Unique name for this ability resource.
+		</member>
+		<member name="ability_tag" type="StringName" setter="set_ability_tag" getter="get_ability_tag" default="&amp;&quot;&quot;">
+			The unique tag identifying this ability.
+		</member>
+		<member name="activation_blocked_tags" type="StringName[]" setter="set_activation_blocked_tags" getter="get_activation_blocked_tags" default="[]">
+			Ability cannot activate if owner has any of these tags.
+		</member>
+		<member name="activation_owned_tags" type="StringName[]" setter="set_activation_owned_tags" getter="get_activation_owned_tags" default="[]">
+			Tags granted to the owner while the ability is active.
+		</member>
+		<member name="activation_required_tags" type="StringName[]" setter="set_activation_required_tags" getter="get_activation_required_tags" default="[]">
+			Owner must have all of these tags to activate.
+		</member>
+		<member name="cooldown_effect" type="AbilitySystemEffect" setter="set_cooldown_effect" getter="get_cooldown_effect">
+			Effect applied to owner to represent the cooldown.
+		</member>
+		<member name="cost_effect" type="AbilitySystemEffect" setter="set_cost_effect" getter="get_cost_effect">
+			Effect applied to owner to consume resources (Mana, Stamina).
+		</member>
+		<member name="cues" type="AbilitySystemCue[]" setter="set_cues" getter="get_cues" default="[]">
+			List of [AbilitySystemCue] resources to be executed directly when the ability is activated and when it ends. This allows encapsulating animation and sound logic within the ability itself.
+		</member>
+		<member name="effect" type="AbilitySystemEffect" setter="set_effect" getter="get_effect">
+			The main effect applied by this ability.
+		</member>
+	</members>
+</class>

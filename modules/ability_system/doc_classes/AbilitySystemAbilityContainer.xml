@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AbilitySystemAbilityContainer" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Pure data container that defines an actor archetype.
+	</brief_description>
+	<description>
+		[AbilitySystemAbilityContainer] is a pure storage [Resource] that defines the [b]archetype[/b] of an actor (Player, Zombie, NPC). It groups the full catalog of abilities, effects, tags, an [AbilitySystemAttributeSet], and cues into a single reusable asset.
+		[b]Important:[/b] The container does [b]NOT[/b] grant abilities or initialize attributes directly. The [AbilitySystemAttributeSet] stored inside it is the one responsible for defining which abilities are unlocked and what initial attribute values to use.
+		The container is applied to an [AbilitySystemComponent] via [method AbilitySystemComponent.apply_ability_container].
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="has_ability" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="ability" type="AbilitySystemAbility" />
+			<description>
+				Returns [code]true[/code] if [param ability] is part of the catalog of abilities this container authorizes. Checks both the [member abilities] list and any abilities granted by the [member attribute_set].
+			</description>
+		</method>
+		<method name="has_cue" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns [code]true[/code] if a [AbilitySystemCue] with the given [param tag] is registered in this container's [member cues] list.
+			</description>
+		</method>
+		<method name="has_effect" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="effect" type="AbilitySystemEffect" />
+			<description>
+				Returns [code]true[/code] if [param effect] is registered in this container's [member effects] list, or as a cost/cooldown effect of any catalogued ability. Used by [method AbilitySystemComponent.make_outgoing_spec] to enforce the archetype contract before allowing the effect to be instantiated.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="abilities" type="AbilitySystemAbility[]" setter="set_abilities" getter="get_abilities" default="[]">
+			Full catalog of [AbilitySystemAbility] resources this archetype can potentially use. These are [b]not[/b] granted automatically — only those listed in the [member attribute_set]'s [code]granted_abilities[/code] are actually unlocked.
+		</member>
+		<member name="attribute_set" type="AbilitySystemAttributeSet" setter="set_attribute_set" getter="get_attribute_set">
+			The [AbilitySystemAttributeSet] responsible for initializing the actor. It defines attribute definitions, initial values, and which abilities from the catalog are already granted.
+		</member>
+		<member name="cues" type="AbilitySystemCue[]" setter="set_cues" getter="get_cues" default="[]">
+			List of [AbilitySystemCue] resources associated with this archetype.
+		</member>
+		<member name="effects" type="AbilitySystemEffect[]" setter="set_effects" getter="get_effects" default="[]">
+			List of [AbilitySystemEffect] resources applied automatically when the container is loaded (usually Infinite duration).
+		</member>
+		<member name="tags" type="StringName[]" setter="set_tags" getter="get_tags" default="[]">
+			List of Tags granted permanently by this archetype.
+		</member>
+	</members>
+</class>
