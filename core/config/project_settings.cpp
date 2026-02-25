@@ -31,6 +31,7 @@
 #include "project_settings.h"
 
 #include "core/core_bind.h" // For Compression enum.
+#include "core/crypto/crypto.h"
 #include "core/input/input_map.h"
 #include "core/io/config_file.h"
 #include "core/io/dir_access.h"
@@ -372,14 +373,12 @@ bool ProjectSettings::_set(const StringName &p_name, const Variant &p_value) {
 		if (p_name == "application/persistence/encryption_key") {
 			String key = p_value;
 			if (key.is_empty()) {
-				// Re-generate if cleared (Reset)
-				String allowed = "abcdef0123456789";
-				String new_key = "";
-				for (int i = 0; i < 32; i++) {
-					int r = Math::rand() % allowed.length();
-					new_key += String::chr(allowed[r]);
+				// Re-generate if cleared (Reset) - Using cryptographically secure RNG
+				Ref<Crypto> crypto = Crypto::create();
+				if (crypto.is_valid()) {
+					PackedByteArray bytes = crypto->generate_random_bytes(16); // 128 bits -> 32 hex chars
+					props[p_name].variant = String::hex_encode_buffer(bytes.ptr(), bytes.size());
 				}
-				props[p_name].variant = new_key;
 			}
 		}
 	}

@@ -53,6 +53,7 @@ void VirtualDPad::_update_theme_item_cache() {
 		Ref<StyleBoxFlat> flat = p_src;
 		if (flat.is_valid() && theme_cache.border_width > 0) {
 			flat = flat->duplicate();
+			ERR_FAIL_COND_V_MSG(flat.is_null(), p_src, "Failed to duplicate StyleBoxFlat");
 			flat->set_border_width_all(theme_cache.border_width);
 			flat->set_border_color(theme_cache.border_color);
 			return flat;
@@ -288,7 +289,10 @@ void VirtualDPad::_press_direction(DPadDirection p_dir, bool p_pressed) {
 		ie->set_device(get_device());
 		ie->set_button_index(btn);
 		ie->set_pressed(p_pressed);
-		Input::get_singleton()->parse_input_event(ie);
+		Input *input = Input::get_singleton();
+		if (input && get_input_mode() == INPUT_MODE_NATIVE) {
+			input->parse_input_event(ie);
+		}
 	}
 }
 
@@ -352,6 +356,40 @@ int VirtualDPad::get_right_button_index() const {
 	return right_button_index;
 }
 
+void VirtualDPad::set_action(int p_direction, const StringName &p_action) {
+	switch (p_direction) {
+		case DIR_UP:
+			action_up = p_action;
+			break;
+		case DIR_DOWN:
+			action_down = p_action;
+			break;
+		case DIR_LEFT:
+			action_left = p_action;
+			break;
+		case DIR_RIGHT:
+			action_right = p_action;
+			break;
+		default:
+			break;
+	}
+}
+
+StringName VirtualDPad::get_action(int p_direction) const {
+	switch (p_direction) {
+		case DIR_UP:
+			return action_up;
+		case DIR_DOWN:
+			return action_down;
+		case DIR_LEFT:
+			return action_left;
+		case DIR_RIGHT:
+			return action_right;
+		default:
+			return StringName();
+	}
+}
+
 Size2 VirtualDPad::get_minimum_size() const {
 	Size2 ms = VirtualDevice::get_minimum_size();
 	float s = MAX(MAX(ms.width, ms.height), 20.0f);
@@ -363,6 +401,11 @@ VirtualDPad::VirtualDPad() {
 	down_button_index = 13;
 	left_button_index = 14;
 	right_button_index = 15;
+
+	action_up = "ui_up";
+	action_down = "ui_down";
+	action_left = "ui_left";
+	action_right = "ui_right";
 }
 
 void VirtualDPad::_bind_methods() {
@@ -382,6 +425,9 @@ void VirtualDPad::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_right_button_index", "index"), &VirtualDPad::set_right_button_index);
 	ClassDB::bind_method(D_METHOD("get_right_button_index"), &VirtualDPad::get_right_button_index);
 
+	ClassDB::bind_method(D_METHOD("set_action", "direction", "action"), &VirtualDPad::set_action);
+	ClassDB::bind_method(D_METHOD("get_action", "direction"), &VirtualDPad::get_action);
+
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture2D"), "set_texture", "get_texture");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "deadzone_size"), "set_deadzone_size", "get_deadzone_size");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "button_width_ratio", PROPERTY_HINT_RANGE, "0.1,1.0,0.01"), "set_button_width_ratio", "get_button_width_ratio");
@@ -391,6 +437,12 @@ void VirtualDPad::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "down_index"), "set_down_button_index", "get_down_button_index");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "left_index"), "set_left_button_index", "get_left_button_index");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "right_index"), "set_right_button_index", "get_right_button_index");
+
+	ADD_GROUP("Emulated Mode", "action_");
+	ADD_PROPERTYI(PropertyInfo(Variant::STRING_NAME, "action_up", PROPERTY_HINT_INPUT_NAME, "show_builtin,loose_mode"), "set_action", "get_action", DIR_UP);
+	ADD_PROPERTYI(PropertyInfo(Variant::STRING_NAME, "action_down", PROPERTY_HINT_INPUT_NAME, "show_builtin,loose_mode"), "set_action", "get_action", DIR_DOWN);
+	ADD_PROPERTYI(PropertyInfo(Variant::STRING_NAME, "action_left", PROPERTY_HINT_INPUT_NAME, "show_builtin,loose_mode"), "set_action", "get_action", DIR_LEFT);
+	ADD_PROPERTYI(PropertyInfo(Variant::STRING_NAME, "action_right", PROPERTY_HINT_INPUT_NAME, "show_builtin,loose_mode"), "set_action", "get_action", DIR_RIGHT);
 
 	BIND_THEME_ITEM(Theme::DATA_TYPE_STYLEBOX, VirtualDPad, normal_style);
 	BIND_THEME_ITEM(Theme::DATA_TYPE_STYLEBOX, VirtualDPad, pressed_style);

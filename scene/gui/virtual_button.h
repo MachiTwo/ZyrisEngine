@@ -61,6 +61,7 @@ private:
 
 protected:
 	int button_index = 0; // The virtual button index (0, 1, 2...)
+	StringName action; // Emulated action name
 
 	// Similar to TextureButton - accessible for derived buttons
 	Ref<Texture2D> texture_normal;
@@ -103,6 +104,12 @@ protected:
 	static void _bind_methods();
 
 	virtual void pressed_state_changed() override;
+
+	virtual void _get_emulated_actions(Vector<StringName> &r_actions) const override {
+		if (!action.is_empty()) {
+			r_actions.push_back(action);
+		}
+	}
 	virtual Size2 get_minimum_size() const override;
 
 public:
@@ -114,6 +121,9 @@ public:
 
 	void set_button_index(int p_index);
 	int get_button_index() const;
+
+	void set_action(const StringName &p_action) { action = p_action; }
+	StringName get_action() const { return action; }
 
 	void set_font(const Ref<Font> &p_font);
 	Ref<Font> get_font() const;
@@ -149,6 +159,7 @@ public:
 	bool is_flat() const;
 
 	VirtualButton();
+	~VirtualButton();
 };
 
 VARIANT_ENUM_CAST(VirtualButton::StretchMode);

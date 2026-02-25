@@ -163,14 +163,19 @@ void VirtualJoystick::_update_input_vector() {
 	ie_x->set_device(get_device());
 	ie_x->set_axis(axis_x);
 	ie_x->set_axis_value(input_vector.x);
-	Input::get_singleton()->parse_input_event(ie_x);
+	Input *input = Input::get_singleton();
+	if (input && get_input_mode() == INPUT_MODE_NATIVE) {
+		input->parse_input_event(ie_x);
+	}
 
 	Ref<InputEventVirtualMotion> ie_y;
 	ie_y.instantiate();
 	ie_y->set_device(get_device());
 	ie_y->set_axis(axis_y);
 	ie_y->set_axis_value(input_vector.y);
-	Input::get_singleton()->parse_input_event(ie_y);
+	if (input && get_input_mode() == INPUT_MODE_NATIVE) {
+		input->parse_input_event(ie_y);
+	}
 }
 
 void VirtualJoystick::_reset_joystick() {
@@ -187,19 +192,24 @@ void VirtualJoystick::_reset_joystick() {
 	ie_x->set_device(get_device());
 	ie_x->set_axis(axis_x);
 	ie_x->set_axis_value(0.0);
-	Input::get_singleton()->parse_input_event(ie_x);
+	Input *input = Input::get_singleton();
+	if (input) {
+		input->parse_input_event(ie_x);
+	}
 
 	Ref<InputEventVirtualMotion> ie_y;
 	ie_y.instantiate();
 	ie_y->set_device(get_device());
 	ie_y->set_axis(axis_y);
 	ie_y->set_axis_value(0.0);
-	Input::get_singleton()->parse_input_event(ie_y);
+	if (input && get_input_mode() == INPUT_MODE_NATIVE) {
+		input->parse_input_event(ie_y);
+	}
 }
 
 #ifdef TOOLS_ENABLED
 int VirtualJoystick::_edit_get_handle_count() const {
-	return 2;
+	return 3;
 }
 
 String VirtualJoystick::_edit_get_handle_name(int p_idx) const {
@@ -329,7 +339,39 @@ void VirtualJoystick::set_tip_color(const Color &p_color) {
 Color VirtualJoystick::get_tip_color() const {
 	return tip_color;
 }
+void VirtualJoystick::set_action(int p_direction, const StringName &p_action) {
+	switch (p_direction) {
+		case DIR_UP:
+			action_up = p_action;
+			break;
+		case DIR_DOWN:
+			action_down = p_action;
+			break;
+		case DIR_LEFT:
+			action_left = p_action;
+			break;
+		case DIR_RIGHT:
+			action_right = p_action;
+			break;
+		default:
+			break;
+	}
+}
 
+StringName VirtualJoystick::get_action(int p_direction) const {
+	switch (p_direction) {
+		case DIR_UP:
+			return action_up;
+		case DIR_DOWN:
+			return action_down;
+		case DIR_LEFT:
+			return action_left;
+		case DIR_RIGHT:
+			return action_right;
+		default:
+			return StringName();
+	}
+}
 void VirtualJoystick::_update_theme_item_cache() {
 	VirtualDevice::_update_theme_item_cache();
 
@@ -344,6 +386,11 @@ void VirtualJoystick::_update_theme_item_cache() {
 }
 
 VirtualJoystick::VirtualJoystick() {
+	action_up = "ui_up";
+	action_down = "ui_down";
+	action_left = "ui_left";
+	action_right = "ui_right";
+
 	set_mouse_filter(MOUSE_FILTER_PASS); // Let users click
 }
 
@@ -383,10 +430,19 @@ void VirtualJoystick::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_tip_scale", "scale"), &VirtualJoystick::set_tip_scale);
 	ClassDB::bind_method(D_METHOD("get_tip_scale"), &VirtualJoystick::get_tip_scale);
 
+	ClassDB::bind_method(D_METHOD("set_action", "direction", "action"), &VirtualJoystick::set_action);
+	ClassDB::bind_method(D_METHOD("get_action", "direction"), &VirtualJoystick::get_action);
+
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "joystick_hand", PROPERTY_HINT_ENUM, "Left,Right"), "set_joystick_hand", "get_joystick_hand");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tip_scale", PROPERTY_HINT_RANGE, "0.01,1.0,0.01"), "set_tip_scale", "get_tip_scale");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "deadzone_size", PROPERTY_HINT_RANGE, "0,0.15,0.001"), "set_deadzone_size", "get_deadzone_size");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "clamp_zone_size", PROPERTY_HINT_RANGE, "0.5,2.0,0.01"), "set_clamp_zone_size", "get_clamp_zone_size");
+
+	ADD_GROUP("Emulated Mode", "action_");
+	ADD_PROPERTYI(PropertyInfo(Variant::STRING_NAME, "action_up", PROPERTY_HINT_INPUT_NAME, "show_builtin,loose_mode"), "set_action", "get_action", DIR_UP);
+	ADD_PROPERTYI(PropertyInfo(Variant::STRING_NAME, "action_down", PROPERTY_HINT_INPUT_NAME, "show_builtin,loose_mode"), "set_action", "get_action", DIR_DOWN);
+	ADD_PROPERTYI(PropertyInfo(Variant::STRING_NAME, "action_left", PROPERTY_HINT_INPUT_NAME, "show_builtin,loose_mode"), "set_action", "get_action", DIR_LEFT);
+	ADD_PROPERTYI(PropertyInfo(Variant::STRING_NAME, "action_right", PROPERTY_HINT_INPUT_NAME, "show_builtin,loose_mode"), "set_action", "get_action", DIR_RIGHT);
 
 	ADD_GROUP("Visuals", "");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "base_texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture2D"), "set_base_texture", "get_base_texture");

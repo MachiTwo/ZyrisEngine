@@ -302,8 +302,10 @@ private:
 		SavePolicy save_policy = SAVE_POLICY_INHERIT;
 
 		mutable NodePath *path_cache = nullptr;
-
 	} data;
+
+	static void (*persistence_register_id_callback)(const StringName &p_id, ObjectID p_obj);
+	static void (*persistence_unregister_id_callback)(const StringName &p_id);
 
 	String _get_tree_string_pretty(const String &p_prefix, bool p_last);
 	String _get_tree_string(const Node *p_node);
@@ -798,6 +800,7 @@ public:
 	void queue_free();
 
 	//hacks for speed
+	static void set_persistence_callbacks(void (*p_register_cb)(const StringName &, ObjectID), void (*p_unregister_cb)(const StringName &));
 	static void init_node_hrcr();
 
 	bool is_owned_by_parent() const;

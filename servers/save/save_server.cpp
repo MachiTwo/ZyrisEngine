@@ -42,7 +42,7 @@
 #include "core/variant/variant_utility.h"
 #include "scene/main/node.h"
 #include "scene/resources/packed_scene.h"
-#include "scene/resources/snapshot.h"
+#include "servers/save/snapshot.h"
 
 SaveServer *SaveServer::singleton = nullptr;
 
@@ -171,12 +171,15 @@ void SaveServer::save_slot(const String &p_slot_name, const Dictionary &p_data, 
 	// Calculate and set checksum
 	snapshot_res->set_checksum(_calculate_checksum(p_data));
 
-	// Update base snapshot for amend saves if full save succeeds
-	if (base_snapshot.is_null()) {
-		base_snapshot.instantiate();
+	{
+		MutexLock lock(base_snapshot_mutex);
+		// Update base snapshot for amend saves if full save succeeds
+		if (base_snapshot.is_null()) {
+			base_snapshot.instantiate();
+		}
+		base_snapshot->set_snapshot(p_data); // Always update the base on full save
+		current_slot_name = slot_name;
 	}
-	base_snapshot->set_snapshot(p_data); // Always update the base on full save
-	current_slot_name = slot_name;
 
 	_queue_save_task(slot_name, snapshot_res, p_async);
 }
@@ -329,12 +332,15 @@ void SaveServer::_finish_load_async(const String &p_slot_name, ObjectID p_node_i
 
 	if (root) {
 		if (!p_data.is_empty()) {
-			// Update base snapshot context for amend saves
-			if (base_snapshot.is_null()) {
-				base_snapshot.instantiate();
+			{
+				MutexLock lock(base_snapshot_mutex);
+				// Update base snapshot context for amend saves
+				if (base_snapshot.is_null()) {
+					base_snapshot.instantiate();
+				}
+				base_snapshot->set_snapshot(p_data);
+				current_slot_name = p_slot_name;
 			}
-			base_snapshot->set_snapshot(p_data);
-			current_slot_name = p_slot_name;
 
 			root->propagate_notification(Node::NOTIFICATION_LOAD_STARTED);
 			_load_node_recursive(root, p_data, p_dynamic_respawn);
@@ -685,50 +691,62 @@ void SaveServer::_process_queue() {
 }
 
 void SaveServer::set_save_format(SaveFormat p_format) {
+	MutexLock lock(settings_mutex);
 	current_format = p_format;
 }
 
 SaveServer::SaveFormat SaveServer::get_save_format() const {
+	MutexLock lock(settings_mutex);
 	return current_format;
 }
 
 void SaveServer::set_encryption_key(const String &p_key) {
+	MutexLock lock(settings_mutex);
 	encryption_key = p_key;
 }
 
 String SaveServer::get_encryption_key() const {
+	MutexLock lock(settings_mutex);
 	return encryption_key;
 }
 
 void SaveServer::set_compression_enabled(bool p_enabled) {
+	MutexLock lock(settings_mutex);
 	compression_enabled = p_enabled;
 }
 
 bool SaveServer::is_compression_enabled() const {
+	MutexLock lock(settings_mutex);
 	return compression_enabled;
 }
 
 void SaveServer::set_save_path(const String &p_path) {
+	MutexLock lock(settings_mutex);
 	save_path = p_path;
 }
 
 String SaveServer::get_save_path() const {
+	MutexLock lock(settings_mutex);
 	return save_path;
 }
 
 void SaveServer::set_backup_enabled(bool p_enabled) {
+	MutexLock lock(settings_mutex);
 	backup_enabled = p_enabled;
 }
 
 bool SaveServer::is_backup_enabled() const {
+	MutexLock lock(settings_mutex);
 	return backup_enabled;
 }
 
 void SaveServer::set_integrity_check_level(IntegrityCheckLevel p_level) {
+	MutexLock lock(settings_mutex);
 	integrity_level = p_level;
 }
 
 SaveServer::IntegrityCheckLevel SaveServer::get_integrity_check_level() const {
+	MutexLock lock(settings_mutex);
 	return integrity_level;
 }
 
@@ -799,14 +817,14 @@ bool SaveServer::_patch_snapshot_data(Dictionary &p_target, const NodePath &p_re
 	for (int i = 0; i < p_relative_path.get_name_count(); i++) {
 		StringName segment = p_relative_path.get_name(i);
 
-		if (!current.has(".children")) {
+		if (!current.has(".children") || current[".children"].get_type() != Variant::DICTIONARY) {
 			// Path broken (parent missing in snapshot). Cannot patch.
 			return false;
 		}
 
 		Dictionary children = current[".children"];
-		if (!children.has(segment)) {
-			// Child missing in snapshot. Cannot patch.
+		if (!children.has(segment) || children[segment].get_type() != Variant::DICTIONARY) {
+			// Child missing or not a dictionary in snapshot. Cannot patch.
 			return false;
 		}
 
@@ -873,9 +891,12 @@ bool SaveServer::amend_save(Node *p_root, const String &p_slot_name) {
 
 	String main_slot = _sanitize_slot_name(p_slot_name);
 
-	// Context check - If we switched slots, we need a full save/load cycle to establish a new base
-	if (current_slot_name != main_slot) {
-		return save_snapshot(p_root, main_slot);
+	{
+		MutexLock lock(base_snapshot_mutex);
+		// Context check - If we switched slots, we need a full save/load cycle to establish a new base
+		if (current_slot_name != main_slot) {
+			return save_snapshot(p_root, main_slot);
+		}
 	}
 
 	HashMap<StringName, HashSet<ObjectID>> dirty_tags;
@@ -973,9 +994,23 @@ bool SaveServer::amend_save(Node *p_root, const String &p_slot_name) {
 	return true;
 }
 
+static void _node_register_id_bridge(const StringName &p_id, ObjectID p_obj) {
+	if (SaveServer::get_singleton()) {
+		SaveServer::get_singleton()->register_id(p_id, p_obj);
+	}
+}
+
+static void _node_unregister_id_bridge(const StringName &p_id) {
+	if (SaveServer::get_singleton()) {
+		SaveServer::get_singleton()->unregister_id(p_id);
+	}
+}
+
 SaveServer::SaveServer() {
 	singleton = this;
 	exit_thread.clear();
+
+	Node::set_persistence_callbacks(_node_register_id_bridge, _node_unregister_id_bridge);
 
 	// Load configuration
 	backup_enabled = GLOBAL_GET("application/persistence/backup_enabled");
@@ -1037,6 +1072,8 @@ SaveServer::~SaveServer() {
 	id_registry.clear();
 	staged_objects.clear();
 	base_snapshot.unref();
+
+	Node::set_persistence_callbacks(nullptr, nullptr);
 
 	singleton = nullptr;
 }
@@ -1273,26 +1310,23 @@ void SaveServer::_prune_backups(const String &p_slot_name) {
 }
 
 String SaveServer::_sanitize_slot_name(const String &p_slot_name) const {
-	String sanitized = p_slot_name.replace("..", ""); // Prevent path traversal
-	sanitized = sanitized.replace("\\", "/");
+	String sanitized = p_slot_name.replace("\\", "/");
+	sanitized = sanitized.simplify_path(); // Removes .. and redundant slashes
 
-	// Allow slashes for subfolders, but ensure no illegal chars
-	// Windows restricted chars: < > : " / \ | ? *
-	// But / is allowed for subfolders in Godot user://
-	// So we should just be careful with : * ? " < > |
+	// Prevent path traversal and absolute paths
+	if (sanitized.begins_with("/") || sanitized.begins_with("..") || sanitized.contains(":")) {
+		// If it's still dangerous after simplify, we strip problematic parts or just use the basename
+		sanitized = sanitized.get_file();
+	}
 
-	// A simple approach is to rely on Godot's FileAccess::open failure for invalid chars,
-	// but removing .. is crucial.
-	// Also strip leading/trailing slashes/spaces.
 	sanitized = sanitized.strip_edges();
-	if (sanitized.begins_with("/")) {
-		sanitized = sanitized.substr(1);
+
+	// Final safety check: if empty after sanitization, or still contains restricted chars
+	if (sanitized.is_empty()) {
+		return "";
 	}
 
 	// Remove invalid chars for file names (conservatively)
-	// On Windows : is driver separator, but we are inside user://
-	// But let's replace : with _ just in case
-	sanitized = sanitized.replace(":", "_");
 	sanitized = sanitized.replace("*", "_");
 	sanitized = sanitized.replace("?", "_");
 	sanitized = sanitized.replace("\"", "_");

@@ -31,51 +31,51 @@
 #include "snapshot.h"
 
 void Snapshot::set_snapshot(const Dictionary &p_snapshot) {
-	snapshot = p_snapshot;
+	data["snapshot"] = p_snapshot;
 }
 
 Dictionary Snapshot::get_snapshot() const {
-	return snapshot;
+	return data.get("snapshot", Dictionary());
 }
 
 void Snapshot::set_metadata(const Dictionary &p_metadata) {
-	metadata = p_metadata;
+	data["metadata"] = p_metadata;
 }
 
 Dictionary Snapshot::get_metadata() const {
-	return metadata;
+	return data.get("metadata", Dictionary());
 }
 
 void Snapshot::set_tag_slots(const Dictionary &p_tag_slots) {
-	tag_slots = p_tag_slots;
+	data["tag_slots"] = p_tag_slots;
 }
 
 Dictionary Snapshot::get_tag_slots() const {
-	return tag_slots;
+	return data.get("tag_slots", Dictionary());
 }
 
 void Snapshot::set_thumbnail(Ref<Resource> p_thumbnail) {
-	thumbnail = p_thumbnail;
+	data["thumbnail"] = p_thumbnail;
 }
 
 Ref<Resource> Snapshot::get_thumbnail() const {
-	return thumbnail;
+	return data.get("thumbnail", Ref<Resource>());
 }
 
 void Snapshot::set_version(const String &p_version) {
-	version = p_version;
+	data["version"] = p_version;
 }
 
 String Snapshot::get_version() const {
-	return version;
+	return data.get("version", "");
 }
 
 void Snapshot::set_checksum(const String &p_checksum) {
-	checksum = p_checksum;
+	data["checksum"] = p_checksum;
 }
 
 String Snapshot::get_checksum() const {
-	return checksum;
+	return data.get("checksum", "");
 }
 
 void Snapshot::_bind_methods() {

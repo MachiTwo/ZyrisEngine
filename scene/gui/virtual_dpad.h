@@ -61,6 +61,12 @@ protected:
 	bool pressed_left = false;
 	bool pressed_right = false;
 
+	// Emulated mode actions
+	StringName action_up = "ui_up";
+	StringName action_down = "ui_down";
+	StringName action_left = "ui_left";
+	StringName action_right = "ui_right";
+
 	// Settings
 	float deadzone_size = 15.0f;
 	float button_width_ratio = 0.33f; // Default ratio
@@ -94,6 +100,21 @@ protected:
 
 	virtual void pressed_state_changed() override;
 
+	virtual void _get_emulated_actions(Vector<StringName> &r_actions) const override {
+		if (!action_up.is_empty()) {
+			r_actions.push_back(action_up);
+		}
+		if (!action_down.is_empty()) {
+			r_actions.push_back(action_down);
+		}
+		if (!action_left.is_empty()) {
+			r_actions.push_back(action_left);
+		}
+		if (!action_right.is_empty()) {
+			r_actions.push_back(action_right);
+		}
+	}
+
 	HashMap<int, Vector2> touches;
 	void _update_dpad();
 	void _press_direction(DPadDirection p_dir, bool p_pressed);
@@ -121,6 +142,9 @@ public:
 
 	void set_button_width_ratio(float p_ratio);
 	float get_button_width_ratio() const;
+
+	void set_action(int p_direction, const StringName &p_action);
+	StringName get_action(int p_direction) const;
 
 	VirtualDPad();
 };

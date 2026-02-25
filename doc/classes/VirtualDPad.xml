@@ -4,11 +4,39 @@
 		An on-screen virtual directional pad.
 	</brief_description>
 	<description>
-		[VirtualDPad] provides a directional pad interface. It detects touches in four sectors (Up, Down, Left, Right) relative to its center and emits [InputEventVirtualButton] events corresponding to the configured button indices for each direction.
+		[VirtualDPad] provides a directional pad interface. By default, it detects touches in four sectors (Up, Down, Left, Right) relative to its center and emits [InputEventVirtualButton] events corresponding to the configured button indices for each direction.
+		When [member VirtualDevice.input_mode] is set to [constant VirtualDevice.INPUT_MODE_EMULATED], it switches to a simpler emulation path that dispatches standard [InputEventAction] events using the configured [member action_up], [member action_down], [member action_left], and [member action_right] properties.
 	</description>
 	<tutorials>
 	</tutorials>
+	<methods>
+		<method name="get_action" qualifiers="const">
+			<return type="StringName" />
+			<param index="0" name="direction" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="set_action">
+			<return type="void" />
+			<param index="0" name="direction" type="int" />
+			<param index="1" name="action" type="StringName" />
+			<description>
+			</description>
+		</method>
+	</methods>
 	<members>
+		<member name="action_down" type="StringName" setter="set_action" getter="get_action" default="&amp;&quot;ui_down&quot;">
+			The name of the emulated action triggered by the down direction when [member VirtualDevice.input_mode] is set to [constant VirtualDevice.INPUT_MODE_EMULATED].
+		</member>
+		<member name="action_left" type="StringName" setter="set_action" getter="get_action" default="&amp;&quot;ui_left&quot;">
+			The name of the emulated action triggered by the left direction when [member VirtualDevice.input_mode] is set to [constant VirtualDevice.INPUT_MODE_EMULATED].
+		</member>
+		<member name="action_right" type="StringName" setter="set_action" getter="get_action" default="&amp;&quot;ui_right&quot;">
+			The name of the emulated action triggered by the right direction when [member VirtualDevice.input_mode] is set to [constant VirtualDevice.INPUT_MODE_EMULATED].
+		</member>
+		<member name="action_up" type="StringName" setter="set_action" getter="get_action" default="&amp;&quot;ui_up&quot;">
+			The name of the emulated action triggered by the up direction when [member VirtualDevice.input_mode] is set to [constant VirtualDevice.INPUT_MODE_EMULATED].
+		</member>
 		<member name="button_width_ratio" type="float" setter="set_button_width_ratio" getter="get_button_width_ratio" default="0.33">
 			The width ratio of the directional arms relative to the control size (0.1 to 1.0).
 		</member>
