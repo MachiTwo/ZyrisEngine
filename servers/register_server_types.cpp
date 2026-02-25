@@ -73,6 +73,7 @@
 #include "rendering/storage/render_scene_buffers.h"
 #include "rendering/storage/render_scene_data.h"
 #include "save/save_server.h"
+#include "save/snapshot.h"
 #include "servers/rendering/shader_types.h"
 #include "text/text_server.h"
 #include "text/text_server_dummy.h"
@@ -146,6 +147,7 @@ void register_server_types() {
 	save_server = memnew(SaveServer);
 
 	GDREGISTER_CLASS(SaveServer);
+	GDREGISTER_CLASS(Snapshot);
 
 	GDREGISTER_CLASS(TextServerManager);
 	GDREGISTER_ABSTRACT_CLASS(TextServer);

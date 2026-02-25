@@ -55,6 +55,9 @@ STATIC_ASSERT_INCOMPLETE_TYPE(class, Engine);
 SafeNumeric<uint64_t> Node::total_node_count{ 0 };
 #endif
 
+void (*Node::persistence_register_id_callback)(const StringName &p_id, ObjectID p_obj) = nullptr;
+void (*Node::persistence_unregister_id_callback)(const StringName &p_id) = nullptr;
+
 thread_local Node *Node::current_process_thread_group = nullptr;
 
 void Node::_notification(int p_notification) {
@@ -1481,6 +1484,11 @@ String Node::get_description() const {
 
 static SafeRefCount node_hrcr_count;
 
+void Node::set_persistence_callbacks(void (*p_register_cb)(const StringName &, ObjectID), void (*p_unregister_cb)(const StringName &)) {
+	persistence_register_id_callback = p_register_cb;
+	persistence_unregister_id_callback = p_unregister_cb;
+}
+
 void Node::init_node_hrcr() {
 	node_hrcr_count.init(1);
 }
@@ -2111,8 +2119,18 @@ int32_t Node::get_unique_scene_id() const {
 }
 
 void Node::set_persistence_id(const StringName &p_id) {
+	if (data.persistence_id == p_id) {
+		return;
+	}
+
+	if (!data.persistence_id.is_empty() && persistence_unregister_id_callback) {
+		persistence_unregister_id_callback(data.persistence_id);
+	}
+
 	data.persistence_id = p_id;
-	// TODO: Register/unregister with SaveServer when implemented
+	if (!data.persistence_id.is_empty() && data.save_policy != SAVE_POLICY_NEVER && persistence_register_id_callback) {
+		persistence_register_id_callback(data.persistence_id, get_instance_id());
+	}
 }
 
 StringName Node::get_persistence_id() const {
@@ -2120,7 +2138,23 @@ StringName Node::get_persistence_id() const {
 }
 
 void Node::set_save_policy(SavePolicy p_policy) {
+	if (data.save_policy == p_policy) {
+		return;
+	}
+
 	data.save_policy = p_policy;
+
+	if (!data.persistence_id.is_empty()) {
+		if (data.save_policy == SAVE_POLICY_NEVER) {
+			if (persistence_unregister_id_callback) {
+				persistence_unregister_id_callback(data.persistence_id);
+			}
+		} else {
+			if (persistence_register_id_callback) {
+				persistence_register_id_callback(data.persistence_id, get_instance_id());
+			}
+		}
+	}
 }
 
 Node::SavePolicy Node::get_save_policy() const {
@@ -4165,6 +4199,10 @@ Node::Node() {
 }
 
 Node::~Node() {
+	if (!data.persistence_id.is_empty() && persistence_unregister_id_callback) {
+		persistence_unregister_id_callback(data.persistence_id);
+	}
+
 	data.grouped.clear();
 	data.owned.clear();
 	data.children.clear();

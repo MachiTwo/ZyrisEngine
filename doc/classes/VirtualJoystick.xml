@@ -4,20 +4,35 @@
 		An on-screen virtual joystick.
 	</brief_description>
 	<description>
-		[VirtualJoystick] is a GUI control that simulates an analog stick in a fixed position. For a dynamic joystick that appears at the touch position, use [VirtualJoystickDynamic]. It emits [InputEventVirtualMotion] events for axes 0 (X) and 1 (Y).
+		[VirtualJoystick] is a GUI control that simulates an analog stick in a fixed position. For a dynamic joystick that appears at the touch position, use [VirtualJoystickDynamic]. By default, it emits [InputEventVirtualMotion] events for axes 0 (X) and 1 (Y).
+		When [member VirtualDevice.input_mode] is set to [constant VirtualDevice.INPUT_MODE_EMULATED], it switches to a simpler emulation path that dispatches standard [InputEventAction] events based on the stick's direction, using the configured [member action_up], [member action_down], [member action_left], and [member action_right] properties.
 	</description>
 	<tutorials>
 	</tutorials>
 	<methods>
+		<method name="get_action" qualifiers="const">
+			<return type="StringName" />
+			<param index="0" name="direction" type="int" />
+			<description>
+			</description>
+		</method>
 		<method name="get_joystick_mode" qualifiers="const">
 			<return type="int" enum="VirtualJoystick.JoystickMode" />
 			<description>
+				Returns the current joystick mode (fixed or dynamic).
 			</description>
 		</method>
 		<method name="get_output" qualifiers="const">
 			<return type="Vector2" />
 			<description>
 				Returns the current normalized output vector of the joystick.
+			</description>
+		</method>
+		<method name="set_action">
+			<return type="void" />
+			<param index="0" name="direction" type="int" />
+			<param index="1" name="action" type="StringName" />
+			<description>
 			</description>
 		</method>
 		<method name="set_joystick_mode">
@@ -29,6 +44,18 @@
 		</method>
 	</methods>
 	<members>
+		<member name="action_down" type="StringName" setter="set_action" getter="get_action" default="&amp;&quot;ui_down&quot;">
+			The name of the emulated action triggered by pulling the joystick down when [member VirtualDevice.input_mode] is set to [constant VirtualDevice.INPUT_MODE_EMULATED].
+		</member>
+		<member name="action_left" type="StringName" setter="set_action" getter="get_action" default="&amp;&quot;ui_left&quot;">
+			The name of the emulated action triggered by pulling the joystick left when [member VirtualDevice.input_mode] is set to [constant VirtualDevice.INPUT_MODE_EMULATED].
+		</member>
+		<member name="action_right" type="StringName" setter="set_action" getter="get_action" default="&amp;&quot;ui_right&quot;">
+			The name of the emulated action triggered by pulling the joystick right when [member VirtualDevice.input_mode] is set to [constant VirtualDevice.INPUT_MODE_EMULATED].
+		</member>
+		<member name="action_up" type="StringName" setter="set_action" getter="get_action" default="&amp;&quot;ui_up&quot;">
+			The name of the emulated action triggered by pulling the joystick up when [member VirtualDevice.input_mode] is set to [constant VirtualDevice.INPUT_MODE_EMULATED].
+		</member>
 		<member name="base_color" type="Color" setter="set_base_color" getter="get_base_color" default="Color(1, 1, 1, 1)">
 			Modulate color for the joystick base.
 		</member>

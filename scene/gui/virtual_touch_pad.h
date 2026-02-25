@@ -56,6 +56,13 @@ public:
 		TRACE_STYLE_SQUARES,
 	};
 
+	enum TouchPadDirection {
+		DIR_UP,
+		DIR_DOWN,
+		DIR_LEFT,
+		DIR_RIGHT,
+	};
+
 private:
 	// Axis Mapping is derived from hand property
 
@@ -63,6 +70,12 @@ protected:
 	// Settings - accessible to derived touchpads
 	float sensitivity = 1.0f;
 	TouchPadHand hand = HAND_LEFT;
+
+	// Emulated mode actions
+	StringName action_up = "ui_up";
+	StringName action_down = "ui_down";
+	StringName action_left = "ui_left";
+	StringName action_right = "ui_right";
 
 	// Visuals
 	TouchPadMode mode = MODE_CIRCLE;
@@ -87,7 +100,7 @@ protected:
 	Vector2 current_pos;
 	Vector2 accumulated_relative;
 	Vector2 last_sent_deflection;
-	Timer *fade_timer = nullptr;
+	float fade_accumulator = 0.0f;
 
 	void _send_axis_events(const Vector2 &p_deflection);
 
@@ -101,8 +114,6 @@ protected:
 	virtual void _update_theme_item_cache() override;
 	void _notification(int p_what);
 	static void _bind_methods();
-	void _on_fade_timer_timeout();
-	void _update_timer_interval();
 
 	virtual void _on_touch_down(int p_index, const Vector2 &p_pos) override;
 	virtual void _on_touch_up(int p_index, const Vector2 &p_pos) override;
@@ -110,6 +121,19 @@ protected:
 
 	void _reset_touchpad();
 	virtual void pressed_state_changed() override;
+
+	virtual void _get_emulated_actions(Vector<StringName> &r_actions) const override {
+		if (last_sent_deflection.y < -0.3f && !action_up.is_empty()) {
+			r_actions.push_back(action_up);
+		} else if (last_sent_deflection.y > 0.3f && !action_down.is_empty()) {
+			r_actions.push_back(action_down);
+		}
+		if (last_sent_deflection.x < -0.3f && !action_left.is_empty()) {
+			r_actions.push_back(action_left);
+		} else if (last_sent_deflection.x > 0.3f && !action_right.is_empty()) {
+			r_actions.push_back(action_right);
+		}
+	}
 	virtual Size2 get_minimum_size() const override;
 
 public:
@@ -149,7 +173,11 @@ public:
 	void set_circle_color(const Color &p_color);
 	Color get_circle_color() const;
 
+	void set_action(int p_direction, const StringName &p_action);
+	StringName get_action(int p_direction) const;
+
 	VirtualTouchPad();
+	~VirtualTouchPad() override;
 };
 
 VARIANT_ENUM_CAST(VirtualTouchPad::TouchPadHand);

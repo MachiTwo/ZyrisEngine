@@ -10,19 +10,22 @@
 	</tutorials>
 	<members>
 		<member name="checksum" type="String" setter="set_checksum" getter="get_checksum" default="&quot;&quot;">
+			A SHA-256 checksum used to verify the integrity of the snapshot data.
 		</member>
 		<member name="metadata" type="Dictionary" setter="set_metadata" getter="get_metadata" default="{}">
+			Optional dictionary containing game-specific metadata (e.g. playtime, level name) for quick preview without loading the full snapshot.
 		</member>
 		<member name="snapshot" type="Dictionary" setter="set_snapshot" getter="get_snapshot" default="{}">
-			The dictionary containing the saved state.
+			The main dictionary containing the serialized state of the objects and their properties.
 		</member>
 		<member name="tag_slots" type="Dictionary" setter="set_tag_slots" getter="get_tag_slots" default="{}">
-			Maps tags to additional slot files.
+			Internal map that links specific gameplay tags to satellite save files for modular persistence.
 		</member>
 		<member name="thumbnail" type="Resource" setter="set_thumbnail" getter="get_thumbnail">
+			An optional [Texture2D] resource representing a visual preview of the save state.
 		</member>
 		<member name="version" type="String" setter="set_version" getter="get_version" default="&quot;&quot;">
-			The game version when this snapshot was created.
+			The version of the application ([code]application/config/version[/code]) at the time the snapshot was created, used for migrations.
 		</member>
 	</members>
 </class>

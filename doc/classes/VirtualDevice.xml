@@ -1,18 +1,74 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="VirtualDevice" inherits="Control" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../class.xsd">
 	<brief_description>
-		A base class for all on-screen virtual input devices.
+		Abstract base class for multitouch virtual input devices.
 	</brief_description>
 	<description>
-		[VirtualDevice] serves as the foundation for creating on-screen input controls like joysticks, buttons, and D-pads. It inherits from [Control], enabling layout and theming. Use this class as a base if you want to implement custom virtual input devices. It handles basic touch state management (pressed, hovered) and output device indexing.
+		[VirtualDevice] is an abstract base class that provides multitouch support for virtual input controls like joysticks, buttons, and D-pads. It inherits from [Control], enabling layout and theming.
+
+		[b]Input Modes:[/b] The device can operate in two distinct modes controlled by [member input_mode]:
+		- [constant INPUT_MODE_NATIVE]: Dispatches real [InputEventVirtualButton] and [InputEventVirtualMotion] events through [Input]. This is the default, high-performance path that integrates with the [InputMap] and works transparently with [method Input.is_action_pressed].
+		- [constant INPUT_MODE_EMULATED]: Simpler emulation path, similar to [TouchScreenButton]. Instead of native virtual device events, it fires standard [InputEventAction] events. Useful for quick prototyping or when native virtual device support is not available.
+
+		[b]Output control in Emulated mode:[/b] Use [member emit_input_events] and [member emit_signals] to independently toggle whether the emulated mode feeds the [Input] system and/or emits GDScript signals ([signal action_pressed], [signal action_released]).
+
+		[b]Multitouch Architecture:[/b] Each device tracks a single touch index to prevent conflicts between different virtual devices. The system uses: -1 for no touch, -2 for mouse input, and 0+ for individual finger touches. This ensures that multiple virtual devices on screen don't interfere with each other when users touch different areas simultaneously.
+
+		Use this class as a base if you want to implement custom virtual input devices with proper multitouch isolation. Subclasses must implement the virtual touch handlers (_on_touch_down, _on_touch_up, _on_drag) to define their specific behavior.
 	</description>
 	<tutorials>
 	</tutorials>
 	<methods>
+		<method name="get_active_touch_count" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the number of currently active touches on this device.
+			</description>
+		</method>
+		<method name="get_current_touch_index" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the current touch index tracking this device. Returns -1 if no touch is active, -2 for mouse input, or 0+ for finger touches. Useful for debugging multitouch behavior.
+			</description>
+		</method>
 		<method name="get_draw_mode" qualifiers="const">
 			<return type="int" enum="VirtualDevice.DrawMode" />
 			<description>
 				Returns the current visual state of the device (normal, pressed, hovered, etc.), useful for custom drawing logic.
+			</description>
+		</method>
+		<method name="get_touch_duration" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns the duration in seconds that the specified touch has been active. Returns 0.0 if the touch is not active.
+			</description>
+		</method>
+		<method name="get_touch_position" qualifiers="const">
+			<return type="Vector2" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns the current position of the specified touch. Returns Vector2.ZERO if the touch is not active.
+			</description>
+		</method>
+		<method name="get_touch_pressure" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns the pressure value of the specified touch (0.0 to 1.0). Returns 0.0 if the touch is not active.
+			</description>
+		</method>
+		<method name="get_touch_start_position" qualifiers="const">
+			<return type="Vector2" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns the initial position where the specified touch started. Returns Vector2.ZERO if the touch is not active.
+			</description>
+		</method>
+		<method name="is_hovered" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if the mouse is hovering over the device.
 			</description>
 		</method>
 		<method name="is_pressed" qualifiers="const">
@@ -21,15 +77,55 @@
 				Returns [code]true[/code] if the device is currently being touched or clicked.
 			</description>
 		</method>
+		<method name="is_touch_active" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns [code]true[/code] if the specified touch index is currently active on this device.
+			</description>
+		</method>
 	</methods>
 	<members>
 		<member name="device" type="int" setter="set_device" getter="get_device" default="0">
 			The device index to be used in the generated [InputEvent]. For example, if set to 0, events will appear as "Device 0".
 		</member>
+		<member name="emit_input_events" type="bool" setter="set_emit_input_events" getter="is_emitting_input_events" default="true">
+			If [code]true[/code], the device feeds [InputEventAction] events into the [Input] system when operating in [constant INPUT_MODE_EMULATED]. Disable this to suppress input propagation while keeping GDScript signals active.
+			[b]Note:[/b] Has no effect in [constant INPUT_MODE_NATIVE] mode.
+		</member>
+		<member name="emit_signals" type="bool" setter="set_emit_signals" getter="is_emitting_signals" default="true">
+			If [code]true[/code], the device emits [signal action_pressed] and [signal action_released] signals when operating in [constant INPUT_MODE_EMULATED]. Disable this to suppress signal emission while keeping input event propagation active.
+			[b]Note:[/b] Has no effect in [constant INPUT_MODE_NATIVE] mode.
+		</member>
+		<member name="input_mode" type="int" setter="set_input_mode" getter="get_input_mode" enum="VirtualDevice.InputMode" default="0">
+			Controls how the device generates input events.
+			- [constant INPUT_MODE_NATIVE]: Dispatches [InputEventVirtualButton] / [InputEventVirtualMotion] through [Input]. Fully integrated with [InputMap].
+			- [constant INPUT_MODE_EMULATED]: Dispatches standard [InputEventAction] events, similar to [TouchScreenButton]. Controlled by [member emit_input_events] and [member emit_signals].
+		</member>
+		<member name="max_touches" type="int" setter="set_max_touches" getter="get_max_touches" default="10">
+			The maximum number of simultaneous touches this device can track (1 to 32).
+		</member>
+		<member name="priority_to_first_touch" type="bool" setter="set_priority_to_first_touch" getter="get_priority_to_first_touch" default="true">
+			If [code]true[/code], the first touch to touch the device becomes the primary touch. If [code]false[/code], the last touch becomes primary.
+		</member>
 		<member name="visibility_mode" type="int" setter="set_visibility_mode" getter="get_visibility_mode" enum="VirtualDevice.VisibilityMode" default="0">
 			Controls when the virtual device is visible. Can be set to show always or only on touchscreen devices.
 		</member>
 	</members>
+	<signals>
+		<signal name="action_pressed">
+			<param index="0" name="action" type="StringName" />
+			<description>
+				Emitted when an emulated action is activated. Only fires in [constant INPUT_MODE_EMULATED] when [member emit_signals] is [code]true[/code].
+			</description>
+		</signal>
+		<signal name="action_released">
+			<param index="0" name="action" type="StringName" />
+			<description>
+				Emitted when an emulated action is deactivated. Only fires in [constant INPUT_MODE_EMULATED] when [member emit_signals] is [code]true[/code].
+			</description>
+		</signal>
+	</signals>
 	<constants>
 		<constant name="VISIBILITY_ALWAYS" value="0" enum="VisibilityMode">
 			The device is always visible.
@@ -48,6 +144,12 @@
 		</constant>
 		<constant name="DRAW_HOVER_PRESSED" value="3" enum="DrawMode">
 			The hovered and pressed state.
+		</constant>
+		<constant name="INPUT_MODE_NATIVE" value="0" enum="InputMode">
+			Dispatches real [InputEventVirtualButton] and [InputEventVirtualMotion] events through [Input]. Fully integrated with [InputMap]; use [method Input.is_action_pressed] as usual.
+		</constant>
+		<constant name="INPUT_MODE_EMULATED" value="1" enum="InputMode">
+			Simpler emulation path that dispatches standard [InputEventAction] events, similar to [TouchScreenButton]. Output is controlled by [member emit_input_events] and [member emit_signals].
 		</constant>
 	</constants>
 </class>

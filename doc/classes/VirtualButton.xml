@@ -4,11 +4,15 @@
 		An on-screen virtual button.
 	</brief_description>
 	<description>
-		[VirtualButton] behaves like a standard button but emits [InputEventVirtualButton] events associated with a specific virtual button index. It supports textures for various states (normal, pressed, hovered, disabled) and various stretch modes.
+		[VirtualButton] behaves like a standard button. By default, it emits [InputEventVirtualButton] events associated with a specific virtual button index.
+		When [member VirtualDevice.input_mode] is set to [constant VirtualDevice.INPUT_MODE_EMULATED], it switches to a simpler emulation path that dispatches standard [InputEventAction] events using the configured [member action] property.
 	</description>
 	<tutorials>
 	</tutorials>
 	<members>
+		<member name="action" type="StringName" setter="set_action" getter="get_action" default="&amp;&quot;&quot;">
+			The name of the emulated action triggered by this button when [member VirtualDevice.input_mode] is set to [constant VirtualDevice.INPUT_MODE_EMULATED].
+		</member>
 		<member name="alignment" type="int" setter="set_alignment" getter="get_alignment" enum="HorizontalAlignment" default="1">
 			The horizontal alignment of the button text.
 		</member>

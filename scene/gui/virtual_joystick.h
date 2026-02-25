@@ -46,6 +46,13 @@ public:
 		JOYSTICK_HAND_RIGHT,
 	};
 
+	enum JoystickDirection {
+		DIR_UP,
+		DIR_DOWN,
+		DIR_LEFT,
+		DIR_RIGHT,
+	};
+
 private:
 	Vector2 input_vector; // Normalized output (-1 to 1)
 	Vector2 last_sent_vector;
@@ -57,6 +64,12 @@ protected:
 	float clamp_zone_size = 1.0f;
 	JoystickMode joystick_mode = JOYSTICK_MODE_FIXED;
 	JoystickHand joystick_hand = JOYSTICK_HAND_LEFT;
+
+	// Emulated mode actions
+	StringName action_up = "ui_up";
+	StringName action_down = "ui_down";
+	StringName action_left = "ui_left";
+	StringName action_right = "ui_right";
 
 	// Visualization
 	Vector2 base_pos; // Visual position of the base (bg)
@@ -100,6 +113,19 @@ protected:
 
 	virtual void pressed_state_changed() override;
 
+	virtual void _get_emulated_actions(Vector<StringName> &r_actions) const override {
+		if (input_vector.y < -0.3f && !action_up.is_empty()) {
+			r_actions.push_back(action_up);
+		} else if (input_vector.y > 0.3f && !action_down.is_empty()) {
+			r_actions.push_back(action_down);
+		}
+		if (input_vector.x < -0.3f && !action_left.is_empty()) {
+			r_actions.push_back(action_left);
+		} else if (input_vector.x > 0.3f && !action_right.is_empty()) {
+			r_actions.push_back(action_right);
+		}
+	}
+
 public:
 	void set_deadzone_size(float p_size);
 	float get_deadzone_size() const;
@@ -136,6 +162,9 @@ public:
 
 	void set_tip_color(const Color &p_color);
 	Color get_tip_color() const;
+
+	void set_action(int p_direction, const StringName &p_action);
+	StringName get_action(int p_direction) const;
 
 	VirtualJoystick();
 };

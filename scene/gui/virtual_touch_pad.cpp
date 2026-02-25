@@ -34,7 +34,6 @@
 #include "core/input/input.h"
 #include "scene/2d/cpu_particles_2d.h"
 #include "scene/2d/gpu_particles_2d.h"
-#include "scene/main/timer.h"
 #include "scene/theme/theme_db.h"
 
 void VirtualTouchPad::_update_theme_item_cache() {
@@ -76,6 +75,20 @@ void VirtualTouchPad::_notification(int p_what) {
 				}
 
 				accumulated_relative = Vector2();
+			}
+
+			if (mode == MODE_TRACE && trace_points.size() > 0) {
+				float delta = get_process_delta_time();
+				fade_accumulator += delta;
+				float interval = fade_duration / (float)MAX(1, trace_length);
+				while (fade_accumulator >= interval && trace_points.size() > 0) {
+					trace_points.remove_at(0);
+					fade_accumulator -= interval;
+					queue_redraw();
+				}
+				if (trace_points.is_empty()) {
+					fade_accumulator = 0.0f;
+				}
 			}
 		} break;
 		case NOTIFICATION_DRAW: {
@@ -203,20 +216,21 @@ void VirtualTouchPad::_notification(int p_what) {
 }
 
 void _update_fx(Node *p_root, const Vector2 &p_pos, bool p_emitting) {
+	ERR_FAIL_NULL(p_root);
 	for (int i = 0; i < p_root->get_child_count(); i++) {
 		Node *child = p_root->get_child(i);
-		if (!child) {
+		if (!child || !child->is_inside_tree()) {
 			continue;
 		}
 
 		if (CPUParticles2D *cpu_part = Object::cast_to<CPUParticles2D>(child)) {
 			cpu_part->set_emitting(p_emitting);
-			if (p_emitting) {
+			if (p_emitting && cpu_part->is_inside_tree()) {
 				cpu_part->set_position(p_pos);
 			}
 		} else if (GPUParticles2D *gpu_part = Object::cast_to<GPUParticles2D>(child)) {
 			gpu_part->set_emitting(p_emitting);
-			if (p_emitting) {
+			if (p_emitting && gpu_part->is_inside_tree()) {
 				gpu_part->set_position(p_pos);
 			}
 		}
@@ -243,19 +257,29 @@ void VirtualTouchPad::_send_axis_events(const Vector2 &p_deflection) {
 	int axis_x = (hand == HAND_LEFT) ? 0 : 2;
 	int axis_y = (hand == HAND_LEFT) ? 1 : 3;
 
-	Ref<InputEventVirtualMotion> ie_x;
-	ie_x.instantiate();
-	ie_x->set_device(get_device());
-	ie_x->set_axis(axis_x);
-	ie_x->set_axis_value(p_deflection.x);
-	Input::get_singleton()->parse_input_event(ie_x);
+	Input *input = Input::get_singleton();
 
-	Ref<InputEventVirtualMotion> ie_y;
-	ie_y.instantiate();
-	ie_y->set_device(get_device());
-	ie_y->set_axis(axis_y);
-	ie_y->set_axis_value(p_deflection.y);
-	Input::get_singleton()->parse_input_event(ie_y);
+	if (axis_x != -1) {
+		Ref<InputEventVirtualMotion> ie_x;
+		ie_x.instantiate();
+		ie_x->set_device(get_device());
+		ie_x->set_axis(axis_x);
+		ie_x->set_axis_value(p_deflection.x);
+		if (input && get_input_mode() == INPUT_MODE_NATIVE) {
+			input->parse_input_event(ie_x);
+		}
+	}
+
+	if (axis_y != -1) {
+		Ref<InputEventVirtualMotion> ie_y;
+		ie_y.instantiate();
+		ie_y->set_device(get_device());
+		ie_y->set_axis(axis_y);
+		ie_y->set_axis_value(p_deflection.y);
+		if (input && get_input_mode() == INPUT_MODE_NATIVE) {
+			input->parse_input_event(ie_y);
+		}
+	}
 }
 
 void VirtualTouchPad::_reset_touchpad() {
@@ -281,6 +305,7 @@ void VirtualTouchPad::_on_touch_down(int p_index, const Vector2 &p_pos) {
 	accumulated_relative = Vector2();
 	trace_points.clear();
 	trace_points.push_back(p_pos);
+	fade_accumulator = 0.0f; // Reset fade accumulator on new touch
 	_update_fx(this, current_pos, true);
 	queue_redraw();
 }
@@ -298,23 +323,8 @@ float VirtualTouchPad::get_sensitivity() const {
 	return sensitivity;
 }
 
-void VirtualTouchPad::_on_fade_timer_timeout() {
-	if (trace_points.size() > 0) {
-		trace_points.remove_at(0);
-		queue_redraw();
-	}
-}
-
-void VirtualTouchPad::_update_timer_interval() {
-	if (fade_timer) {
-		float interval = fade_duration / (float)MAX(1, trace_length);
-		fade_timer->set_wait_time(MAX(0.001f, interval));
-	}
-}
-
 void VirtualTouchPad::set_trace_length(int p_length) {
 	trace_length = MAX(2, p_length);
-	_update_timer_interval();
 }
 
 int VirtualTouchPad::get_trace_length() const {
@@ -323,7 +333,6 @@ int VirtualTouchPad::get_trace_length() const {
 
 void VirtualTouchPad::set_fade_duration(float p_duration) {
 	fade_duration = MAX(0.01f, p_duration);
-	_update_timer_interval();
 }
 
 float VirtualTouchPad::get_fade_duration() const {
@@ -402,14 +411,50 @@ Color VirtualTouchPad::get_circle_color() const {
 	return circle_color;
 }
 
+void VirtualTouchPad::set_action(int p_direction, const StringName &p_action) {
+	switch (p_direction) {
+		case DIR_UP:
+			action_up = p_action;
+			break;
+		case DIR_DOWN:
+			action_down = p_action;
+			break;
+		case DIR_LEFT:
+			action_left = p_action;
+			break;
+		case DIR_RIGHT:
+			action_right = p_action;
+			break;
+		default:
+			break;
+	}
+}
+
+StringName VirtualTouchPad::get_action(int p_direction) const {
+	switch (p_direction) {
+		case DIR_UP:
+			return action_up;
+		case DIR_DOWN:
+			return action_down;
+		case DIR_LEFT:
+			return action_left;
+		case DIR_RIGHT:
+			return action_right;
+		default:
+			return StringName();
+	}
+}
+
 VirtualTouchPad::VirtualTouchPad() {
-	fade_timer = memnew(Timer);
-	_update_timer_interval();
-	fade_timer->connect(SNAME("timeout"), callable_mp(this, &VirtualTouchPad::_on_fade_timer_timeout));
-	fade_timer->set_autostart(true);
-	add_child(fade_timer);
+	action_up = "ui_up";
+	action_down = "ui_down";
+	action_left = "ui_left";
+	action_right = "ui_right";
 
 	set_process_internal(true);
+}
+
+VirtualTouchPad::~VirtualTouchPad() {
 }
 
 Size2 VirtualTouchPad::get_minimum_size() const {
@@ -452,9 +497,18 @@ void VirtualTouchPad::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_circle_color", "color"), &VirtualTouchPad::set_circle_color);
 	ClassDB::bind_method(D_METHOD("get_circle_color"), &VirtualTouchPad::get_circle_color);
 
+	ClassDB::bind_method(D_METHOD("set_action", "direction", "action"), &VirtualTouchPad::set_action);
+	ClassDB::bind_method(D_METHOD("get_action", "direction"), &VirtualTouchPad::get_action);
+
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sensitivity"), "set_sensitivity", "get_sensitivity");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "hand", PROPERTY_HINT_ENUM, "Left,Right"), "set_hand", "get_hand");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "mode", PROPERTY_HINT_ENUM, "None,Circle,Trace"), "set_mode", "get_mode");
+
+	ADD_GROUP("Emulated Mode", "action_");
+	ADD_PROPERTYI(PropertyInfo(Variant::STRING_NAME, "action_up", PROPERTY_HINT_INPUT_NAME, "show_builtin,loose_mode"), "set_action", "get_action", DIR_UP);
+	ADD_PROPERTYI(PropertyInfo(Variant::STRING_NAME, "action_down", PROPERTY_HINT_INPUT_NAME, "show_builtin,loose_mode"), "set_action", "get_action", DIR_DOWN);
+	ADD_PROPERTYI(PropertyInfo(Variant::STRING_NAME, "action_left", PROPERTY_HINT_INPUT_NAME, "show_builtin,loose_mode"), "set_action", "get_action", DIR_LEFT);
+	ADD_PROPERTYI(PropertyInfo(Variant::STRING_NAME, "action_right", PROPERTY_HINT_INPUT_NAME, "show_builtin,loose_mode"), "set_action", "get_action", DIR_RIGHT);
 
 	ADD_GROUP("Trace", "trace_");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "trace_style", PROPERTY_HINT_ENUM, "Solid,Dotted,Dashed,Squares"), "set_trace_style", "get_trace_style");

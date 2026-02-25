@@ -98,6 +98,8 @@ private:
 	SafeFlag exit_thread;
 	List<SaveTask> queue;
 	mutable Mutex staged_mutex;
+	mutable Mutex settings_mutex;
+	mutable Mutex base_snapshot_mutex;
 
 	// Configuration
 	SaveFormat current_format = FORMAT_TEXT;

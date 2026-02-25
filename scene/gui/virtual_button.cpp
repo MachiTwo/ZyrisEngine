@@ -45,20 +45,25 @@ void VirtualButton::pressed_state_changed() {
 	ie->set_device(get_device());
 	ie->set_button_index(button_index);
 	ie->set_pressed(is_pressed());
-	Input::get_singleton()->parse_input_event(ie);
+
+	Input *input = Input::get_singleton();
+	if (input && get_input_mode() == INPUT_MODE_NATIVE) {
+		input->parse_input_event(ie);
+	}
 
 	queue_redraw();
 }
 
 void VirtualButton::_shape() {
-	if (text_buf.is_null()) {
+	Ref<TextParagraph> buf = text_buf; // Create local copy to avoid race conditions
+	if (buf.is_null()) {
 		return;
 	}
-	text_buf->clear();
+	buf->clear();
 	Ref<Font> active_font = font.is_valid() ? font : theme_cache.font_theme;
 	int active_size = font_size > 0 ? font_size : theme_cache.font_size_theme;
 	if (active_font.is_valid()) {
-		text_buf->add_string(atr(text), active_font, active_size);
+		buf->add_string(atr(text), active_font, active_size);
 	}
 }
 
@@ -180,8 +185,9 @@ void VirtualButton::_notification(int p_what) {
 			}
 
 			// Draw Text
-			if (!text.is_empty() && text_buf.is_valid()) {
-				Size2 text_size = text_buf->get_size();
+			Ref<TextParagraph> buf = text_buf; // Create local copy to avoid race conditions
+			if (!text.is_empty() && buf.is_valid()) {
+				Size2 text_size = buf->get_size();
 				Vector2 text_pos;
 				switch (alignment) {
 					case HORIZONTAL_ALIGNMENT_LEFT:
@@ -199,9 +205,9 @@ void VirtualButton::_notification(int p_what) {
 				text_pos.y = (size.y - text_size.y) / 2;
 
 				if (theme_cache.outline_size > 0 && theme_cache.font_outline_color.a > 0) {
-					text_buf->draw_outline(ci, text_pos, theme_cache.outline_size, theme_cache.font_outline_color);
+					buf->draw_outline(ci, text_pos, theme_cache.outline_size, theme_cache.font_outline_color);
 				}
-				text_buf->draw(ci, text_pos, text_color);
+				buf->draw(ci, text_pos, text_color);
 			}
 
 		} break;
@@ -415,6 +421,11 @@ VirtualButton::VirtualButton() {
 	stretch_mode = STRETCH_SCALE;
 }
 
+VirtualButton::~VirtualButton() {
+	// Ref<> handles automatic cleanup, but ensure any manual resources are cleared
+	text_buf.unref();
+}
+
 void VirtualButton::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_button_index", "index"), &VirtualButton::set_button_index);
 	ClassDB::bind_method(D_METHOD("get_button_index"), &VirtualButton::get_button_index);
@@ -458,6 +469,9 @@ void VirtualButton::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_flat", "flat"), &VirtualButton::set_flat);
 	ClassDB::bind_method(D_METHOD("is_flat"), &VirtualButton::is_flat);
 
+	ClassDB::bind_method(D_METHOD("set_action", "action"), &VirtualButton::set_action);
+	ClassDB::bind_method(D_METHOD("get_action"), &VirtualButton::get_action);
+
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "button_index", PROPERTY_HINT_RANGE, "0,15,1"), "set_button_index", "get_button_index");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "text"), "set_text", "get_text");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "font", PROPERTY_HINT_RESOURCE_TYPE, "Font"), "set_font", "get_font");
@@ -465,6 +479,9 @@ void VirtualButton::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "icon", PROPERTY_HINT_RESOURCE_TYPE, "Texture2D"), "set_icon", "get_icon");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "alignment", PROPERTY_HINT_ENUM, "Left,Center,Right"), "set_alignment", "get_alignment");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flat"), "set_flat", "is_flat");
+
+	ADD_GROUP("Emulated Mode", "action_");
+	ADD_PROPERTY(PropertyInfo(Variant::STRING_NAME, "action", PROPERTY_HINT_INPUT_NAME, "show_builtin,loose_mode"), "set_action", "get_action");
 
 	ADD_GROUP("Textures", "texture_");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture_normal", PROPERTY_HINT_RESOURCE_TYPE, "Texture2D"), "set_texture_normal", "get_texture_normal");

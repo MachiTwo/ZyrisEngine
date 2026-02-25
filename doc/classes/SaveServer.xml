@@ -4,8 +4,9 @@
 		High-performance persistence backend.
 	</brief_description>
 	<description>
-		[SaveServer] is a singleton responsible for managing data storage on disk for the Godot Engine. It abstracts I/O complexity in separate threads (non-blocking).
-		It ensures that game state snapshots are persisted asynchronously as [Snapshot] resources in [code].tres[/code] format, allowing for easy inspection, version control integration, and automatic game version tracking.
+		[SaveServer] is a high-performance singleton responsible for managing game data persistence. It abstracts complex I/O operations by offloading them to dedicated background threads, ensuring that the main gameplay loop remains stutter-free.
+		Key features include atomic saves (temp-file swap), secure encryption using cryptographically safe random keys, ZSTD compression, and a robust backup system that can automatically restore corrupted files.
+		Data is stored as [Snapshot] resources, allowing for easy inspection and modularity via satellite slots.
 	</description>
 	<tutorials>
 	</tutorials>
@@ -63,7 +64,7 @@
 			<return type="Dictionary" />
 			<param index="0" name="slot_name" type="String" />
 			<description>
-				Loads a [Snapshot] resource and returns its [code]snapshot[/code] data. Returns an empty dictionary if the slot does not exist or is corrupted.
+				Loads a [Snapshot] resource from the given [param slot_name]. It automatically handles decryption and decompression based on the file format. If the file is corrupted, the server will attempt to restore it from the most recent backup before returning an empty dictionary.
 			</description>
 		</method>
 		<method name="load_snapshot">
@@ -105,7 +106,7 @@
 			<param index="3" name="metadata" type="Dictionary" default="{}" />
 			<param index="4" name="thumbnail" type="Resource" default="null" />
 			<description>
-				Wraps the [param data] into a [Snapshot] resource and saves it. Supports optional [param metadata] and a [param thumbnail] (e.g. screenshot).
+				Wraps the provided [param data] into a [Snapshot] and performs an atomic save to disk. In atomic mode, data is first written to a temporary file and then renamed, preventing file corruption in case of sudden shutdowns.
 			</description>
 		</method>
 		<method name="save_snapshot">
@@ -152,7 +153,7 @@
 			Enables or disables ZSTD compression for binary saves.
 		</member>
 		<member name="encryption_key" type="String" setter="set_encryption_key" getter="get_encryption_key" default="&quot;&quot;">
-			Sets the encryption key for binary saves.
+			The encryption key used for binary saves. If empty in the editor, [SaveServer] will automatically generate a cryptographically secure key and save it to the project settings.
 		</member>
 		<member name="integrity_check_level" type="int" setter="set_integrity_check_level" getter="get_integrity_check_level" enum="SaveServer.IntegrityCheckLevel" default="1">
 			Determines how strictly the [SaveServer] validates the integrity of a save file during loading.
@@ -164,7 +165,7 @@
 			The file format used by [SaveServer] when creating snapshots.
 		</member>
 		<member name="save_path" type="String" setter="set_save_path" getter="get_save_path" default="&quot;user://saves/&quot;">
-			The base directory within the [code]user://[/code] path where [SaveServer] stores snapshot files.
+			The base directory within the [code]user://[/code] path where [SaveServer] stores snapshot files. All paths are internally sanitized to prevent path traversal attacks.
 		</member>
 	</members>
 	<signals>

@@ -37,12 +37,7 @@ class Snapshot : public Resource {
 	GDCLASS(Snapshot, Resource);
 
 private:
-	Dictionary snapshot;
-	Dictionary metadata;
-	Dictionary tag_slots;
-	Ref<Resource> thumbnail;
-	String version;
-	String checksum;
+	Dictionary data;
 
 protected:
 	static void _bind_methods();
