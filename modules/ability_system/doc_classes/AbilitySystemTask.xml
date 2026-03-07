@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AbilitySystemTask" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Base class for asynchronous tasks within the Ability System.
+	</brief_description>
+	<description>
+		[AbilitySystemTask] is the base class for all asynchronous actions that can be performed during an ability's execution.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="activate">
+			<return type="void" />
+			<description>
+				Starts the task execution.
+			</description>
+		</method>
+		<method name="end_task">
+			<return type="void" />
+			<description>
+				Ends the task and emits the [signal completed] signal.
+			</description>
+		</method>
+		<method name="is_finished" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if the task has completed.
+			</description>
+		</method>
+		<method name="set_owner">
+			<return type="void" />
+			<param index="0" name="owner" type="AbilitySystemComponent" />
+			<description>
+				Assigns the owning [AbilitySystemComponent] to the task.
+			</description>
+		</method>
+	</methods>
+	<signals>
+		<signal name="completed">
+			<description>
+				Emitted when the task is finished.
+			</description>
+		</signal>
+	</signals>
+	<constants>
+		<constant name="TASK_GENERIC" value="0" enum="TaskType">
+			Generic task with no specific behavior.
+		</constant>
+		<constant name="TASK_WAIT_DELAY" value="1" enum="TaskType">
+			Task that waits for a specified time delay.
+		</constant>
+		<constant name="TASK_PLAY_MONTAGE" value="2" enum="TaskType">
+			Task that plays an animation and waits for it to finish.
+		</constant>
+		<constant name="TASK_WAIT_EVENT" value="3" enum="TaskType">
+			Task that waits for a specific ability system tag event.
+		</constant>
+	</constants>
+</class>

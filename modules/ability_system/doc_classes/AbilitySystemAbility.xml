@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AbilitySystemAbility" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Base resource for defining abilities within the module.
+	</brief_description>
+	<description>
+		[AbilitySystemAbility] defines the logic and data for a specific action. It manages its own costs, cooldowns, and tags.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="_on_activate_ability" qualifiers="virtual">
+			<return type="void" />
+			<param index="0" name="owner" type="Object" />
+			<param index="1" name="spec" type="RefCounted" />
+			<description>
+				Virtual method to implement the ability's logic.
+			</description>
+		</method>
+		<method name="_on_can_activate_ability" qualifiers="virtual const">
+			<return type="bool" />
+			<param index="0" name="owner" type="Object" />
+			<param index="1" name="spec" type="RefCounted" />
+			<description>
+				Virtual method to implement custom activation requirements.
+			</description>
+		</method>
+		<method name="_on_end_ability" qualifiers="virtual">
+			<return type="void" />
+			<param index="0" name="owner" type="Object" />
+			<param index="1" name="spec" type="RefCounted" />
+			<description>
+				Virtual method called when the ability ends.
+			</description>
+		</method>
+		<method name="activate_ability">
+			<return type="void" />
+			<param index="0" name="owner" type="AbilitySystemComponent" />
+			<param index="1" name="spec" type="AbilitySystemAbilitySpec" default="null" />
+			<param index="2" name="target_node" type="Object" default="null" />
+			<description>
+				Starts the ability execution. Handles native costs and cooldown application automatically.
+			</description>
+		</method>
+		<method name="add_cost">
+			<return type="void" />
+			<param index="0" name="attribute" type="StringName" />
+			<param index="1" name="amount" type="float" />
+			<description>
+				Adds a native cost modifier.
+			</description>
+		</method>
+		<method name="apply_costs" qualifiers="const">
+			<return type="void" />
+			<param index="0" name="owner" type="AbilitySystemComponent" />
+			<param index="1" name="spec" type="AbilitySystemAbilitySpec" default="null" />
+			<description>
+				Applies the costs of the ability to the owner.
+			</description>
+		</method>
+		<method name="can_activate_ability" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="owner" type="AbilitySystemComponent" />
+			<param index="1" name="spec" type="AbilitySystemAbilitySpec" default="null" />
+			<description>
+				Returns true if the ability can be activated (checks tags, costs, and cooldown).
+			</description>
+		</method>
+		<method name="can_afford_costs" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="owner" type="AbilitySystemComponent" />
+			<param index="1" name="spec" type="AbilitySystemAbilitySpec" default="null" />
+			<description>
+				Checks if the owner has enough resources to afford the costs.
+			</description>
+		</method>
+		<method name="end_ability">
+			<return type="void" />
+			<param index="0" name="owner" type="AbilitySystemComponent" />
+			<param index="1" name="spec" type="AbilitySystemAbilitySpec" default="null" />
+			<description>
+				Ends the ability execution and cleans up owned tags.
+			</description>
+		</method>
+		<method name="get_cost_amount" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="attribute" type="StringName" />
+			<description>
+			</description>
+		</method>
+		<method name="remove_cost">
+			<return type="bool" />
+			<param index="0" name="attribute" type="StringName" />
+			<description>
+				Removes a cost definition for a specific attribute.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="ability_name" type="String" setter="set_ability_name" getter="get_ability_name" default="&quot;&quot;">
+			Unique name for this ability.
+		</member>
+		<member name="ability_tag" type="StringName" setter="set_ability_tag" getter="get_ability_tag" default="&amp;&quot;&quot;">
+			The unique tag identifying this ability.
+		</member>
+		<member name="activation_blocked_tags" type="StringName[]" setter="set_activation_blocked_tags" getter="get_activation_blocked_tags" default="[]">
+			Ability cannot activate if owner has any of these tags.
+		</member>
+		<member name="activation_owned_tags" type="StringName[]" setter="set_activation_owned_tags" getter="get_activation_owned_tags" default="[]">
+			Tags granted to the owner while the ability is active.
+		</member>
+		<member name="activation_required_tags" type="StringName[]" setter="set_activation_required_tags" getter="get_activation_required_tags" default="[]">
+			Owner must have all of these tags to activate.
+		</member>
+		<member name="cooldown_duration" type="float" setter="set_cooldown_duration" getter="get_cooldown_duration" default="0.0">
+			Base duration of cooldown.
+		</member>
+		<member name="cooldown_tags" type="StringName[]" setter="set_cooldown_tags" getter="get_cooldown_tags" default="[]">
+			Tags applied during cooldown.
+		</member>
+		<member name="cooldown_use_custom" type="bool" setter="set_use_custom_cooldown" getter="get_use_custom_cooldown" default="false">
+			If true, triggers [code]_on_calculate_custom_magnitude[/code] with index -2 for duration.
+		</member>
+		<member name="costs" type="Dictionary[]" setter="set_costs" getter="get_costs" default="[]">
+			Array of native costs (attribute and amount).
+		</member>
+		<member name="costs_use_custom" type="bool" setter="set_use_custom_costs" getter="get_use_custom_costs" default="false">
+			If true, triggers [code]_on_calculate_custom_magnitude[/code] with index -3 and below for amounts.
+		</member>
+		<member name="cues" type="AbilitySystemCue[]" setter="set_cues" getter="get_cues" default="[]">
+			Visual/Audio cues triggered on start and end.
+		</member>
+		<member name="effect" type="AbilitySystemEffect" setter="set_effect" getter="get_effect">
+			The main effect applied by this ability.
+		</member>
+	</members>
+</class>

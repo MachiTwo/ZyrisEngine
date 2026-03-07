@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AbilitySystemEditorPropertyTagSelector" inherits="EditorProperty" version="4.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Editor property for selecting a single ability system tag.
+	</brief_description>
+	<description>
+		[AbilitySystemEditorPropertyTagSelector] provides a dropdown interface for selecting a single ability system tag from the registered tags.
+		Displays an OptionButton with "(None)" option and all available tags.
+	</description>
+	<tutorials>
+	</tutorials>
+</class>

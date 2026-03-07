@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AbilitySystemCueSpec" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Runtime context for a cue execution.
+	</brief_description>
+	<description>
+		[AbilitySystemCueSpec] provides context for visual/audio effects, such as who triggered it and where it happened.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_effect_spec" qualifiers="const">
+			<return type="AbilitySystemEffectSpec" />
+			<description>
+				Returns the effect specification that triggered this cue, if any.
+			</description>
+		</method>
+		<method name="get_extra_data" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Returns the dictionary of extra data passed to the cue.
+			</description>
+		</method>
+		<method name="get_level" qualifiers="const">
+			<return type="float" />
+			<description>
+			</description>
+		</method>
+		<method name="get_source_asc" qualifiers="const">
+			<return type="AbilitySystemComponent" />
+			<description>
+				Returns the source ASC.
+			</description>
+		</method>
+		<method name="get_target_asc" qualifiers="const">
+			<return type="AbilitySystemComponent" />
+			<description>
+				Returns the target ASC.
+			</description>
+		</method>
+		<method name="get_target_node">
+			<return type="void" />
+			<description>
+				Returns the target object or node.
+			</description>
+		</method>
+		<method name="set_effect_spec">
+			<return type="void" />
+			<param index="0" name="spec" type="AbilitySystemEffectSpec" />
+			<description>
+				Sets the triggering effect specification.
+			</description>
+		</method>
+		<method name="set_extra_data">
+			<return type="void" />
+			<param index="0" name="data" type="Dictionary" />
+			<description>
+				Sets the extra data dictionary.
+			</description>
+		</method>
+		<method name="set_level">
+			<return type="void" />
+			<param index="0" name="level" type="float" />
+			<description>
+			</description>
+		</method>
+		<method name="set_source_asc">
+			<return type="void" />
+			<param index="0" name="asc" type="AbilitySystemComponent" />
+			<description>
+				Sets the source component resource.
+			</description>
+		</method>
+		<method name="set_target_asc">
+			<return type="void" />
+			<param index="0" name="asc" type="AbilitySystemComponent" />
+			<description>
+				Sets the target component resource.
+			</description>
+		</method>
+		<method name="set_target_node">
+			<return type="void" />
+			<param index="0" name="node" type="Object" />
+			<description>
+				Sets the target node or object.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="cue" type="AbilitySystemCue" setter="set_cue" getter="get_cue">
+			The definition resource.
+		</member>
+		<member name="magnitude" type="float" setter="set_magnitude" getter="get_magnitude" default="0.0">
+			Calculated magnitude.
+		</member>
+		<member name="hit_position" type="Variant" setter="set_hit_position" getter="get_hit_position" default="null">
+			Position.
+		</member>
+	</members>
+</class>

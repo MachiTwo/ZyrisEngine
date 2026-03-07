@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AbilitySystemAbilityContainer" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Archetype blueprint for an actor.
+	</brief_description>
+	<description>
+		[AbilitySystemAbilityContainer] stores the catalog of abilities, initial effects, and the attribute set configuration for an entity.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="has_ability" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="ability" type="AbilitySystemAbility" />
+			<description>
+				Checks if an ability is in the catalog.
+			</description>
+		</method>
+		<method name="has_cue" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns true if a cue with the specified tag exists in the container.
+			</description>
+		</method>
+		<method name="has_effect" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="effect" type="AbilitySystemEffect" />
+			<description>
+				Returns true if the specified effect resource is present in the container.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="abilities" type="AbilitySystemAbility[]" setter="set_abilities" getter="get_abilities" default="[]">
+			List of all abilities this archetype can potentially use.
+		</member>
+		<member name="attribute_set" type="AbilitySystemAttributeSet" setter="set_attribute_set" getter="get_attribute_set">
+			The attribute configuration and default granted abilities.
+		</member>
+		<member name="cues" type="AbilitySystemCue[]" setter="set_cues" getter="get_cues" default="[]">
+			Audiovisual cues for this archetype.
+		</member>
+		<member name="effects" type="AbilitySystemEffect[]" setter="set_effects" getter="get_effects" default="[]">
+			Initial effects applied on startup.
+		</member>
+	</members>
+</class>

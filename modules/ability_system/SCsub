@@ -1,0 +1,26 @@
+# ruff: noqa: F821
+# SCsub
+Import("env")
+
+module_env = env.Clone()
+
+# Add the module define if compiling as a native module
+if "ABILITY_SYSTEM_GDEXTENSION" not in env["CPPDEFINES"]:
+    module_env.Append(CPPDEFINES=["ABILITY_SYSTEM_MODULE"])
+
+# Collect source files (now relative to src/)
+sources = []
+sources += Glob("*.cpp")
+sources += Glob("core/*.cpp")
+sources += Glob("resources/*.cpp")
+sources += Glob("scene/*.cpp")
+
+if env["target"] == "editor":
+    sources += Glob("editor/*.cpp")
+
+# Add collected files to Godot's module environment
+module_env.add_source_files(env.modules_sources, sources)
+
+# Unit tests
+if env.get("tests", False):
+    module_env.add_source_files(env.modules_sources, "tests/*.cpp")

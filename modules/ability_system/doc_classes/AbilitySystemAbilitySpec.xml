@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AbilitySystemAbilitySpec" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Runtime instance of an ability.
+	</brief_description>
+	<description>
+		[AbilitySystemAbilitySpec] represents a granted ability. It stores runtime state and provides methods to query execution data like cooldowns and costs.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_ability" qualifiers="const">
+			<return type="AbilitySystemAbility" />
+			<description>
+				Returns the ability resource.
+			</description>
+		</method>
+		<method name="get_cooldown_duration" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the base cooldown duration defined in the ability.
+			</description>
+		</method>
+		<method name="get_cooldown_remaining" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the time remaining for the cooldown on the owner ASC.
+			</description>
+		</method>
+		<method name="get_cost_amount" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="attribute" type="StringName" />
+			<description>
+				Returns the cost for a specific attribute.
+			</description>
+		</method>
+		<method name="get_is_active" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns true if the ability is currently running.
+			</description>
+		</method>
+		<method name="get_level" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the level of this instance.
+			</description>
+		</method>
+		<method name="get_owner" qualifiers="const">
+			<return type="AbilitySystemComponent" />
+			<description>
+				Returns the component that owns this spec.
+			</description>
+		</method>
+		<method name="init">
+			<return type="void" />
+			<param index="0" name="ability" type="AbilitySystemAbility" />
+			<param index="1" name="level" type="int" default="1" />
+			<description>
+				Initializes the spec.
+			</description>
+		</method>
+		<method name="is_on_cooldown" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns true if the ability tag is currently on cooldown.
+			</description>
+		</method>
+		<method name="set_is_active">
+			<return type="void" />
+			<param index="0" name="active" type="bool" />
+			<description>
+				Sets the active state.
+			</description>
+		</method>
+		<method name="set_level">
+			<return type="void" />
+			<param index="0" name="level" type="int" />
+			<description>
+				Sets the instance level.
+			</description>
+		</method>
+	</methods>
+</class>
