@@ -54,7 +54,6 @@ Define o arquétipo de um personagem, agrupando habilidades e atributos iniciais
   - `granted_abilities`: Lista de habilidades concedidas.
   - `innate_effects`: Efeitos passivos aplicados ao iniciar.
   - `initial_attributes`: Valores base para atributos (Força, Vigor).
-  - `innate_tags`: Tags concedidas permanentemente.
   - `cues`: Mapeamento de cues visuais/sonoros.
 
 ### 2.2 AbilitySystemAttribute
@@ -86,14 +85,7 @@ Container que gerencia coleções de AbilitySystemAttribute Resources.
 Define a lógica de "o que acontece".
 
 - **Fluxo de Vida:** `can_activate` -> `activate_ability` -> `end_ability`.
-- **Tags:** Gerencia tags de habilidade, cancelamento e bloqueio usando `StringName` otimizado.
-- **Propriedades:**
-  - `ability_tag`: Tag única identificadora (`StringName`).
-  - `activation_required_tags`: Tags necessárias para ativação.
-  - `activation_blocked_tags`: Tags que bloqueiam ativação.
-  - `activation_owned_tags`: Tags concedidas durante ativação.
-  - `cost_effect`: Efeito aplicado como custo.
-  - `cooldown_effect`: Efeito aplicado como cooldown.
+- **Tags:** Gerencia tags de habilidade, cancelamento e bloqueio.
 
 ### 2.5 AbilitySystemEffect (Resource)
 
@@ -103,107 +95,16 @@ Regras para alterar atributos ou tags.
 - **Modificadores:** Operações de `ADD`, `MULTIPLY`, `DIVIDE` e `OVERRIDE`.
 - **Costs:** Custos de ativação (Mana, Stamina, etc.).
 - **Cooldowns:** Tempo de recarga entre usos.
-- **Tags:** `granted_tags`, `removed_tags`, `blocked_tags` usando `StringName` otimizado.
-- **Cues:** `cue_tags` para disparar feedback visual/sonoro.
-- **Magnitude Custom:** `AbilitySystemMagnitudeCalculation` para fórmulas complexas.
 
 ### 2.6 AbilitySystemCue (Resource)
 
-Sistema de ativação e sincronização de eventos (animações, sons) disparado por efeitos ou habilidades.
+Sistema de feedback visual e sonoro para eventos de gameplay.
 
 - **Trigger:** Executado quando efeitos são aplicados/removidos ou habilidades ativadas.
 - **Tipos:** `OnActive` (enquanto ativo), `OnExecute` (instantâneo), `OnRemove` (ao remover).
-- **Uso:** Sincronização de animações e sons através de tags de gameplay.
+- **Uso:** Spawn de VFX, SFX, screen shake, números flutuantes.
 
-### 2.7 AbilitySystemTag
-
-Identificador único para estados de gameplay usando `StringName` otimizado.
-
-- **Hierárquico:** Ex: `state.debuff.poison`, `ability.fireball`.
-- **Otimizado:** `StringName` para performance com armazenamento direto.
-- **Global:** Registrado no singleton `AbilitySystem`.
-- **Performance:** Operações O(1) via `HashSet<StringName>`.
-
-### 2.8 AbilitySystemTagContainer
-
-Container otimizado de tags para consultas e modificações em runtime [RefCounted].
-
-- **Propósito:** Compatibilidade backward e casos específicos com reference counting.
-- **Gerenciamento:** `add_tag()`, `remove_tag()` com contagem de referências.
-- **Consultas:** `has_tag()`, `has_any_tags()`, `has_all_tags()`.
-- **Matching:** Suporte a matching hierárquico (`exact` parameter).
-- **Performance:** Estrutura otimizada para alta frequência de operações.
-
-### 2.9 AbilitySystemTargetData
-
-Container para dados de targeting em multiplayer [RefCounted].
-
-- **Dados:** `hit_position` (Vector3), `target_node` (Object).
-- **Uso:** Comunicação client-server de hits e seleções.
-
-### 2.10 AbilitySystemTask
-
-Base para tarefas assíncronas em habilidades [RefCounted].
-
-- **Tipos:** `TASK_WAIT_DELAY`, `TASK_PLAY_MONTAGE`, `TASK_WAIT_EVENT`.
-- **Métodos Estáticos:** `wait_delay()`, `play_montage()`.
-- **Sinais:** `completed` para coordenação assíncrona.
-- **Extensível:** Herança para tarefas customizadas.
-
-### 2.11 AbilitySystemMagnitudeCalculation
-
-Lógica customizada para cálculo de magnitudes (MMC) [RefCounted].
-
-- **Método Virtual:** `_calculate_magnitude(spec)`.
-- **Utilitários:** `get_source_attribute_value()`, `get_target_attribute_value()`.
-- **Uso:** Escalar dano por atributos, curvas de progressão, modificadores ambientais.
-
-## 3. Gameplay Tags
-
-As **GameplayTags** são `StringName` hierárquicos otimizados com armazenamento direto.
-
-- **Exemplo:** `state.buff.speed`, `state.debuff.stun`.
-- **Registro:** Gerenciados pelo singleton `AbilitySystem`.
-- **Storage:** `HashSet<StringName>` para performance O(1).
-- **Matching:** Suporte a matching hierárquico via `AbilitySystem.tag_matches()`.
-- **Performance:** Otimizados para consultas de alta frequência sem overhead de RefCounted.
-
-### 3.1 Implementação Otimizada
-
-O sistema usa `HashSet<StringName>` diretamente no `AbilitySystemComponent`:
-
-- **owned_tags**: Storage principal das tags da entidade
-- **Operações**: `add_tag()`, `remove_tag()`, `has_tag()` O(1)
-- **Memory**: 4x menos uso vs sistema anterior com RefCounted
-- **Compatibilidade**: Método `get_owned_tags()` retorna `AbilitySystemTagContainer` para backward compatibility
-
-## 4. Sistema de Runtime (Specs)
-
-### 4.1 AbilitySystemAbilitySpec
-
-Instância de runtime de uma `AbilitySystemAbility` concedida ao ASC.
-
-- **Dados:** Nível, estado ativo, referência ao Resource.
-- **Métodos:** `get_ability()`, `get_is_active()`, `get_level()`.
-- **Ciclo:** Gerenciado pelo `AbilitySystemComponent`.
-
-### 4.2 AbilitySystemEffectSpec
-
-Instância de runtime de um `AbilitySystemEffect` aplicado.
-
-- **Dados:** Duração restante, magnitudes dinâmicas, nível.
-- **Contexto:** Source/target ASCs, cálculos de magnitude.
-- **Métodos:** `get_duration_remaining()`, `set_magnitude()`, `calculate_modifier_magnitude()`.
-
-### 4.3 AbilitySystemCueSpec
-
-Contexto de execução de uma `AbilitySystemCue`.
-
-- **Dados:** Cue resource, effect spec trigger, magnitude calculada.
-- **Contexto:** Source ASC, target ASC, dados extras.
-- **Uso:** Passado para callbacks da Cue com contexto completo.
-
-## 5. Attribute Events
+### 2.7 Attribute Events
 
 Signals emitidos quando atributos mudam.
 
@@ -211,7 +112,34 @@ Signals emitidos quando atributos mudam.
 - **`attribute_pre_change(attribute_name, old_value, new_value)`**: Antes da mudança (pode ser cancelado).
 - **Uso:** Atualizar UI (health bars), triggers de gameplay (morte quando HP = 0).
 
-## 6. Interface de Script (GDScript)
+### 2.8 Gameplay Tasks
+
+Sistema assíncrono para operações de longa duração dentro de habilidades.
+
+- **Tasks:** `WaitDelay`, `WaitInputPress`, `MoveToLocation`, `SpawnProjectile`.
+- **Async:** Permite escrever lógica de habilidade linear usando `await`.
+
+### 2.9 Target Data
+
+Pipeline de validação e filtragem de alvos.
+
+- **Fluxo:** O Ator seleciona alvos através de logic handles.
+- **Support:** Line Trace, Sphere Overlap, Box, Custom Shapes.
+
+### 2.10 Magnitude Calculation (MMC)
+
+Cálculos complexos de magnitude para efeitos.
+
+- **Custom logic:** Permite definir curvas de dano, escala por atributos (Força, Inteligência) e modificadores de ambiente.
+- **GEE:** Gameplay Effect Execution para lógica arbitrária ao aplicar efeitos.
+
+## 3. Gameplay Tags
+
+As **GameplayTags** são `StringName` hierárquicos otimizados.
+
+- **Exemplo:** `state.buff.speed`, `state.debuff.stun`.
+
+## 4. Interface de Script (GDScript)
 
 ### Exemplo: Pipeline de Combate com Atributos Validados
 
