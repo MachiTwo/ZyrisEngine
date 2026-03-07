@@ -29,29 +29,35 @@ O ponto central de verdade do sistema. Gerenciado como um Singleton da Engine [O
 
 O "cérebro" do Ator. Deve ser anexado a um `CharacterBody2D/3D` [Node].
 
-- **Integração Nativa (Sibling Cache):**
-  - Detecta automaticamente e cacheia: `AnimationPlayer`, `AnimatedSprite`, `AudioStreamPlayer`, `RayCast`, `GPUParticles`, `Area`, `Marker`.
-- **API Principal:**
+- **API de Registro (Setup Manual):**
+  - `set_animation_player(Node)`: Define o slot padrão para animações (aceita `AnimationPlayer` ou `AnimatedSprite`).
+  - `set_audio_player(Node)`: Define le slot padrão para áudio (aceita `AudioStreamPlayer`, `2D` ou `3D`).
+  - `register_node(StringName name, Node)`: Registra um nó nomeado para Cues específicos.
+- **API de Feedback (Execução):**
+  - `play_montage(StringName anim, Node target)`: Toca animação. Se `target` nulo, usa o slot padrão.
+  - `play_sound(AudioStream sound, Node target)`: Toca áudio. Se `target` nulo, usa o slot padrão.
+- **API Principal (Execução):**
   - `give_ability(AbilitySystemAbility ability)`: Registra uma nova habilidade.
-  - `try_activate_ability_by_tag(StringName tag)`: Tenta disparar uma habilidade via tag.
-  - `make_outgoing_spec(AbilitySystemEffect effect)`: Cria uma especificação para aplicação dinâmica.
-  - `apply_gameplay_effect_spec_to_self(AbilitySystemEffectSpec spec)`: Aplica modificadores.
-  - `play_montage(StringName anim)`: Toca animação no nó irmão cacheado.
+  - `try_activate_ability(AbilitySystemAbility ability)`: Tenta executar a habilidade passada.
+  - `apply_effect_spec_to_self(AbilitySystemEffectSpec spec)`: Aplica modificadores.
 - **Signals Reativos:**
   - `attribute_changed(name, old, new)`: Para UI e Feedback.
   - `tag_changed(name, present)`: Para mudanças de estado visual.
 
+> [!NOTE]
+> Os métodos `play_montage` e `play_sound` são públicos e podem ser usados via script, mas o fluxo recomendado é o **Data-Driven**, onde as Habilidades e Efeitos disparam esses métodos internamente através de Cues.
+
 ### 2.2 AbilitySystemAbilityContainer (Resource)
 
-Define o arquétipo de um personagem, agrupando habilidades e atributos iniciais.
+Define o **contrato de permissão** (arquétipo) de uma entidade, catalogando tudo o que ela é capaz de possuir ou realizar.
 
-- **Propósito:** Configuração base de classes (Guerreiro, Mago) ou inimigos.
-- **Conteúdo:**
-  - `granted_abilities`: Lista de habilidades concedidas.
-  - `innate_effects`: Efeitos passivos aplicados ao iniciar.
-  - `initial_attributes`: Valores base para atributos (Força, Vigor).
-  - `innate_tags`: Tags concedidas permanentemente.
-  - `cues`: Mapeamento de cues visuais/sonoros.
+- **Propósito:** Atua como um "blueprint" ou "template" fixo para raças, classes ou tipos de inimigos. Ele define o escopo de possibilidades, permitindo que o jogo gerencie o desbloqueio progressivo (via nível ou classe) de forma segura.
+- **Conteúdo (Catálogo):**
+  - `abilities`: Lista de habilidades que a entidade **pode** aprender ou equipar (catálogo de acesso).
+  - `effects`: Catálogo de efeitos, passivas e **instâncias de ataque** permitidas (ex: veneno, escudos, buffs), que o arquétipo está autorizado a carregar ou instanciar.
+  - `attributes`: Atributos permitidos e suas definições para este arquétipo.
+  - `tags`: Tags de identidade e permissão inerentes ao arquétipo.
+  - `cues`: Mapeamento de feedbacks audiovisuais disponíveis para o arquétipo.
 
 ### 2.3 AbilitySystemAttribute
 
@@ -80,24 +86,39 @@ Container que gerencia coleções de AbilitySystemAttribute Resources.
 
 ### 2.5 AbilitySystemAbility (Resource)
 
-Define a lógica de "o que acontece".
+Define a lógica de "o que acontece" e principalmente "o que esta habilidade é".
+
+- **Identidade vs Comportamento:** Uma habilidade no Ability System se define primeiramente pelo seu `Ability Tag` único, que atua como o seu "Documento de Identidade". O restante dos campos de Tags (os Arrays de Ativação) não ditam *quem* a Habilidade é, mas sim o seu *comportamento* mediante o personagem e o cenário.
+- **Hierarquia do Polimorfismo:** Por causa do formato das Tags (e.g. `ability.spell.fire.fireball`), a Engine lida facilmente com grupos ou classificadores sem usar um Array de Tags na Identidade. Se o player tentar ativar `ability.spell` no ASC, todas as sub-skills de magia respondem. Se quiser especificidade, chame de forma integral: `ability.spell.fire`.
+
+**Propriedades de Controle de Estado e Condições (As "Activation Tags"):**
+
+- **`ability_tag` (O Registro Único):** Tag principal e singular formadora de identidade e filtragem (`StringName`). Exemplo: `ability.movement.dodge`
+- **`activation_owned_tags` (O Buff Temporário):** Array de Tags. Quando a habilidade iniciar, ela carimba todo este grupo no Character e os remove assim que terminar o ciclo de vida. Dita o que seu Personagem "se torna" (ex: durante a Esquiva, ganha *state.immune.damage* e *state.animation.rolling*).
+- **`activation_required_tags` (Os Requisitos):** Array de Tags. A habilidade recusa ativar se tentar ser invocada por um Player que não detenha todas estas tags listadas (Pode exigir *state.combat.advantage* ou algo nativo como *state.in_air*).
+- **`activation_blocked_tags` (O CC/Block):** Array de Tags. A habilidade recusa ativar se o usuário tentar usá-la enquanto estiver sofrendo de qualquer uma destas Tags (As famosas janelas de Stun, Silence e Root - *state.debuff.stun*).
+
+**Outras Estruturas Core:**
 
 - **Fluxo de Vida:** `can_activate` -> `activate_ability` -> `end_ability`.
-- **Tags:** Gerencia tags de habilidade, cancelamento e bloqueio.
-- **Propriedades:**
-  - `ability_tag`: Tag única identificadora.
-  - `activation_required_tags`: Tags necessárias para ativação.
-  - `activation_blocked_tags`: Tags que bloqueiam ativação.
-  - `activation_owned_tags`: Tags concedidas durante ativação.
-  - `cost_effect`: Efeito aplicado como custo.
-  - `cooldown_effect`: Efeito aplicado como cooldown.
+- **Encapsulamento Audiovisual:** Contém uma lista de `cues` executados automaticamente.
+- **Restritores Físicos e Lógicos (Resources Conexos):**
+  - `cost_effect`: Efeito aplicado como custo na barra de mana/stamina no momento de tentar a Ativação.
+  - `cooldown_effect`: Efeito aplicado no usuário ao tentar engatilhar o gatilho pós-uso.
 - **Métodos Virtuais:** `_can_activate_ability()`, `_activate_ability()`, `_on_end_ability()`.
 
 ### 2.6 AbilitySystemEffect (Resource)
 
-Regras para alterar atributos ou tags.
+Define as regras e o "pacote" de alteração de um personagem:
 
-- **Duração:** Instantâneo, Duração ou Infinito.
+- **Lógica de Origem:** Registrado no `AbilitySystemAbilityContainer` de quem **causa** o efeito. O Sniper tem o "efeito tiro" em seu catálogo; o inimigo apenas recebe o impacto do cálculo via código.
+- **Variedade:**
+  - **Dano Único** (Sniper) vs **Dano Contínuo/DOT** (Veneno, Área de Fogo).
+  - **Buffs de Status** (Força, Escudos de Proteção).
+- **Políticas de duração:**
+  - `INSTANT` — Ex: Um tiro de sniper (dano único registrado na arma/personagem).
+  - `DURATION` — Ex: Uma flechada envenenada ou um escudo protetor temporário.
+  - `INFINITE` — Ex: Um encantamento de força ou aura permanente.
 - **Modificadores:** Operações de `ADD`, `MULTIPLY`, `DIVIDE` e `OVERRIDE`.
 - **Costs:** Custos de ativação (Mana, Stamina, etc.).
 - **Cooldowns:** Tempo de recarga entre usos.
@@ -107,20 +128,42 @@ Regras para alterar atributos ou tags.
 
 ### 2.7 AbilitySystemCue (Resource)
 
-Sistema de feedback visual e sonoro para eventos de gameplay.
+Sistema de ativação e sincronização de eventos (animações, sons) disparado por efeitos ou habilidades.
 
+- **Função:** Sistema para ativação e sincronização de eventos de gameplay.
+- **Dependência:** Requer classes especializadas (CueAnimation, CueAudio, CueParticles [em planejamento]) para funcionalidade real.
 - **Trigger:** Executado quando efeitos são aplicados/removidos ou habilidades ativadas.
 - **Tipos:** `ON_EXECUTE` (instantâneo), `ON_ACTIVE` (enquanto ativo), `ON_REMOVE` (ao remover).
-- **Uso:** Spawn de VFX, SFX, screen shake, números flutuantes.
-- **Métodos Virtuais:** `_on_execute()`, `_on_active()`, `_on_remove()`.
+- **Arquitetura:** Fornece estrutura base mas não implementa funcionalidade específica.
+- **Métodos Virtuais:** `_on_execute()`, `_on_active()`, `_on_remove()` para customização via script.
+- **Uso:** Herança para criar cues especializados ou customização via GDScript/C#.
+
+#### 2.7.1 AbilitySystemCueAnimation (Resource)
+
+Especializado em executar animações.
+
+- **Propriedade:** `animation_name` (StringName) - Nome da animação.
+- **Propriedade:** `node_name` (StringName) - Nome do nó alvo registrado no ASC (opcional).
+- **Execução:** O sistema chama internamente `asc->play_montage(animation_name, target)`. Se `node_name` estiver vazio, usa o `AnimationPlayer` padrão do ASC.
+
+#### 2.7.2 AbilitySystemCueAudio (Resource)
+
+Especializado em reproduzir áudios.
+
+- **Propriedade:** `audio_stream` (Ref<AudioStream>) - Recurso de áudio.
+- **Propriedade:** `node_name` (StringName) - Nome do nó alvo registrado no ASC (opcional).
+- **Execução:** O sistema chama internamente `asc->play_sound(audio_stream, target)`. Se `node_name` estiver vazio, usa o `AudioStreamPlayer` padrão do ASC.
+
+**Nota de Fluxo:** Play Montage e Play Sound são a "ponta final" da execução de feedback do sistema. Embora públicos no ASC, seu uso via Cues (Data-Driven) é preferível para manter a lógica desacoplada do código de animação/som.
 
 ### 2.8 AbilitySystemTag
 
-Identificador único para estados de gameplay [RefCounted].
+Identificador único para estados do jogo [RefCounted].
 
 - **Hierárquico:** Ex: `state.debuff.poison`, `ability.fireball`.
-- **Otimizado:** `StringName` para performance.
-- **Global:** Registrado no singleton `AbilitySystem`.
+- **Otimizado:** `StringName` puro com armazenamento direto em `HashSet` para máxima performance.
+- **Global:** Gerenciado centralmente pelo singleton `AbilitySystem`.
+- **Strict-Mode:** No editor, seletores garantem que apenas tags registradas no `AbilitySystemTagsEditor` sejam utilizadas.
 
 ### 2.9 AbilitySystemTagContainer
 
@@ -181,24 +224,41 @@ Contexto de execução de uma `AbilitySystemCue`.
 - **Contexto:** Source ASC, target ASC, dados extras.
 - **Uso:** Passado para callbacks da Cue com contexto completo.
 
-## 4. Gameplay Tags
+## 4. Ability System Tags
 
-As **GameplayTags** são `StringName` hierárquicos otimizados.
+As **Tags do Ability System** são `StringName` hierárquicos otimizados.
 
 - **Exemplo:** `state.buff.speed`, `state.debuff.stun`.
 - **Registro:** Gerenciados pelo singleton `AbilitySystem`.
 - **Matching:** Suporte a matching hierárquico via `AbilitySystem.tag_matches()`.
-- **Performance:** Otimizados para consultas de alta frequência.
+- **Performance:** Otimizados para consultas de alta frequência sem overhead de classes.
+- **Workflow:** Registre as tags no Project Settings e use os seletores automáticos nos Resources.
 
 ## 5. Ferramentas do Editor
 
 ### 5.1 AbilitySystemEditorPlugin
 
-Integração nativa com o **Inspector** da Godot para facilitar o desenvolvimento:
+Integração nativa com o **Inspector** da Godot para automatização de UI:
 
-- **Inspector Customizado:** Seletores especializados de Tags e Atributos.
-- **Project Settings:** As Gameplay Tags globais são gerenciadas e registradas via singleton central [AbilitySystem].
-- **Validação Visual:** Feedback imediato de configurações inválidas.
+- **Seletores Unificados:** Qualquer propriedade terminada em `_tag` (StringName) ou `_tags` (Array de StringName) recebe automaticamente um seletor dropdown.
+- **Sincronização em Real-time:** O seletor se conecta ao sinal `tags_changed` do `AbilitySystem`, garantindo que novos registros no Tag Editor apareçam instantaneamente no Inspetor sem reiniciar a engine.
+- **Validação Visual:** Tags selecionadas que não existem mais no registro global são marcadas com um ícone de erro e aviso "(Inexistente)".
+
+### 5.2 AbilitySystemTagsEditor (Tag Registry)
+
+Localizado em **Project Settings > Ability System Tags**, é a central de verdade do sistema:
+
+- **Gestão Centralizada:** Adicione ou remova tags globais que serão usadas em todo o projeto.
+- **Persistência Segura:** As tags são salvas nas configurações do projeto (`project.godot`), garantindo que a equipe de design tenha o mesmo catálogo validado.
+- **Prevenção de Erros:** Evita o uso de "Magic Strings" espalhadas pelo projeto, forçando um workflow baseado em registro prévio.
+
+### 5.3 AbilitySystemTagsSelector (Integração de Propriedades Array)
+
+Componente de UI customizado puro C++ (herdeiro de `EditorProperty`) que intercede no inspetor da Engine substituindo o editor padrão de Arrays para propriedades terminadas em `_tags`.
+
+- **Seleção Multi-Tags Dinâmica:** Oferece um botão que abre um dialog flutuante. O layout conta com uma `Tree` listando todas as tags cadastradas e checkboxes nativos, suportando múltiplas inserções de uma só vez.
+- **Filtro em Tempo Real:** Possui campo de pesquisa dinâmico acoplado no topo da lista que mascara e filtra as tags (ex: ao digitar "poison", todas as sub-tags associadas surgem para marcação rápida).
+- **Sumário Visual Constante:** Mantém sua interface limpa quando colapsada, exibindo diretamente a estatística das marcações (ex: "4 Tags Selected" ou "(Empty Tags)").
 
 ## 6. Sinais e Eventos
 
@@ -211,7 +271,7 @@ Integração nativa com o **Inspector** da Godot para facilitar o desenvolviment
 - **`tag_changed(name, present)`**: Adição/remoção de tag.
 - **`effect_applied(spec)`**: Efeito aplicado.
 - **`effect_removed(spec)`**: Efeito removido.
-- **`gameplay_event_received(tag, data)`**: Evento genérico.
+- **`tag_event_received(tag, data)`**: Evento genérico disparado por Cues ou manualmente.
 - **`cooldown_started(tag, duration)`**: Início de cooldown.
 - **`cooldown_ended(tag)`**: Fim de cooldown.
 
@@ -219,7 +279,7 @@ Integração nativa com o **Inspector** da Godot para facilitar o desenvolviment
 
 - **`attribute_changed(attribute_name, old_value, new_value)`**: Disparado em qualquer mudança.
 - **`attribute_pre_change(attribute_name, old_value, new_value)`**: Antes da mudança (pode ser cancelado).
-- **Uso:** Atualizar UI (health bars), triggers de gameplay (morte quando HP = 0).
+- **Uso:** Atualizar UI (health bars), triggers de lógica (morte quando HP = 0).
 
 ## 7. Interface de Script (GDScript)
 
@@ -227,28 +287,16 @@ Integração nativa com o **Inspector** da Godot para facilitar o desenvolviment
 
 ```gdscript
 func setup_character():
+    # Cache manual via @onready
+    asc.set_animation_player($AnimationPlayer)
+    asc.set_audio_player($AudioStreamPlayer)
+
+    # Registrar nós específicos para Cues
+    asc.register_node(&"weapon_vfx", $Weapon/Particles)
+
     # Criar atributo com limites
     var health_attr = AbilitySystemAttribute.new()
-    health_attr.name = "Health"
-    health_attr.min_value = 0.0
-    health_attr.max_value = 1000.0
-
-    # Adicionar ao AttributeSet
-    var attr_set = AbilitySystemAttributeSet.new()
-    attr_set.add_attribute_definition(health_attr)
-
-    # Valores são automaticamente validados
-    attr_set.set_attribute_base_value("Health", 150.0)  # OK
-    # attr_set.set_attribute_base_value("Health", 1500.0)  # Error!
-
-func apply_damage(target: AbilitySystemComponent, amount: float):
-    # Efeitos baseados em dados (.tres) para facilidade de design
-    var spec = asc.make_outgoing_spec(load("res://effects/damage_fire.tres"))
-
-    # Magnitudes dinâmicas (MMC) com validação automática
-    spec.set_magnitude("base_damage", amount * asc.get_attribute_base_value("Health"))
-
-    asc.apply_gameplay_effect_spec_to_target(spec, target)
+    ...
 ```
 
 ### Exemplo: Habilidades Assíncronas (Montagens e Eventos)
@@ -258,10 +306,10 @@ func _activate_ability():
     # Cache interno do AbilitySystemComponent lida com a busca de nós irmãos (AnimationPlayer)
     asc.play_montage("attack_swing")
 
-    # O uso de await com 'wait_for_gameplay_event' permite lógica linear AAA
-    var impact = await asc.wait_for_gameplay_event("event.combat.impact").completed
+    # O uso de await permite lógica linear AAA (ex: aguardar animação ou sinal)
+    await asc.tag_event_received # Exemplo genérico, o sistema de Tasks é o foco aqui
 
-    _apply_area_damage(impact.position)
+    _apply_area_damage()
     end_ability()
 ```
 
@@ -283,19 +331,35 @@ func _ready():
         print("Health limits: ", health_def.min_value, " - ", health_def.max_value)
 ```
 
+### Exemplo: Cues Especializados para Feedback Audiovisual
+
+```gdscript
+func setup_combat_cues():
+    # Cue de animação para ataque
+    var attack_anim = AbilitySystemCueAnimation.new()
+    attack_anim.cue_tag = &"combat.attack"
+    attack_anim.animation_name = "sword_slash"
+    attack_anim.event_type = AbilitySystemCue.ON_EXECUTE
+    asc.register_cue_resource(attack_anim)
+
+    # Cue de áudio para impacto
+    var impact_sound = AbilitySystemCueAudio.new()
+    impact_sound.cue_tag = &"combat.impact"
+    impact_sound.audio_stream = load("res://sounds/sword_hit.wav")
+    impact_sound.event_type = AbilitySystemCue.ON_EXECUTE
+    asc.register_cue_resource(impact_sound)
+
+
+func activate_fireball():
+    # Dispara habilidade que automaticamente executa os cues
+    asc.try_activate_ability_by_tag(&"spell.fireball")
+    # Resultado: Toca animação + som + partículas automaticamente
+```
+
 ## 8. Sincronização e Persistência
 
 Integrado nativamente com o `SaveServer` para persistência automática de atributos e estados de habilidades.
 
-## 9. Integração Multiplayer
-
-O Ability System foi projetado com suporte nativo para multiplayer autoritativo:
-
-- **Validação Servidor:** Todas as ativações são validadas no servidor.
-- **Predição Client:** Predição local de habilidades para responsividade.
-- **Rollback:** Reversão de estados se rejeitado pelo servidor.
-- **Replicação:** Sincronização eficiente de estados entre clientes.
-
 ---
 
-_Este documento define a especificação técnica oficial do módulo GAS na Zyris Engine._
+*Este documento define a especificação técnica oficial do módulo Ability System na Zyris Engine.*

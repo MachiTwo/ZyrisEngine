@@ -1,4 +1,4 @@
-# Save Server - Sistema de Persistência de Dados
+# Persistent Core
 
 ## Visão Geral
 
@@ -36,6 +36,10 @@ SaveServer.load_snapshot(get_tree().current_scene, "slot_1", _on_load_complete, 
 
 # Salvamento incremental (amend)
 SaveServer.amend_save(get_tree().current_scene, "slot_1")
+
+# Operações de baixo nível
+SaveServer.save_slot("inventory", inv_data)
+Dictionary data = SaveServer.load_slot("inventory")
 ```
 
 ### 3. Dynamic Spawning & Cleanup
