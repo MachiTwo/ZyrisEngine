@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  ability_system_target_data.cpp                                        */
+/*  test_ability_system.h                                                 */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,20 +28,39 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#include "ability_system_target_data.h"
+#pragma once
 
-void AbilitySystemTargetData::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("set_target_node", "node"), &AbilitySystemTargetData::set_target_node);
-	ClassDB::bind_method(D_METHOD("get_target_node"), &AbilitySystemTargetData::get_target_node);
-	ClassDB::bind_method(D_METHOD("set_hit_position", "position"), &AbilitySystemTargetData::set_hit_position);
-	ClassDB::bind_method(D_METHOD("get_hit_position"), &AbilitySystemTargetData::get_hit_position);
+#ifdef ABILITY_SYSTEM_MODULE
+#include "modules/ability_system/core/ability_system.h"
+#include "modules/ability_system/tests/doctest.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/core/ability_system.h"
+#include "src/tests/doctest.h"
+#endif
 
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "target_node", PROPERTY_HINT_RESOURCE_TYPE, "Node"), "set_target_node", "get_target_node");
-	ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "hit_position"), "set_hit_position", "get_hit_position");
-}
+using namespace godot;
 
-AbilitySystemTargetData::AbilitySystemTargetData() {
-}
+TEST_CASE("AbilitySystem Tag Matching") {
+	SUBCASE("Exact matches") {
+		CHECK(AbilitySystem::tag_matches("State.Dead", "State.Dead", true) == true);
+		CHECK(AbilitySystem::tag_matches("State.Dead", "State.Alive", true) == false);
+		CHECK(AbilitySystem::tag_matches("State", "State", true) == true);
+	}
 
-AbilitySystemTargetData::~AbilitySystemTargetData() {
+	SUBCASE("Hierarchical matches") {
+		CHECK(AbilitySystem::tag_matches("State.Dead", "State", false) == true);
+		CHECK(AbilitySystem::tag_matches("State.Dead.Bleeding", "State", false) == true);
+		CHECK(AbilitySystem::tag_matches("State.Dead.Bleeding", "State.Dead", false) == true);
+
+		CHECK(AbilitySystem::tag_matches("State", "State.Dead", false) == false);
+		CHECK(AbilitySystem::tag_matches("States", "State", false) == false);
+		CHECK(AbilitySystem::tag_matches("State.Dead", "Sta", false) == false);
+	}
+
+	SUBCASE("Partial string matches without dot separator") {
+		// "Apple" should not match "App"
+		CHECK(AbilitySystem::tag_matches("Apple", "App", false) == false);
+		// "App.Apple" should match "App"
+		CHECK(AbilitySystem::tag_matches("App.Apple", "App", false) == true);
+	}
 }

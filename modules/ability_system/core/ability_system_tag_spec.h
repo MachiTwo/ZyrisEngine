@@ -30,9 +30,17 @@
 
 #pragma once
 
+#ifdef ABILITY_SYSTEM_MODULE
 #include "core/object/ref_counted.h"
-#include "core/templates/hash_set.h"
+#include "core/templates/hash_map.h"
 #include "core/variant/typed_array.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/classes/ref_counted.hpp>
+#include <godot_cpp/templates/hash_map.hpp>
+#include <godot_cpp/variant/typed_array.hpp>
+#endif
+
+namespace godot {
 
 class AbilitySystemTagSpec : public RefCounted {
 	GDCLASS(AbilitySystemTagSpec, RefCounted);
@@ -55,3 +63,5 @@ public:
 	AbilitySystemTagSpec();
 	~AbilitySystemTagSpec();
 };
+
+} // namespace godot

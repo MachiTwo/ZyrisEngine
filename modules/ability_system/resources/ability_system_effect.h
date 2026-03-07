@@ -30,19 +30,35 @@
 
 #pragma once
 
+#ifdef ABILITY_SYSTEM_MODULE
+#include "modules/ability_system/resources/ability_system_cue.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/resources/ability_system_cue.h"
+#endif
+
+#ifdef ABILITY_SYSTEM_MODULE
 #include "core/io/resource.h"
 #include "core/templates/vector.h"
 #include "core/variant/typed_array.h"
-#include "modules/ability_system/resources/ability_system_cue.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/classes/resource.hpp>
+#include <godot_cpp/templates/vector.hpp>
+#include <godot_cpp/variant/typed_array.hpp>
+#endif
+
+namespace godot {
+
+class AbilitySystemCue;
+class AbilitySystemEffectSpec;
 
 class AbilitySystemEffect : public Resource {
 	GDCLASS(AbilitySystemEffect, Resource);
 
 public:
 	enum DurationPolicy {
-		INSTANT,
-		DURATION,
-		INFINITE
+		POLICY_INSTANT,
+		POLICY_DURATION,
+		POLICY_INFINITE
 	};
 
 	enum StackingPolicy {
@@ -53,15 +69,15 @@ public:
 	};
 
 	enum ModifierOp {
-		ADD,
-		MULTIPLY,
-		DIVIDE,
-		OVERRIDE
+		OP_ADD,
+		OP_MULTIPLY,
+		OP_DIVIDE,
+		OP_OVERRIDE
 	};
 
 	struct Modifier {
 		StringName attribute;
-		ModifierOp operation = ADD;
+		ModifierOp operation = OP_ADD;
 		float magnitude = 0.0f;
 	};
 
@@ -74,8 +90,9 @@ protected:
 private:
 	String effect_name;
 	StringName effect_tag;
-	DurationPolicy duration_policy = INSTANT;
+	DurationPolicy duration_policy = POLICY_INSTANT;
 	float duration_magnitude = 0.0f;
+	bool use_custom_duration = false;
 
 	StackingPolicy stacking_policy = STACK_NEW_INSTANCE;
 
@@ -86,9 +103,13 @@ private:
 		StringName attribute;
 		ModifierOp operation;
 		float magnitude;
-		Ref<class AbilitySystemMagnitudeCalculation> custom_magnitude;
+		bool use_custom_magnitude = false;
 	};
 	Vector<ModifierData> modifiers;
+
+	// Activation requirements
+	TypedArray<StringName> activation_required_tags;
+	TypedArray<StringName> activation_blocked_tags;
 
 	TypedArray<StringName> granted_tags;
 	TypedArray<StringName> blocked_tags;
@@ -108,6 +129,9 @@ public:
 	void set_duration_magnitude(float p_mag) { duration_magnitude = p_mag; }
 	float get_duration_magnitude() const { return duration_magnitude; }
 
+	void set_use_custom_duration(bool p_use) { use_custom_duration = p_use; }
+	bool get_use_custom_duration() const { return use_custom_duration; }
+
 	void set_stacking_policy(StackingPolicy p_policy) { stacking_policy = p_policy; }
 	StackingPolicy get_stacking_policy() const { return stacking_policy; }
 
@@ -117,12 +141,12 @@ public:
 	void set_execute_periodic_tick_on_application(bool p_exec) { execute_periodic_tick_on_application = p_exec; }
 	bool get_execute_periodic_tick_on_application() const { return execute_periodic_tick_on_application; }
 
-	void add_modifier(const StringName &p_attr, ModifierOp p_op, float p_mag, Ref<class AbilitySystemMagnitudeCalculation> p_custom_mag = nullptr);
+	void add_modifier(const StringName &p_attr, ModifierOp p_op, float p_mag, bool p_custom = false);
 	int get_modifier_count() const { return modifiers.size(); }
 	StringName get_modifier_attribute(int p_idx) const;
 	ModifierOp get_modifier_operation(int p_idx) const;
 	float get_modifier_magnitude(int p_idx) const;
-	Ref<class AbilitySystemMagnitudeCalculation> get_modifier_custom_magnitude(int p_idx) const;
+	bool is_modifier_custom(int p_idx) const;
 
 	void set_granted_tags(const TypedArray<StringName> &p_tags);
 	TypedArray<StringName> get_granted_tags() const { return granted_tags; }
@@ -139,10 +163,18 @@ public:
 	void set_modifiers_count(int p_count);
 	int get_modifiers_count() const;
 
+	void set_activation_required_tags(const TypedArray<StringName> &p_tags);
+	TypedArray<StringName> get_activation_required_tags() const { return activation_required_tags; }
+
+	void set_activation_blocked_tags(const TypedArray<StringName> &p_tags);
+	TypedArray<StringName> get_activation_blocked_tags() const { return activation_blocked_tags; }
+
 	AbilitySystemEffect();
 	~AbilitySystemEffect();
 };
 
-VARIANT_ENUM_CAST(AbilitySystemEffect::DurationPolicy);
-VARIANT_ENUM_CAST(AbilitySystemEffect::StackingPolicy);
-VARIANT_ENUM_CAST(AbilitySystemEffect::ModifierOp);
+} // namespace godot
+
+VARIANT_ENUM_CAST(godot::AbilitySystemEffect::DurationPolicy);
+VARIANT_ENUM_CAST(godot::AbilitySystemEffect::StackingPolicy);
+VARIANT_ENUM_CAST(godot::AbilitySystemEffect::ModifierOp);

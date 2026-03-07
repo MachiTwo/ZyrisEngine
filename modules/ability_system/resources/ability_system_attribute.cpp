@@ -28,8 +28,15 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#ifdef ABILITY_SYSTEM_MODULE
 #include "modules/ability_system/resources/ability_system_attribute.h"
 #include "modules/ability_system/core/ability_system.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/core/ability_system.h"
+#include "src/resources/ability_system_attribute.h"
+#endif
+
+namespace godot {
 
 void AbilitySystemAttribute::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_attribute_name", "name"), &AbilitySystemAttribute::set_attribute_name);
@@ -61,8 +68,10 @@ void AbilitySystemAttribute::set_attribute_name(const String &p_name) {
 	if (as) {
 		if (!attribute_name.is_empty()) {
 			as->unregister_resource_name(attribute_name);
+			as->unregister_tag(attribute_name);
 		}
 		as->register_resource_name(p_name, get_instance_id());
+		as->register_tag(p_name, AbilitySystem::TAG_TYPE_NAME, get_instance_id());
 	}
 	attribute_name = p_name;
 }
@@ -124,3 +133,5 @@ AbilitySystemAttribute::AbilitySystemAttribute() {
 
 AbilitySystemAttribute::~AbilitySystemAttribute() {
 }
+
+} // namespace godot

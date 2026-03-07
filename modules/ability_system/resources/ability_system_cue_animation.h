@@ -30,7 +30,13 @@
 
 #pragma once
 
+#ifdef ABILITY_SYSTEM_MODULE
 #include "modules/ability_system/resources/ability_system_cue.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/resources/ability_system_cue.h"
+#endif
+
+namespace godot {
 
 class AbilitySystemCueAnimation : public AbilitySystemCue {
 	GDCLASS(AbilitySystemCueAnimation, AbilitySystemCue);
@@ -51,3 +57,5 @@ protected:
 	AbilitySystemCueAnimation();
 	~AbilitySystemCueAnimation();
 };
+
+} // namespace godot

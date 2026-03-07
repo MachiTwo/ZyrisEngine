@@ -30,7 +30,25 @@
 
 #pragma once
 
-#include "modules/register_module_types.h"
+#ifndef ABILITY_SYSTEM_REGISTER_TYPES_H
+#define ABILITY_SYSTEM_REGISTER_TYPES_H
 
+#ifdef ABILITY_SYSTEM_MODULE
+#include "core/object/class_db.h"
+#include "modules/register_module_types.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/godot.hpp>
+#endif
+
+#ifdef ABILITY_SYSTEM_MODULE
 void initialize_ability_system_module(ModuleInitializationLevel p_level);
 void uninitialize_ability_system_module(ModuleInitializationLevel p_level);
+#else
+namespace godot {
+void initialize_ability_system_module(ModuleInitializationLevel p_level);
+void uninitialize_ability_system_module(ModuleInitializationLevel p_level);
+} // namespace godot
+#endif
+
+#endif // ABILITY_SYSTEM_REGISTER_TYPES_H

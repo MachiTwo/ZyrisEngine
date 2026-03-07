@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AbilitySystemInspectorPlugin" inherits="EditorInspectorPlugin" version="4.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Editor integration for the Ability System.
+	</brief_description>
+	<description>
+		[AbilitySystemInspectorPlugin] provides custom inspectors and UI for managing Tags and attributes within the Godot Editor.
+	</description>
+	<tutorials>
+	</tutorials>
+</class>

@@ -30,11 +30,32 @@
 
 #pragma once
 
-#include "core/io/resource.h"
+#ifdef ABILITY_SYSTEM_MODULE
 #include "modules/ability_system/resources/ability_system_ability.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/resources/ability_system_ability.h"
+#endif
 
-class AbilitySystemAbilitySpec : public Resource {
-	GDCLASS(AbilitySystemAbilitySpec, Resource);
+#ifdef ABILITY_SYSTEM_MODULE
+#include "core/object/ref_counted.h"
+#include "core/templates/vector.h"
+#include "core/variant/typed_array.h"
+#include "core/variant/variant.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/classes/ref_counted.hpp>
+#include <godot_cpp/templates/vector.hpp>
+#include <godot_cpp/variant/typed_array.hpp>
+#include <godot_cpp/variant/variant.hpp>
+#endif
+
+namespace godot {
+
+class AbilitySystemComponent;
+class AbilitySystemEffectSpec;
+
+class AbilitySystemAbilitySpec : public RefCounted {
+	GDCLASS(AbilitySystemAbilitySpec, RefCounted);
 
 protected:
 	static void _bind_methods();
@@ -43,6 +64,8 @@ private:
 	Ref<AbilitySystemAbility> ability;
 	bool is_active = false;
 	int level = 1;
+	ObjectID owner_id;
+	Vector<Ref<AbilitySystemEffectSpec>> active_effects;
 
 public:
 	void init(Ref<AbilitySystemAbility> p_ability, int p_level = 1);
@@ -54,6 +77,24 @@ public:
 	int get_level() const { return level; }
 	void set_level(int p_level) { level = p_level; }
 
+	void set_owner(AbilitySystemComponent *p_owner);
+	AbilitySystemComponent *get_owner() const;
+
+	// Runtime query methods
+	float get_cooldown_duration() const;
+	float get_cooldown_remaining() const;
+	bool is_on_cooldown() const;
+
+	float get_cost_amount(const StringName &p_attribute) const;
+
+	// Effect tracking for cascading cancellation
+	void add_active_effect(Ref<AbilitySystemEffectSpec> p_spec);
+	void remove_active_effect(Ref<AbilitySystemEffectSpec> p_spec);
+	Vector<Ref<AbilitySystemEffectSpec>> get_active_effects() const { return active_effects; }
+	void clear_active_effects();
+
 	AbilitySystemAbilitySpec();
 	~AbilitySystemAbilitySpec();
 };
+
+} // namespace godot

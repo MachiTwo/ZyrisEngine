@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  ability_system_tags_editor.h                                          */
+/*  ability_system_editor_property.h                                      */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -30,30 +30,105 @@
 
 #pragma once
 
-#include "scene/gui/box_container.h"
+#ifdef ABILITY_SYSTEM_MODULE
+#include "scene/gui/dialogs.h"
+#else
+#include <godot_cpp/classes/accept_dialog.hpp>
+#endif
+#ifdef ABILITY_SYSTEM_MODULE
 #include "scene/gui/button.h"
+#else
+#include <godot_cpp/classes/button.hpp>
+#endif
+#ifdef ABILITY_SYSTEM_MODULE
+#include "editor/inspector/editor_inspector.h"
+#else
+#include <godot_cpp/classes/editor_property.hpp>
+#endif
+#ifdef ABILITY_SYSTEM_MODULE
+#include "scene/gui/label.h"
 #include "scene/gui/line_edit.h"
+#include "scene/gui/option_button.h"
 #include "scene/gui/tree.h"
+#else
+#include <godot_cpp/classes/label.hpp>
+#include <godot_cpp/classes/line_edit.hpp>
+#include <godot_cpp/classes/option_button.hpp>
+#include <godot_cpp/classes/tree.hpp>
+#endif
 
-class AbilitySystemTagsEditor : public VBoxContainer {
-	GDCLASS(AbilitySystemTagsEditor, VBoxContainer);
+namespace godot {
 
-	LineEdit *add_tag_edit = nullptr;
-	Button *add_tag_button = nullptr;
+class AbilitySystemEditorPropertySelector : public EditorProperty {
+	GDCLASS(AbilitySystemEditorPropertySelector, EditorProperty);
+
+	Button *edit_button = nullptr;
+	AcceptDialog *dialog = nullptr;
 	LineEdit *search_edit = nullptr;
 	Tree *tags_tree = nullptr;
+	bool updating = false;
 
-	void _add_tag();
-	void _add_tag_text(const String &p_tag);
-	void _on_search_changed(const String &p_text);
-	void _tag_removed(Object *p_item, int p_column, int p_id, MouseButton p_button);
+	void _edit_pressed();
+	void _update_tree();
+	void _tag_toggled();
+	void _update_button_text();
+	void _search_changed(const String &p_text);
 
 protected:
-	void _notification(int p_what);
 	static void _bind_methods();
 
 public:
-	void update_tags();
+#ifdef ABILITY_SYSTEM_MODULE
+	virtual void update_property() override;
+#else
+	virtual void _update_property() override;
+#endif
 
-	AbilitySystemTagsEditor();
+	AbilitySystemEditorPropertySelector();
 };
+
+class AbilitySystemEditorPropertyName : public EditorProperty {
+	GDCLASS(AbilitySystemEditorPropertyName, EditorProperty);
+
+	LineEdit *edit = nullptr;
+	Label *warning_label = nullptr;
+	bool updating = false;
+
+	void _text_changed(const String &p_text);
+	void _check_uniqueness(const String &p_text);
+
+protected:
+	static void _bind_methods();
+
+public:
+#ifdef ABILITY_SYSTEM_MODULE
+	virtual void update_property() override;
+#else
+	virtual void _update_property() override;
+#endif
+
+	AbilitySystemEditorPropertyName();
+};
+
+class AbilitySystemEditorPropertyTagSelector : public EditorProperty {
+	GDCLASS(AbilitySystemEditorPropertyTagSelector, EditorProperty);
+
+	OptionButton *options = nullptr;
+	bool updating = false;
+
+	void _option_selected(int p_index);
+
+protected:
+	static void _bind_methods();
+
+public:
+#ifdef ABILITY_SYSTEM_MODULE
+	virtual void update_property() override;
+#else
+	virtual void _update_property() override;
+#endif
+
+	AbilitySystemEditorPropertyTagSelector();
+};
+
+} // namespace godot

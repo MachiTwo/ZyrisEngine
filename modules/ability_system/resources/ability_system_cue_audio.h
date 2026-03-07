@@ -30,9 +30,19 @@
 
 #pragma once
 
+#ifdef ABILITY_SYSTEM_MODULE
 #include "modules/ability_system/resources/ability_system_cue.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/resources/ability_system_cue.h"
+#endif
 
-class AudioStream;
+#ifdef ABILITY_SYSTEM_MODULE
+#include "servers/audio/audio_stream.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/classes/audio_stream.hpp>
+#endif
+
+namespace godot {
 
 class AbilitySystemCueAudio : public AbilitySystemCue {
 	GDCLASS(AbilitySystemCueAudio, AbilitySystemCue);
@@ -53,3 +63,5 @@ protected:
 	AbilitySystemCueAudio();
 	~AbilitySystemCueAudio();
 };
+
+} // namespace godot

@@ -1,33 +1,37 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="AbilitySystemComponent" inherits="Node" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
-		Core component for managing abilities, attributes, and effects on an actor.
+		Core component for managing abilities, attributes, and effects.
 	</brief_description>
 	<description>
-		The [AbilitySystemComponent] (ASC) is the central hub for all logic on an actor. It manages abilities, attributes, and effects.
-		[b]CRITICAL REQUIREMENT:[/b] This component [b]MUST[/b] be a child of [CharacterBody2D] or [CharacterBody3D]. The component will show an error and disable itself if placed under any other node type. The CharacterBody parent is automatically detected and cached.
-		[b]Example Usage:[/b]
-		[codeblock]
-		func _ready():
-			asc.try_activate_ability(fireball_resource)
-		[/codeblock]
-		[b]Node References:[/b] The ASC does [b]NOT[/b] cache sibling nodes automatically. Developers should use [code]@onready[/code] variables in their Actor scripts to cache nodes like [AnimationPlayer] and pass them directly to the execution methods ([method play_montage], [method play_sound], etc.).
+		The [AbilitySystemComponent] (ASC) is the central hub for an actor's logic. It handles the lifecycle of abilities, applies effects, and tracks attribute values. Must be a child of [CharacterBody2D] or [CharacterBody3D].
 	</description>
 	<tutorials>
 	</tutorials>
 	<methods>
+		<method name="_on_calculate_custom_magnitude" qualifiers="virtual">
+			<return type="float" />
+			<param index="0" name="effect_spec" type="AbilitySystemEffectSpec" />
+			<param index="1" name="index" type="int" />
+			<description>
+				Virtual method for custom calculations.
+				Index -1: Effect Duration.
+				Index -2: Native Ability Cooldown.
+				Index -3 and below: Native Ability Costs.
+			</description>
+		</method>
 		<method name="add_attribute_set">
 			<return type="void" />
 			<param index="0" name="set" type="AbilitySystemAttributeSet" />
 			<description>
-				Adds an attribute set to this component. This allows the component to track and manipulate the attributes defined in the set.
+				Adds a unique instance of the attribute set to this component.
 			</description>
 		</method>
 		<method name="add_tag">
 			<return type="void" />
 			<param index="0" name="tag" type="StringName" />
 			<description>
-				Adds a tag to this actor. This can be used to trigger logic or modify behavior based on the presence of the tag.
+				Adds a tag to the actor.
 			</description>
 		</method>
 		<method name="apply_ability_container">
@@ -35,14 +39,32 @@
 			<param index="0" name="container" type="AbilitySystemAbilityContainer" />
 			<param index="1" name="level" type="int" default="1" />
 			<description>
-				Initializes the component using an [AbilitySystemAbilityContainer]. This process registers the container's [AbilitySystemAttributeSet], sets initial attribute values, grants pre-unlocked abilities, and applies effects and tags.
+				Initializes the component with an archetype blueprint.
+			</description>
+		</method>
+		<method name="apply_effect_by_resource">
+			<return type="void" />
+			<param index="0" name="effect" type="AbilitySystemEffect" />
+			<param index="1" name="level" type="float" />
+			<param index="2" name="target_node" type="Object" default="null" />
+			<description>
+				Directly applies an effect to this actor without checking activation requirements.
+			</description>
+		</method>
+		<method name="apply_effect_by_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<param index="1" name="level" type="float" />
+			<param index="2" name="target_node" type="Object" default="null" />
+			<description>
+				Directly applies an effect from the container catalog to this actor by its tag, without checking activation requirements.
 			</description>
 		</method>
 		<method name="apply_effect_spec_to_self">
 			<return type="void" />
 			<param index="0" name="spec" type="AbilitySystemEffectSpec" />
 			<description>
-				Applies an effect specification to this actor. The spec contains the calculated magnitudes and duration logic.
+				Applies an effect instance to this actor.
 			</description>
 		</method>
 		<method name="apply_effect_spec_to_target">
@@ -50,81 +72,235 @@
 			<param index="0" name="spec" type="AbilitySystemEffectSpec" />
 			<param index="1" name="target" type="AbilitySystemComponent" />
 			<description>
-				Applies an effect specification instantiated from this actor's catalog to another target's [AbilitySystemComponent].
+				Applies an effect instance to another target component.
 			</description>
 		</method>
-		<method name="execute_cue">
+		<method name="calculate_modifier_magnitude" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="spec" type="AbilitySystemEffectSpec" />
+			<param index="1" name="modifier_index" type="int" />
+			<description>
+				Calculates the magnitude of a modifier within an effect spec.
+			</description>
+		</method>
+		<method name="can_activate_ability_by_resource">
+			<return type="bool" />
+			<param index="0" name="ability" type="AbilitySystemAbility" />
+			<description>
+				Returns true if the specified ability resource can be activated.
+			</description>
+		</method>
+		<method name="can_activate_ability_by_tag">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns true if an ability with the specified tag can be activated.
+			</description>
+		</method>
+		<method name="can_activate_cue_by_resource">
+			<return type="bool" />
+			<param index="0" name="cue" type="AbilitySystemCue" />
+			<description>
+				Checks if the specified cue resource can be activated.
+			</description>
+		</method>
+		<method name="can_activate_cue_by_tag">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Checks if a cue with the specified tag can be activated.
+			</description>
+		</method>
+		<method name="can_activate_effect_by_resource">
+			<return type="bool" />
+			<param index="0" name="effect" type="AbilitySystemEffect" />
+			<description>
+				Checks if the specified effect resource can be applied.
+			</description>
+		</method>
+		<method name="can_activate_effect_by_tag">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Checks if an effect with the specified tag can be applied.
+			</description>
+		</method>
+		<method name="cancel_ability_by_resource">
+			<return type="void" />
+			<param index="0" name="ability" type="AbilitySystemAbility" />
+			<description>
+				Cancels the execution of the specified ability resource.
+			</description>
+		</method>
+		<method name="cancel_ability_by_tag">
 			<return type="void" />
 			<param index="0" name="tag" type="StringName" />
-			<param index="1" name="data" type="Dictionary" default="{}" />
 			<description>
-				Triggers a cue associated with the given tag. Cues are used for visual and audio feedback.
+				Cancels all active abilities that match the specified tag.
+			</description>
+		</method>
+		<method name="cancel_all_abilities">
+			<return type="void" />
+			<description>
+				Forcefully cancels all currently active abilities.
+			</description>
+		</method>
+		<method name="cancel_cue_by_resource">
+			<return type="void" />
+			<param index="0" name="cue" type="AbilitySystemCue" />
+			<description>
+				Cancels the specified cue resource.
+			</description>
+		</method>
+		<method name="cancel_cue_by_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Cancels all active cues that match the specified tag.
+			</description>
+		</method>
+		<method name="cancel_effect_by_resource">
+			<return type="void" />
+			<param index="0" name="effect" type="AbilitySystemEffect" />
+			<description>
+				Cancels the specified effect resource.
+			</description>
+		</method>
+		<method name="cancel_effect_by_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Cancels all active effects that match the specified tag.
 			</description>
 		</method>
 		<method name="get_active_effects_debug" qualifiers="const">
 			<return type="AbilitySystemEffectSpec[]" />
 			<description>
-				Returns a list of all currently active effect specifications. Primarily used for debugging.
+				Returns a list of active effects for debugging.
 			</description>
 		</method>
-		<method name="get_animation_player" qualifiers="const">
+		<method name="get_animation_player">
 			<return type="Node" />
 			<description>
-				Returns the default animation node.
+				Returns the registered AnimationPlayer or AnimatedSprite node.
 			</description>
 		</method>
-		<method name="get_attribute_value" qualifiers="const">
+		<method name="get_attribute_base_value_by_resource" qualifiers="const">
 			<return type="float" />
-			<param index="0" name="attribute_name" type="StringName" />
+			<param index="0" name="attribute" type="AbilitySystemAttribute" />
 			<description>
-				Returns the current value of the specified attribute.
+				Returns the unmodified base value of the specified attribute resource.
 			</description>
 		</method>
-		<method name="get_audio_player" qualifiers="const">
+		<method name="get_attribute_base_value_by_tag" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns the unmodified base value of the attribute identified by the tag.
+			</description>
+		</method>
+		<method name="get_attribute_value_by_resource" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="attribute" type="AbilitySystemAttribute" />
+			<description>
+				Returns the current value of the specified attribute resource.
+			</description>
+		</method>
+		<method name="get_attribute_value_by_tag" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns the current value of the attribute identified by the tag.
+			</description>
+		</method>
+		<method name="get_audio_player">
 			<return type="Node" />
 			<description>
-				Returns the default audio node.
+				Returns the registered AudioStreamPlayer node.
+			</description>
+		</method>
+		<method name="get_cooldown_remaining" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="ability_tag" type="StringName" />
+			<description>
+				Returns the time remaining for a specific cooldown tag.
 			</description>
 		</method>
 		<method name="get_cue_resource" qualifiers="const">
 			<return type="AbilitySystemCue" />
 			<param index="0" name="tag" type="StringName" />
 			<description>
-				Returns the resource registered for the given cue tag.
+				Returns the cue resource associated with the specified tag.
 			</description>
 		</method>
 		<method name="get_granted_abilities_debug" qualifiers="const">
 			<return type="AbilitySystemAbilitySpec[]" />
 			<description>
-				Returns a list of all currently granted ability specifications. Primarily used for debugging.
+				Returns a list of granted abilities for debugging.
 			</description>
 		</method>
-		<method name="get_node_ptr" qualifiers="const">
+		<method name="get_node_ptr">
 			<return type="Node" />
-			<param index="0" name="name" type="StringName" />
+			<param index="0" name="name" type="Variant" />
 			<description>
-				Returns the node pointer registered under the given name, or [code]null[/code] if not found.
+				Returns a registered node by its alias.
 			</description>
 		</method>
 		<method name="get_owned_tags" qualifiers="const">
 			<return type="AbilitySystemTagSpec" />
 			<description>
-				Returns the container holding all tags currently owned by this actor.
+				Returns the tag specification object holding all tags currently owned by the actor.
 			</description>
 		</method>
-		<method name="give_ability">
+		<method name="give_ability_by_resource">
 			<return type="void" />
 			<param index="0" name="ability" type="AbilitySystemAbility" />
 			<param index="1" name="level" type="int" default="1" />
 			<description>
-				Grants a new ability to the actor.
+				Grants the specified ability resource to the actor.
+			</description>
+		</method>
+		<method name="give_ability_by_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<param index="1" name="level" type="int" default="1" />
+			<description>
+				Grants an ability from the container catalog by its tag.
+			</description>
+		</method>
+		<method name="has_active_effect_by_resource" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="effect" type="AbilitySystemEffect" />
+			<description>
+				Returns true if the specified effect resource is currently active.
+			</description>
+		</method>
+		<method name="has_active_effect_by_tag" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns true if an effect with the specified tag is currently active.
+			</description>
+		</method>
+		<method name="has_attribute_by_resource" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="attribute" type="AbilitySystemAttribute" />
+			<description>
+				Returns true if the component has the specified attribute resource.
+			</description>
+		</method>
+		<method name="has_attribute_by_tag" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns true if the component has an attribute with the specified tag.
 			</description>
 		</method>
 		<method name="has_tag" qualifiers="const">
 			<return type="bool" />
 			<param index="0" name="tag" type="StringName" />
 			<description>
-				Returns [code]true[/code] if the actor currently possesses the specified tag.
+				Checks for tag presence.
 			</description>
 		</method>
 		<method name="is_montage_playing" qualifiers="const">
@@ -132,16 +308,23 @@
 			<param index="0" name="name" type="StringName" />
 			<param index="1" name="target" type="Node" default="null" />
 			<description>
-				Returns [code]true[/code] if the specified montage (animation) is currently playing on the given [param target] node. If [param target] is [code]null[/code], it uses the default animation player set via [method set_animation_player]. Supports [AnimationPlayer], [AnimatedSprite2D], and [AnimatedSprite3D].
+				Returns true if a montage (animation) is currently playing on the target.
+			</description>
+		</method>
+		<method name="is_on_cooldown" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="ability_tag" type="StringName" />
+			<description>
+				Checks if a specific tag is on cooldown.
 			</description>
 		</method>
 		<method name="make_outgoing_spec">
 			<return type="AbilitySystemEffectSpec" />
 			<param index="0" name="effect" type="AbilitySystemEffect" />
-			<param index="1" name="level" type="float" default="1.0" />
+			<param index="1" name="level" type="float" />
+			<param index="2" name="target_node" type="Object" default="null" />
 			<description>
-				Creates a new effect specification from a resource.
-				[b]Blueprint Validation:[/b] Validates that the effect is formally registered in the [b]AbilitySystemAbilityContainer[/b] of this component. Outgoing effects (attacks, buffs, debuffs) must be part of the archetype contract to be instantiated.
+				Creates a validated effect instance.
 			</description>
 		</method>
 		<method name="play_montage">
@@ -149,7 +332,7 @@
 			<param index="0" name="name" type="StringName" />
 			<param index="1" name="target" type="Node" default="null" />
 			<description>
-				Plays a montage (animation) on the specified [param target] node. If [param target] is [code]null[/code], it uses the default animation player set via [method set_animation_player]. Supports [AnimationPlayer], [AnimatedSprite2D], and [AnimatedSprite3D].
+				Plays a montage (animation) on a specific target node.
 			</description>
 		</method>
 		<method name="play_sound">
@@ -157,14 +340,14 @@
 			<param index="0" name="sound" type="AudioStream" />
 			<param index="1" name="target" type="Node" default="null" />
 			<description>
-				Plays the specified [param sound] ([AudioStream]) on the [param target] node. If [param target] is [code]null[/code], it uses the default audio player set via [method set_audio_player]. Supports [AudioStreamPlayer], [AudioStreamPlayer2D], and [AudioStreamPlayer3D].
+				Plays a sound stream on a specific target node.
 			</description>
 		</method>
 		<method name="register_cue_resource">
 			<return type="void" />
 			<param index="0" name="cue" type="AbilitySystemCue" />
 			<description>
-				Registers a cue resource to be used for visual or audio effects when a specific tag is triggered.
+				Registers a cue resource for runtime lookup.
 			</description>
 		</method>
 		<method name="register_node">
@@ -172,105 +355,200 @@
 			<param index="0" name="name" type="StringName" />
 			<param index="1" name="node" type="Node" />
 			<description>
-				Registers a node with a unique name to be used by the Cue system. This allows Cues to target specific nodes (like a "weapon_vfx" marker) without needing hardcoded paths.
+				Registers a node with an alias for use by cues and effects.
 			</description>
 		</method>
 		<method name="register_task">
 			<return type="void" />
 			<param index="0" name="task" type="AbilitySystemTask" />
 			<description>
-				Registers an asynchronous task. Tasks are typically used within abilities to wait for events, delays, or animations.
+				Registers an active task to the component.
+			</description>
+		</method>
+		<method name="remove_ability_by_resource">
+			<return type="void" />
+			<param index="0" name="ability" type="AbilitySystemAbility" />
+			<description>
+				Removes the specified ability resource from the actor.
+			</description>
+		</method>
+		<method name="remove_ability_by_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Removes all abilities that match the specified tag.
 			</description>
 		</method>
 		<method name="remove_active_effect">
 			<return type="void" />
 			<param index="0" name="spec" type="AbilitySystemEffectSpec" />
 			<description>
-				Removes a specific active effect specification from the actor.
+				Forcefully removes an active effect instance.
 			</description>
 		</method>
-		<method name="remove_granted_ability">
+		<method name="remove_effect_by_resource">
+			<return type="void" />
+			<param index="0" name="effect" type="AbilitySystemEffect" />
+			<description>
+				Removes all active instances of the given effect resource.
+			</description>
+		</method>
+		<method name="remove_effect_by_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Removes all active effects that match the given tag.
+			</description>
+		</method>
+		<method name="remove_granted_ability_spec">
 			<return type="void" />
 			<param index="0" name="spec" type="AbilitySystemAbilitySpec" />
 			<description>
-				Removes a granted ability specification, effectively revoking the actor's ability to use it.
+				Removes a granted ability specification.
 			</description>
 		</method>
 		<method name="remove_tag">
 			<return type="void" />
 			<param index="0" name="tag" type="StringName" />
 			<description>
-				Removes a tag from the actor.
+				Removes a tag.
 			</description>
 		</method>
 		<method name="set_animation_player">
 			<return type="void" />
 			<param index="0" name="node" type="Node" />
 			<description>
-				Sets the default node used for playing animations. Used as fallback by [method play_montage].
+				Registers the node to be used for animations (AnimationPlayer or AnimatedSprite).
 			</description>
 		</method>
-		<method name="set_attribute_base_value">
+		<method name="set_attribute_base_value_by_resource">
 			<return type="void" />
-			<param index="0" name="name" type="StringName" />
+			<param index="0" name="attribute" type="AbilitySystemAttribute" />
 			<param index="1" name="value" type="float" />
 			<description>
-				Directly sets the base value of an attribute. Current value will be updated accordingly.
+				Directly sets the base value of the specified attribute resource.
+			</description>
+		</method>
+		<method name="set_attribute_base_value_by_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<param index="1" name="value" type="float" />
+			<description>
+				Directly sets the base value of an attribute by its tag.
 			</description>
 		</method>
 		<method name="set_audio_player">
 			<return type="void" />
 			<param index="0" name="node" type="Node" />
 			<description>
-				Sets the default node used for playing audio. Used as fallback by [method play_sound].
+				Registers the node to be used for audio (AudioStreamPlayer).
 			</description>
 		</method>
-		<method name="try_activate_ability">
+		<method name="start_cooldown">
+			<return type="void" />
+			<param index="0" name="ability_tag" type="StringName" />
+			<param index="1" name="duration" type="float" />
+			<param index="2" name="tags" type="Variant" />
+			<description>
+				Manually starts a cooldown with a specific tag and duration.
+			</description>
+		</method>
+		<method name="tick">
+			<return type="void" />
+			<param index="0" name="delta" type="float" />
+			<description>
+				Manually advances the component's internal simulation by [param delta] seconds. Called automatically by the node's [code]_process[/code].
+			</description>
+		</method>
+		<method name="try_activate_ability_by_resource">
 			<return type="bool" />
 			<param index="0" name="ability" type="AbilitySystemAbility" />
 			<description>
-				Attempts to activate the given ability. The ability must have been granted to this actor (e.g., via [method give_ability]) to be successful. Returns [code]true[/code] if successfully activated.
+				Attempts to activate the specified ability resource. Returns true if successful.
+			</description>
+		</method>
+		<method name="try_activate_ability_by_tag">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Attempts to activate an ability by its tag. Returns true if successful.
+			</description>
+		</method>
+		<method name="try_activate_cue_by_resource">
+			<return type="bool" />
+			<param index="0" name="cue" type="AbilitySystemCue" />
+			<param index="1" name="data" type="Dictionary" />
+			<param index="2" name="target_node" type="Object" default="null" />
+			<description>
+				Attempts to activate a cue resource if requirements are met.
+			</description>
+		</method>
+		<method name="try_activate_cue_by_tag">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<param index="1" name="data" type="Dictionary" />
+			<param index="2" name="target_node" type="Object" default="null" />
+			<description>
+				Attempts to activate a cue by tag if requirements are met.
+			</description>
+		</method>
+		<method name="try_activate_effect_by_resource">
+			<return type="bool" />
+			<param index="0" name="effect" type="AbilitySystemEffect" />
+			<param index="1" name="level" type="float" />
+			<param index="2" name="target_node" type="Object" default="null" />
+			<description>
+				Attempts to apply an effect resource if requirements are met.
+			</description>
+		</method>
+		<method name="try_activate_effect_by_tag">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<param index="1" name="level" type="float" />
+			<param index="2" name="target_node" type="Object" default="null" />
+			<description>
+				Attempts to apply an effect by tag if requirements are met.
 			</description>
 		</method>
 		<method name="unregister_cue_resource">
 			<return type="void" />
 			<param index="0" name="tag" type="StringName" />
 			<description>
-				Unregisters a cue resource associated with a tag.
+				Unregisters the cue resource associated with the specified tag.
 			</description>
 		</method>
 		<method name="unregister_node">
 			<return type="void" />
 			<param index="0" name="name" type="StringName" />
 			<description>
-				Unregisters a previously registered node.
+				Unregisters the node alias.
 			</description>
 		</method>
 	</methods>
 	<members>
 		<member name="ability_container" type="AbilitySystemAbilityContainer" setter="set_ability_container" getter="get_ability_container">
-			The [AbilitySystemAbilityContainer] that defines the archetypal data for this actor.
+			The archetype blueprint for this actor.
 		</member>
 	</members>
 	<signals>
 		<signal name="ability_activated">
-			<param index="0" name="ability_spec" type="AbilitySystemAbilitySpec" />
+			<param index="0" name="ability_spec" type="Object" />
 			<description>
 				Emitted when an ability starts.
 			</description>
 		</signal>
 		<signal name="ability_ended">
-			<param index="0" name="ability_spec" type="AbilitySystemAbilitySpec" />
+			<param index="0" name="ability_spec" type="Object" />
 			<param index="1" name="was_cancelled" type="bool" />
 			<description>
-				Emitted when an ability ends.
+				Emitted when an ability stops.
 			</description>
 		</signal>
 		<signal name="ability_failed">
 			<param index="0" name="ability_name" type="StringName" />
 			<param index="1" name="reason" type="String" />
 			<description>
-				Emitted when an ability fails to activate.
+				Emitted when an ability fails to activate, providing the reason.
 			</description>
 		</signal>
 		<signal name="attribute_changed">
@@ -278,46 +556,60 @@
 			<param index="1" name="old_value" type="float" />
 			<param index="2" name="new_value" type="float" />
 			<description>
-				Emitted when an attribute value changes.
+				Emitted on stat changes.
 			</description>
 		</signal>
 		<signal name="cooldown_ended">
 			<param index="0" name="ability_tag" type="StringName" />
 			<description>
-				Emitted when a cooldown period ends.
+				Emitted when a cooldown duration reaches zero.
 			</description>
 		</signal>
 		<signal name="cooldown_started">
 			<param index="0" name="ability_tag" type="StringName" />
 			<param index="1" name="duration" type="float" />
 			<description>
-				Emitted when a cooldown period starts.
+				Emitted when a new cooldown starts.
+			</description>
+		</signal>
+		<signal name="cue_failed">
+			<param index="0" name="cue_name" type="StringName" />
+			<param index="1" name="reason" type="String" />
+			<description>
+				Emitted when a cue fails to activate.
 			</description>
 		</signal>
 		<signal name="effect_applied">
-			<param index="0" name="effect_spec" type="AbilitySystemEffectSpec" />
+			<param index="0" name="effect_spec" type="Object" />
 			<description>
-				Emitted when an effect is applied.
+				Emitted when an effect is successfully applied to the component.
+			</description>
+		</signal>
+		<signal name="effect_failed">
+			<param index="0" name="effect_name" type="StringName" />
+			<param index="1" name="reason" type="String" />
+			<description>
+				Emitted when an effect fails to apply.
 			</description>
 		</signal>
 		<signal name="effect_removed">
-			<param index="0" name="effect_spec" type="AbilitySystemEffectSpec" />
+			<param index="0" name="effect_spec" type="Object" />
 			<description>
-				Emitted when an effect is removed.
+				Emitted when an active effect is removed.
 			</description>
 		</signal>
 		<signal name="tag_changed">
 			<param index="0" name="tag_name" type="StringName" />
 			<param index="1" name="is_present" type="bool" />
 			<description>
-				Emitted when a tag is added or removed.
+				Emitted when tags are added or removed.
 			</description>
 		</signal>
 		<signal name="tag_event_received">
 			<param index="0" name="event_tag" type="StringName" />
 			<param index="1" name="data" type="Dictionary" />
 			<description>
-				Emitted when a tag event or cue is received.
+				Emitted when a specific tag event is triggered.
 			</description>
 		</signal>
 	</signals>

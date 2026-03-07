@@ -3,37 +3,34 @@ def can_build(env, platform):
 
 
 def configure(env):
-    pass
-
-
-def get_doc_path():
-    return "doc_classes"
+    env.Append(CPPDEFINES=["ABILITY_SYSTEM_MODULE"])
 
 
 def get_doc_classes():
     return [
-        "AbilitySystemComponent",
-        "AbilitySystemAttributeSet",
-        "AbilitySystemAttribute",
-        "AbilitySystemAbilityContainer",
+        "AbilitySystem",
         "AbilitySystemAbility",
+        "AbilitySystemAbilityContainer",
         "AbilitySystemAbilitySpec",
-        "AbilitySystemEffect",
-        "AbilitySystemEffectSpec",
-        "AbilitySystemTagSpec",
+        "AbilitySystemAttribute",
+        "AbilitySystemAttributeSet",
+        "AbilitySystemComponent",
         "AbilitySystemCue",
         "AbilitySystemCueAnimation",
         "AbilitySystemCueAudio",
         "AbilitySystemCueSpec",
-        "AbilitySystemMagnitudeCalculation",
-        "AbilitySystemTargetData",
-        "AbilitySystemTask",
-        "AbilitySystem",
         "AbilitySystemEditorPlugin",
-        "AbilitySystemTagsEditor",
-        "AbilitySystemTagsSelector",
+        "AbilitySystemEditorPropertyName",
+        "AbilitySystemEditorPropertySelector",
+        "AbilitySystemEditorPropertyTagSelector",
+        "AbilitySystemEffect",
+        "AbilitySystemEffectSpec",
+        "AbilitySystemInspectorPlugin",
+        "AbilitySystemTagSpec",
+        "AbilitySystemTagsPanel",
+        "AbilitySystemTask",
     ]
 
 
-def get_icons_path():
-    return "icons"
+def get_doc_path():
+    return "doc_classes"

@@ -30,14 +30,25 @@
 
 #pragma once
 
+#ifdef ABILITY_SYSTEM_MODULE
+#include "modules/ability_system/resources/ability_system_attribute_set.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/resources/ability_system_attribute_set.h"
+#endif
+
+#ifdef ABILITY_SYSTEM_MODULE
 #include "core/io/resource.h"
 #include "core/variant/typed_array.h"
-#include "modules/ability_system/resources/ability_system_attribute_set.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/classes/resource.hpp>
+#include <godot_cpp/variant/typed_array.hpp>
+#endif
+
+namespace godot {
 
 class AbilitySystemAbility;
 class AbilitySystemEffect;
 class AbilitySystemCue;
-class AbilitySystemAttributeSet;
 
 /**
  * AbilitySystemAbilityContainer
@@ -58,9 +69,6 @@ private:
 	// Effects that are always applied when this container is loaded.
 	TypedArray<AbilitySystemEffect> effects;
 
-	// Tags permanently granted by this archetype.
-	TypedArray<StringName> tags;
-
 	// The AttributeSet responsible for initializing the actor.
 	Ref<AbilitySystemAttributeSet> attribute_set;
 
@@ -79,10 +87,6 @@ public:
 	void set_effects(const TypedArray<AbilitySystemEffect> &p_effects) { effects = p_effects; }
 	TypedArray<AbilitySystemEffect> get_effects() const { return effects; }
 
-	// Tags
-	void set_tags(const TypedArray<StringName> &p_tags);
-	TypedArray<StringName> get_tags() const { return tags; }
-
 	// AttributeSet
 	void set_attribute_set(const Ref<AbilitySystemAttributeSet> &p_set) { attribute_set = p_set; }
 	Ref<AbilitySystemAttributeSet> get_attribute_set() const { return attribute_set; }
@@ -99,3 +103,5 @@ public:
 	AbilitySystemAbilityContainer();
 	~AbilitySystemAbilityContainer();
 };
+
+} // namespace godot

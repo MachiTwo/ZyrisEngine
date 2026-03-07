@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AbilitySystemEditorPropertySelector" inherits="EditorProperty" version="4.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Editor property for selecting multiple ability system tags.
+	</brief_description>
+	<description>
+		[AbilitySystemEditorPropertySelector] provides a dialog-based interface for selecting multiple ability system tags from the registered tags.
+		Displays a button that opens a selection dialog with checkboxes for all available tags.
+	</description>
+	<tutorials>
+	</tutorials>
+</class>

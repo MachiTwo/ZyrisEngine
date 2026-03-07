@@ -30,8 +30,15 @@
 
 #pragma once
 
+#ifdef ABILITY_SYSTEM_MODULE
 #include "core/io/resource.h"
 #include "core/variant/variant.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/classes/resource.hpp>
+#include <godot_cpp/variant/variant.hpp>
+#endif
+
+namespace godot {
 
 class AbilitySystemAttribute : public Resource {
 	GDCLASS(AbilitySystemAttribute, Resource);
@@ -65,3 +72,5 @@ public:
 	AbilitySystemAttribute();
 	~AbilitySystemAttribute();
 };
+
+} // namespace godot

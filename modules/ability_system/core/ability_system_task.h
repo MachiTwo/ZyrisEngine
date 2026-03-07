@@ -29,8 +29,13 @@
 /**************************************************************************/
 
 #pragma once
-
+#ifdef ABILITY_SYSTEM_MODULE
 #include "core/object/ref_counted.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/classes/ref_counted.hpp>
+#endif
+
+namespace godot {
 
 class AbilitySystemComponent;
 
@@ -77,4 +82,6 @@ public:
 	~AbilitySystemTask();
 };
 
-VARIANT_ENUM_CAST(AbilitySystemTask::TaskType);
+} // namespace godot
+
+VARIANT_ENUM_CAST(godot::AbilitySystemTask::TaskType);

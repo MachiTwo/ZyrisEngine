@@ -28,8 +28,15 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#ifdef ABILITY_SYSTEM_MODULE
 #include "modules/ability_system/core/ability_system_tag_spec.h"
 #include "modules/ability_system/core/ability_system.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/core/ability_system.h"
+#include "src/core/ability_system_tag_spec.h"
+#endif
+
+namespace godot {
 
 void AbilitySystemTagSpec::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("has_tag", "tag", "exact"), &AbilitySystemTagSpec::has_tag, DEFVAL(false));
@@ -78,7 +85,7 @@ bool AbilitySystemTagSpec::add_tag(const StringName &p_tag) {
 	}
 
 	// Register with global system if not already there
-	AbilitySystem::get_singleton()->register_tag(p_tag);
+	AbilitySystem::get_singleton()->register_tag(p_tag, AbilitySystem::TAG_TYPE_CONDITIONAL);
 
 	if (tags.has(p_tag)) {
 		tags[p_tag]++;
@@ -117,3 +124,5 @@ AbilitySystemTagSpec::AbilitySystemTagSpec() {
 
 AbilitySystemTagSpec::~AbilitySystemTagSpec() {
 }
+
+} // namespace godot

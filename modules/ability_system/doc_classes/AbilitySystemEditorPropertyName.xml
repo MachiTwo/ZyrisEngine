@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AbilitySystemEditorPropertyName" inherits="EditorProperty" version="4.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Editor property for resource names with uniqueness validation.
+	</brief_description>
+	<description>
+		[AbilitySystemEditorPropertyName] provides a text field for entering resource names with automatic validation to ensure uniqueness across the project.
+		Displays a warning when a duplicate name is detected.
+	</description>
+	<tutorials>
+	</tutorials>
+</class>

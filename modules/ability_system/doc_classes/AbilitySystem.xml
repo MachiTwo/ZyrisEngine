@@ -15,11 +15,25 @@
 				Returns all tags registered in the system.
 			</description>
 		</method>
+		<method name="get_registered_tags_of_type" qualifiers="const">
+			<return type="StringName[]" />
+			<param index="0" name="type" type="int" enum="AbilitySystem.TagType" />
+			<description>
+				Returns all tags registered in the system of a specific type.
+			</description>
+		</method>
 		<method name="get_resource_name_owner" qualifiers="const">
 			<return type="int" />
 			<param index="0" name="name" type="String" />
 			<description>
 				Returns the instance ID of the resource that owns the given name.
+			</description>
+		</method>
+		<method name="get_tag_type" qualifiers="const">
+			<return type="int" enum="AbilitySystem.TagType" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns the type classification of the given tag.
 			</description>
 		</method>
 		<method name="is_tag_registered" qualifiers="const">
@@ -40,18 +54,10 @@
 		<method name="register_tag">
 			<return type="void" />
 			<param index="0" name="tag" type="StringName" />
-			<param index="1" name="owner_id" type="int" default="0" />
+			<param index="1" name="type" type="int" enum="AbilitySystem.TagType" default="TAG_TYPE_NAME" />
+			<param index="2" name="owner_id" type="int" default="0" />
 			<description>
-				Registers a new tag globally.
-			</description>
-		</method>
-		<method name="tag_matches" qualifiers="static">
-			<return type="bool" />
-			<param index="0" name="tag" type="StringName" />
-			<param index="1" name="match_against" type="StringName" />
-			<param index="2" name="exact" type="bool" default="false" />
-			<description>
-				Utility for hierarchical tag matching.
+				Registers a new tag globally with a specific type.
 			</description>
 		</method>
 		<method name="unregister_resource_name">
@@ -76,4 +82,12 @@
 			</description>
 		</signal>
 	</signals>
+	<constants>
+		<constant name="TAG_TYPE_NAME" value="0" enum="TagType">
+			Identity tags (Ability, Effect, Cue, Attribute).
+		</constant>
+		<constant name="TAG_TYPE_CONDITIONAL" value="1" enum="TagType">
+			Status/State tags (on_fire, stunned, moving).
+		</constant>
+	</constants>
 </class>

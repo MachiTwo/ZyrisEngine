@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  ability_system_tags_selector.h                                        */
+/*  test_ability_system_effect_spec.h                                     */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -30,33 +30,42 @@
 
 #pragma once
 
-#include "editor/inspector/editor_inspector.h"
+#ifdef ABILITY_SYSTEM_MODULE
+#include "modules/ability_system/core/ability_system_effect_spec.h"
+#include "modules/ability_system/resources/ability_system_effect.h"
+#include "modules/ability_system/tests/doctest.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/core/ability_system_effect_spec.h"
+#include "src/resources/ability_system_effect.h"
+#include "src/tests/doctest.h"
+#endif
 
-class Button;
-class AcceptDialog;
-class LineEdit;
-class Tree;
+using namespace godot;
 
-class AbilitySystemTagsSelector : public EditorProperty {
-	GDCLASS(AbilitySystemTagsSelector, EditorProperty);
+TEST_CASE("AbilitySystemEffectSpec Initialization and State") {
+	Ref<AbilitySystemEffect> effect = memnew(AbilitySystemEffect);
+	Ref<AbilitySystemEffectSpec> spec = memnew(AbilitySystemEffectSpec);
 
-	Button *edit_button = nullptr;
-	AcceptDialog *dialog = nullptr;
-	LineEdit *search_edit = nullptr;
-	Tree *tags_tree = nullptr;
-	bool updating = false;
+	SUBCASE("Initialization") {
+		spec->init(effect, 5.0f); // Level 5
+		CHECK(spec->get_effect() == effect);
+		CHECK(spec->get_level() == 5.0f);
+	}
 
-	void _edit_pressed();
-	void _update_tree();
-	void _tag_toggled();
-	void _update_button_text();
-	void _search_changed(const String &p_text);
+	SUBCASE("Magnitudes management") {
+		spec->set_magnitude("Damage", 50.0f);
+		CHECK(spec->get_magnitude("Damage") == 50.0f);
+		CHECK(spec->get_magnitude("NonExistent") == 0.0f);
+	}
 
-protected:
-	static void _bind_methods();
+	SUBCASE("Duration tracking") {
+		spec->set_total_duration(10.0f);
+		spec->set_duration_remaining(10.0f);
 
-public:
-	virtual void update_property() override;
+		CHECK(spec->get_total_duration() == 10.0f);
+		CHECK(spec->get_duration_remaining() == 10.0f);
 
-	AbilitySystemTagsSelector();
-};
+		spec->set_duration_remaining(5.5f);
+		CHECK(spec->get_duration_remaining() == 5.5f);
+	}
+}

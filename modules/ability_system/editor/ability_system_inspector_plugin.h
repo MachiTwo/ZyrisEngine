@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  ability_system_magnitude_calculation.cpp                              */
+/*  ability_system_inspector_plugin.h                                     */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,33 +28,34 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#include "modules/ability_system/core/ability_system_magnitude_calculation.h"
-#include "modules/ability_system/core/ability_system_effect_spec.h"
-#include "modules/ability_system/scene/ability_system_component.h"
+#pragma once
+#ifdef ABILITY_SYSTEM_MODULE
+#include "editor/inspector/editor_inspector.h"
+#else
+#include <godot_cpp/classes/editor_inspector_plugin.hpp>
+#endif
 
-void AbilitySystemMagnitudeCalculation::_bind_methods() {
-	GDVIRTUAL_BIND(_calculate_magnitude, "spec");
+namespace godot {
 
-	ClassDB::bind_method(D_METHOD("get_source_attribute_value", "spec", "attribute"), &AbilitySystemMagnitudeCalculation::get_source_attribute_value);
-	ClassDB::bind_method(D_METHOD("get_target_attribute_value", "spec", "attribute"), &AbilitySystemMagnitudeCalculation::get_target_attribute_value);
-}
+/**
+ * AbilitySystemInspectorPlugin
+ * Responsible for intercepting and customizing how Ability System properties
+ * are shown in the Inspector.
+ */
+class AbilitySystemInspectorPlugin : public EditorInspectorPlugin {
+	GDCLASS(AbilitySystemInspectorPlugin, EditorInspectorPlugin);
 
-float AbilitySystemMagnitudeCalculation::get_source_attribute_value(Ref<AbilitySystemEffectSpec> p_spec, const StringName &p_attribute) const {
-	ERR_FAIL_COND_V(p_spec.is_null(), 0.0f);
-	AbilitySystemComponent *source = p_spec->get_source_component();
-	ERR_FAIL_NULL_V(source, 0.0f);
-	return source->get_attribute_value(p_attribute);
-}
+protected:
+	static void _bind_methods();
 
-float AbilitySystemMagnitudeCalculation::get_target_attribute_value(Ref<AbilitySystemEffectSpec> p_spec, const StringName &p_attribute) const {
-	ERR_FAIL_COND_V(p_spec.is_null(), 0.0f);
-	AbilitySystemComponent *target = p_spec->get_target_component();
-	ERR_FAIL_NULL_V(target, 0.0f);
-	return target->get_attribute_value(p_attribute);
-}
+public:
+#ifdef ABILITY_SYSTEM_MODULE
+	virtual bool can_handle(Object *p_object) override;
+	virtual bool parse_property(Object *p_object, Variant::Type p_type, const String &p_path, PropertyHint p_hint, const String &p_hint_text, BitField<PropertyUsageFlags> p_usage, bool p_wide = false) override;
+#else
+	virtual bool _can_handle(Object *p_object) const override;
+	virtual bool _parse_property(Object *p_object, const Variant::Type p_type, const String &p_path, const PropertyHint p_hint, const String &p_hint_text, const BitField<PropertyUsageFlags> p_usage, const bool p_wide = false) override;
+#endif
+};
 
-AbilitySystemMagnitudeCalculation::AbilitySystemMagnitudeCalculation() {
-}
-
-AbilitySystemMagnitudeCalculation::~AbilitySystemMagnitudeCalculation() {
-}
+} // namespace godot

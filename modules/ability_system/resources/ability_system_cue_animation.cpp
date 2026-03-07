@@ -28,10 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#ifdef ABILITY_SYSTEM_MODULE
 #include "modules/ability_system/resources/ability_system_cue_animation.h"
-
 #include "modules/ability_system/core/ability_system_cue_spec.h"
 #include "modules/ability_system/scene/ability_system_component.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/core/ability_system_cue_spec.h"
+#include "src/resources/ability_system_cue_animation.h"
+#include "src/scene/ability_system_component.h"
+#endif
+
+namespace godot {
 
 void AbilitySystemCueAnimation::execute(Ref<AbilitySystemCueSpec> p_spec) {
 	AbilitySystemComponent *asc = p_spec->get_target_asc();
@@ -61,3 +68,5 @@ AbilitySystemCueAnimation::AbilitySystemCueAnimation() {
 
 AbilitySystemCueAnimation::~AbilitySystemCueAnimation() {
 }
+
+} // namespace godot

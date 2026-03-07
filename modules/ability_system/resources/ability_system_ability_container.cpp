@@ -28,13 +28,23 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#ifdef ABILITY_SYSTEM_MODULE
 #include "modules/ability_system/resources/ability_system_ability_container.h"
 #include "modules/ability_system/core/ability_system.h"
-
 #include "modules/ability_system/resources/ability_system_ability.h"
 #include "modules/ability_system/resources/ability_system_attribute_set.h"
 #include "modules/ability_system/resources/ability_system_cue.h"
 #include "modules/ability_system/resources/ability_system_effect.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/core/ability_system.h"
+#include "src/resources/ability_system_ability.h"
+#include "src/resources/ability_system_ability_container.h"
+#include "src/resources/ability_system_attribute_set.h"
+#include "src/resources/ability_system_cue.h"
+#include "src/resources/ability_system_effect.h"
+#endif
+
+namespace godot {
 
 void AbilitySystemAbilityContainer::_bind_methods() {
 	// Abilities (catalog)
@@ -44,10 +54,6 @@ void AbilitySystemAbilityContainer::_bind_methods() {
 	// Effects
 	ClassDB::bind_method(D_METHOD("set_effects", "effects"), &AbilitySystemAbilityContainer::set_effects);
 	ClassDB::bind_method(D_METHOD("get_effects"), &AbilitySystemAbilityContainer::get_effects);
-
-	// Tags
-	ClassDB::bind_method(D_METHOD("set_tags", "tags"), &AbilitySystemAbilityContainer::set_tags);
-	ClassDB::bind_method(D_METHOD("get_tags"), &AbilitySystemAbilityContainer::get_tags);
 
 	// AttributeSet
 	ClassDB::bind_method(D_METHOD("set_attribute_set", "set"), &AbilitySystemAbilityContainer::set_attribute_set);
@@ -65,7 +71,6 @@ void AbilitySystemAbilityContainer::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "attribute_set", PROPERTY_HINT_RESOURCE_TYPE, "AbilitySystemAttributeSet"), "set_attribute_set", "get_attribute_set");
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "abilities", PROPERTY_HINT_TYPE_STRING, vformat("%s/%s:%s", Variant::OBJECT, PROPERTY_HINT_RESOURCE_TYPE, "AbilitySystemAbility")), "set_abilities", "get_abilities");
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "effects", PROPERTY_HINT_TYPE_STRING, vformat("%s/%s:%s", Variant::OBJECT, PROPERTY_HINT_RESOURCE_TYPE, "AbilitySystemEffect")), "set_effects", "get_effects");
-	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "tags", PROPERTY_HINT_TYPE_STRING, vformat("%s/%s:%s", Variant::STRING_NAME, PROPERTY_HINT_NONE, "")), "set_tags", "get_tags");
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "cues", PROPERTY_HINT_TYPE_STRING, vformat("%s/%s:%s", Variant::OBJECT, PROPERTY_HINT_RESOURCE_TYPE, "AbilitySystemCue")), "set_cues", "get_cues");
 }
 
@@ -93,11 +98,19 @@ bool AbilitySystemAbilityContainer::has_effect(const Ref<AbilitySystemEffect> &p
 			return true;
 		}
 	}
-	// Check if it's a cost or cooldown of an ability we have
+	// Check if it's a costs or cooldown of an ability we have
 	for (int i = 0; i < abilities.size(); i++) {
 		Ref<AbilitySystemAbility> ability = abilities[i];
 		if (ability.is_valid()) {
-			if (ability->get_cost_effect() == p_effect || ability->get_cooldown_effect() == p_effect) {
+			// Check if effect matches any cost or cooldown
+			for (int j = 0; j < ability->get_costs().size(); j++) {
+				Dictionary cost = ability->get_costs()[j];
+				if (cost.has("effect") && (Ref<AbilitySystemEffect>)cost["effect"] == p_effect) {
+					return true;
+				}
+			}
+			// Check cooldown tags
+			if (ability->get_cooldown_tags().has(p_effect)) {
 				return true;
 			}
 		}
@@ -108,7 +121,15 @@ bool AbilitySystemAbilityContainer::has_effect(const Ref<AbilitySystemEffect> &p
 		for (int i = 0; i < granted.size(); i++) {
 			Ref<AbilitySystemAbility> ability = granted[i];
 			if (ability.is_valid()) {
-				if (ability->get_cost_effect() == p_effect || ability->get_cooldown_effect() == p_effect) {
+				// Check if effect matches any cost or cooldown
+				for (int j = 0; j < ability->get_costs().size(); j++) {
+					Dictionary cost = ability->get_costs()[j];
+					if (cost.has("effect") && (Ref<AbilitySystemEffect>)cost["effect"] == p_effect) {
+						return true;
+					}
+				}
+				// Check cooldown tags
+				if (ability->get_cooldown_tags().has(p_effect)) {
 					return true;
 				}
 			}
@@ -127,17 +148,10 @@ bool AbilitySystemAbilityContainer::has_cue(const StringName &p_tag) const {
 	return false;
 }
 
-void AbilitySystemAbilityContainer::set_tags(const TypedArray<StringName> &p_tags) {
-	tags = p_tags;
-	if (AbilitySystem::get_singleton()) {
-		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i]);
-		}
-	}
-}
-
 AbilitySystemAbilityContainer::AbilitySystemAbilityContainer() {
 }
 
 AbilitySystemAbilityContainer::~AbilitySystemAbilityContainer() {
 }
+
+} // namespace godot

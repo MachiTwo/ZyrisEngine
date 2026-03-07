@@ -43,6 +43,32 @@
 				Virtual method called when the cue is removed.
 			</description>
 		</method>
+		<method name="get_activation_blocked_tags" qualifiers="const">
+			<return type="StringName[]" />
+			<description>
+				Returns the list of tags that block this cue from triggering.
+			</description>
+		</method>
+		<method name="get_activation_required_tags" qualifiers="const">
+			<return type="StringName[]" />
+			<description>
+				Returns the list of tags required for this cue to trigger.
+			</description>
+		</method>
+		<method name="set_activation_blocked_tags">
+			<return type="void" />
+			<param index="0" name="tags" type="Variant" />
+			<description>
+				Sets the list of tags that block this cue.
+			</description>
+		</method>
+		<method name="set_activation_required_tags">
+			<return type="void" />
+			<param index="0" name="tags" type="Variant" />
+			<description>
+				Sets the list of tags required for this cue to activate.
+			</description>
+		</method>
 	</methods>
 	<members>
 		<member name="cue_name" type="String" setter="set_cue_name" getter="get_cue_name" default="&quot;&quot;">

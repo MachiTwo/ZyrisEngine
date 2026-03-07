@@ -30,7 +30,7 @@
 		</method>
 		<method name="has_all_tags" qualifiers="const">
 			<return type="bool" />
-			<param index="0" name="tags" type="StringName[]" />
+			<param index="0" name="tags" type="Variant" />
 			<param index="1" name="exact" type="bool" default="false" />
 			<description>
 				Returns true if the container has all of the specified tags.
@@ -38,7 +38,7 @@
 		</method>
 		<method name="has_any_tags" qualifiers="const">
 			<return type="bool" />
-			<param index="0" name="tags" type="StringName[]" />
+			<param index="0" name="tags" type="Variant" />
 			<param index="1" name="exact" type="bool" default="false" />
 			<description>
 				Returns true if the container has any of the specified tags.

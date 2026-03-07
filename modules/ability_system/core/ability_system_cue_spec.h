@@ -30,19 +30,27 @@
 
 #pragma once
 
-#include "core/io/resource.h"
+#ifdef ABILITY_SYSTEM_MODULE
+#include "core/object/ref_counted.h"
 #include "core/variant/dictionary.h"
+#include "core/variant/variant.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/classes/ref_counted.hpp>
+#include <godot_cpp/variant/dictionary.hpp>
+#include <godot_cpp/variant/variant.hpp>
+#endif
 
+namespace godot {
+
+// Forward declarations to break circularity
 class AbilitySystemCue;
 class AbilitySystemComponent;
 class AbilitySystemEffectSpec;
 
 // Runtime context for a single Cue execution.
-// Analogous to AbilitySystemEffectSpec / AbilitySystemAbilitySpec:
-// wraps the definition Resource (AbilitySystemCue) with the execution
-// context needed by the Cue's virtual callbacks.
-class AbilitySystemCueSpec : public Resource {
-	GDCLASS(AbilitySystemCueSpec, Resource);
+class AbilitySystemCueSpec : public RefCounted {
+	GDCLASS(AbilitySystemCueSpec, RefCounted);
 
 protected:
 	static void _bind_methods();
@@ -51,33 +59,36 @@ private:
 	// The Cue definition that is being executed.
 	Ref<AbilitySystemCue> cue;
 
-	// ASC that originated this cue (e.g. the attacker). May be null for
-	// cues triggered by non-ASC code.
-	AbilitySystemComponent *source_asc = nullptr;
+	// ObjectID of ASC that originated this cue.
+	ObjectID source_id;
 
-	// ASC that is the target / owner of this cue (e.g. the defender).
-	AbilitySystemComponent *target_asc = nullptr;
+	// ObjectID of ASC that is the target / owner of this cue.
+	ObjectID target_id;
 
-	// The EffectSpec that triggered this cue, if any. Null when the cue
-	// was dispatched directly from an ability or manual code.
+	// Specific node hit (e.g. a limb or bone).
+	ObjectID target_node_id;
+
+	// Position where the hit occurred.
+	Variant hit_position;
+
+	// The EffectSpec that triggered this cue, if any.
 	Ref<AbilitySystemEffectSpec> effect_spec;
 
-	// Pre-calculated magnitude from the triggering effect (damage, heal…).
-	// Zero when no effect is involved.
+	float level = 1.0f;
 	float magnitude = 0.0f;
-
-	// Arbitrary extra data passed at the call site.
 	Dictionary extra_data;
 
 public:
-	// Initialize from an EffectSpec (called by apply_effect_spec_to_self).
+	// IMPORTANT: Constructor and Destructor must be in .cpp to allow Ref<T> with forward declarations
+	AbilitySystemCueSpec();
+	~AbilitySystemCueSpec();
+
 	void init_from_effect(Ref<AbilitySystemCue> p_cue,
 			AbilitySystemComponent *p_source,
 			AbilitySystemComponent *p_target,
 			Ref<AbilitySystemEffectSpec> p_effect_spec,
 			float p_magnitude);
 
-	// Initialize lightweight (called by manual execute_cue).
 	void init_manual(Ref<AbilitySystemCue> p_cue,
 			AbilitySystemComponent *p_owner,
 			const Dictionary &p_extra_data);
@@ -87,11 +98,17 @@ public:
 	Ref<AbilitySystemCue> get_cue() const;
 
 	// --- Source / Target ---
-	void set_source_asc(AbilitySystemComponent *p_asc) { source_asc = p_asc; }
-	AbilitySystemComponent *get_source_asc() const { return source_asc; }
+	void set_source_asc(AbilitySystemComponent *p_asc);
+	AbilitySystemComponent *get_source_asc() const;
 
-	void set_target_asc(AbilitySystemComponent *p_asc) { target_asc = p_asc; }
-	AbilitySystemComponent *get_target_asc() const { return target_asc; }
+	void set_target_asc(AbilitySystemComponent *p_asc);
+	AbilitySystemComponent *get_target_asc() const;
+
+	void set_target_node(Object *p_node);
+	Object *get_target_node() const;
+
+	void set_hit_position(const Variant &p_pos) { hit_position = p_pos; }
+	Variant get_hit_position() const { return hit_position; }
 
 	// --- Effect Spec ---
 	void set_effect_spec(Ref<AbilitySystemEffectSpec> p_spec);
@@ -101,10 +118,13 @@ public:
 	void set_magnitude(float p_mag) { magnitude = p_mag; }
 	float get_magnitude() const { return magnitude; }
 
+	// --- Level ---
+	void set_level(float p_level) { level = p_level; }
+	float get_level() const { return level; }
+
 	// --- Extra Data ---
 	void set_extra_data(const Dictionary &p_data) { extra_data = p_data; }
 	Dictionary get_extra_data() const { return extra_data; }
-
-	AbilitySystemCueSpec();
-	~AbilitySystemCueSpec();
 };
+
+} // namespace godot

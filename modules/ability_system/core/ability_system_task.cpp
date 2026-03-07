@@ -28,14 +28,23 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#ifdef ABILITY_SYSTEM_MODULE
 #include "modules/ability_system/core/ability_system_task.h"
 #include "modules/ability_system/scene/ability_system_component.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/core/ability_system_task.h"
+#include "src/scene/ability_system_component.h"
+#endif
+
+namespace godot {
 
 void AbilitySystemTask::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("completed"));
 
 	ClassDB::bind_method(D_METHOD("activate"), &AbilitySystemTask::activate);
 	ClassDB::bind_method(D_METHOD("end_task"), &AbilitySystemTask::end_task);
+	ClassDB::bind_method(D_METHOD("is_finished"), &AbilitySystemTask::is_finished);
+	ClassDB::bind_method(D_METHOD("set_owner", "owner"), &AbilitySystemTask::set_owner);
 
 	ClassDB::bind_static_method("AbilitySystemTask", D_METHOD("wait_delay", "owner", "delay"), &AbilitySystemTask::wait_delay);
 	ClassDB::bind_static_method("AbilitySystemTask", D_METHOD("play_montage", "owner", "animation_name"), &AbilitySystemTask::play_montage);
@@ -144,3 +153,5 @@ AbilitySystemTask::AbilitySystemTask() {
 
 AbilitySystemTask::~AbilitySystemTask() {
 }
+
+} // namespace godot

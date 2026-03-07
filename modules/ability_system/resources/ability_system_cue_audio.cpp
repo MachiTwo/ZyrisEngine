@@ -28,14 +28,29 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#ifdef ABILITY_SYSTEM_MODULE
 #include "modules/ability_system/resources/ability_system_cue_audio.h"
-
 #include "modules/ability_system/core/ability_system_cue_spec.h"
 #include "modules/ability_system/scene/ability_system_component.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/core/ability_system_cue_spec.h"
+#include "src/resources/ability_system_cue_audio.h"
+#include "src/scene/ability_system_component.h"
+#endif
+
+#ifdef ABILITY_SYSTEM_MODULE
 #include "scene/2d/audio_stream_player_2d.h"
 #include "scene/3d/audio_stream_player_3d.h"
 #include "scene/audio/audio_stream_player.h"
 #include "servers/audio/audio_stream.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/classes/audio_stream.hpp>
+#include <godot_cpp/classes/audio_stream_player.hpp>
+#include <godot_cpp/classes/audio_stream_player2d.hpp>
+#include <godot_cpp/classes/audio_stream_player3d.hpp>
+#endif
+
+namespace godot {
 
 void AbilitySystemCueAudio::set_audio_stream(const Ref<AudioStream> &p_stream) {
 	audio_stream = p_stream;
@@ -73,3 +88,5 @@ AbilitySystemCueAudio::AbilitySystemCueAudio() {
 
 AbilitySystemCueAudio::~AbilitySystemCueAudio() {
 }
+
+} // namespace godot

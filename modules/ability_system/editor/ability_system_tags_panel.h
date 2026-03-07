@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  ability_system_magnitude_calculation.h                                */
+/*  ability_system_tags_panel.h                                           */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -30,28 +30,61 @@
 
 #pragma once
 
-#include "core/object/gdvirtual.gen.inc"
-#include "core/object/ref_counted.h"
-#include "modules/ability_system/core/ability_system_effect_spec.h"
+#ifdef ABILITY_SYSTEM_MODULE
+#include "modules/ability_system/core/ability_system.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/core/ability_system.h"
+#endif
 
-/**
- * AbilitySystemMagnitudeCalculation (MMC)
- * Base class for complex magnitude calculations (e.g., Damage = (Strength * 2) + Level).
- */
-class AbilitySystemMagnitudeCalculation : public RefCounted {
-	GDCLASS(AbilitySystemMagnitudeCalculation, RefCounted);
+#ifdef ABILITY_SYSTEM_MODULE
+#include "scene/gui/button.h"
+#include "scene/gui/line_edit.h"
+#else
+#include <godot_cpp/classes/button.hpp>
+#include <godot_cpp/classes/line_edit.hpp>
+#endif
+#ifdef ABILITY_SYSTEM_MODULE
+#include "scene/gui/tab_container.h"
+#else
+#include <godot_cpp/classes/tab_container.hpp>
+#endif
+#ifdef ABILITY_SYSTEM_MODULE
+#include "scene/gui/box_container.h"
+#include "scene/gui/tree.h"
+#else
+#include <godot_cpp/classes/tree.hpp>
+#include <godot_cpp/classes/v_box_container.hpp>
+#endif
+
+namespace godot {
+
+class AbilitySystemTagsPanel : public VBoxContainer {
+	GDCLASS(AbilitySystemTagsPanel, VBoxContainer);
+
+	LineEdit *add_tag_edit = nullptr;
+	Button *add_tag_button = nullptr;
+	LineEdit *search_edit = nullptr;
+	TabContainer *tabs = nullptr;
+	Tree *name_tags_tree = nullptr;
+	Tree *cond_tags_tree = nullptr;
+
+	void _add_tag();
+	void _add_tag_text(const String &p_tag);
+	void _on_search_changed(const String &p_text);
+	void _tag_removed(Object *p_item, int p_column, int p_id, MouseButton p_button);
+	void _add_sub_tag(Object *p_item, int p_column, int p_id, MouseButton p_button);
+
+	void _update_tree(Tree *p_tree, AbilitySystem::TagType p_type, const String &p_search);
+	void _create_tree_items(Tree *p_tree, TreeItem *p_parent, const String &p_prefix, const TypedArray<StringName> &p_tags, AbilitySystem::TagType p_type, const String &p_search);
 
 protected:
+	void _notification(int p_what);
 	static void _bind_methods();
 
 public:
-	// Script-overridable calculation logic
-	GDVIRTUAL1RC(float, _calculate_magnitude, Ref<AbilitySystemEffectSpec>);
+	void update_tags();
 
-	// Helper methods for calculations
-	float get_source_attribute_value(Ref<AbilitySystemEffectSpec> p_spec, const StringName &p_attribute) const;
-	float get_target_attribute_value(Ref<AbilitySystemEffectSpec> p_spec, const StringName &p_attribute) const;
-
-	AbilitySystemMagnitudeCalculation();
-	~AbilitySystemMagnitudeCalculation();
+	AbilitySystemTagsPanel();
 };
+
+} // namespace godot

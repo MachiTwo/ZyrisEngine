@@ -30,11 +30,21 @@
 
 #pragma once
 
+#ifdef ABILITY_SYSTEM_MODULE
 #include "core/object/class_db.h"
 #include "core/object/object.h"
 #include "core/templates/hash_map.h"
 #include "core/templates/hash_set.h"
 #include "core/variant/typed_array.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/core/object.hpp>
+#include <godot_cpp/templates/hash_map.hpp>
+#include <godot_cpp/templates/hash_set.hpp>
+#include <godot_cpp/variant/typed_array.hpp>
+#endif
+
+namespace godot {
 
 class AbilitySystemCue;
 
@@ -48,7 +58,14 @@ class AbilitySystem : public Object {
 
 	static AbilitySystem *singleton;
 
-	HashSet<StringName> registered_tags;
+public:
+	enum TagType {
+		TAG_TYPE_NAME,
+		TAG_TYPE_CONDITIONAL,
+	};
+
+private:
+	HashMap<StringName, TagType> registered_tags;
 	HashMap<StringName, uint64_t> tag_owners;
 	HashMap<String, uint64_t> resource_names;
 
@@ -61,11 +78,13 @@ protected:
 public:
 	static AbilitySystem *get_singleton() { return singleton; }
 
-	void register_tag(const StringName &p_tag, uint64_t p_owner_id = 0);
+	void register_tag(const StringName &p_tag, TagType p_type = TAG_TYPE_NAME, uint64_t p_owner_id = 0);
 	bool is_tag_registered(const StringName &p_tag) const;
 	void unregister_tag(const StringName &p_tag);
 	uint64_t get_tag_owner(const StringName &p_tag) const;
+	TagType get_tag_type(const StringName &p_tag) const;
 	TypedArray<StringName> get_registered_tags() const;
+	TypedArray<StringName> get_registered_tags_of_type(TagType p_type) const;
 
 	bool register_resource_name(const String &p_name, uint64_t p_owner_id);
 	void unregister_resource_name(const String &p_name);
@@ -77,3 +96,7 @@ public:
 	AbilitySystem();
 	~AbilitySystem();
 };
+
+} // namespace godot
+
+VARIANT_ENUM_CAST(godot::AbilitySystem::TagType);

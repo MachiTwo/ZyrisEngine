@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  ability_system_target_data.h                                          */
+/*  test_ability_system_attribute_set.h                                   */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -30,32 +30,53 @@
 
 #pragma once
 
-#include "core/object/ref_counted.h"
-#include "core/variant/variant.h"
+#ifdef ABILITY_SYSTEM_MODULE
+#include "modules/ability_system/resources/ability_system_attribute.h"
+#include "modules/ability_system/resources/ability_system_attribute_set.h"
+#include "modules/ability_system/tests/doctest.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/resources/ability_system_attribute.h"
+#include "src/resources/ability_system_attribute_set.h"
+#include "src/tests/doctest.h"
+#endif
 
-/**
- * AbilitySystemTargetData
- * A transportable container for targeting information.
- * Used to send hit results, locations, and actor references between systems
- * for validation and effect application.
- */
-class AbilitySystemTargetData : public RefCounted {
-	GDCLASS(AbilitySystemTargetData, RefCounted);
+using namespace godot;
 
-protected:
-	static void _bind_methods();
+TEST_CASE("AbilitySystemAttributeSet Operations") {
+	Ref<AbilitySystemAttributeSet> attr_set = memnew(AbilitySystemAttributeSet);
 
-private:
-	Object *target_node = nullptr;
-	Vector3 hit_position;
+	SUBCASE("Base value initialization") {
+		Ref<AbilitySystemAttribute> health_attr = memnew(AbilitySystemAttribute);
+		health_attr->set_attribute_name("Health");
+		health_attr->set_base_value(0.0f);
+		attr_set->add_attribute_definition(health_attr);
 
-public:
-	void set_target_node(Object *p_node) { target_node = p_node; }
-	Object *get_target_node() const { return target_node; }
+		attr_set->set_attribute_base_value("Health", 100.0);
+		CHECK(attr_set->get_attribute_base_value("Health") == 100.0);
+		CHECK(attr_set->get_attribute_value("Health") == 100.0);
+	}
 
-	void set_hit_position(const Vector3 &p_pos) { hit_position = p_pos; }
-	Vector3 get_hit_position() const { return hit_position; }
+	SUBCASE("Additive Modifiers") {
+		Ref<AbilitySystemAttribute> health_attr = memnew(AbilitySystemAttribute);
+		health_attr->set_attribute_name("Health");
+		health_attr->set_base_value(100.0f);
+		attr_set->add_attribute_definition(health_attr);
 
-	AbilitySystemTargetData();
-	~AbilitySystemTargetData();
-};
+		attr_set->add_modifier("Health", 20.0); // Default type: Add
+		CHECK(attr_set->get_attribute_value("Health") == 120.0);
+
+		attr_set->remove_modifier("Health", 20.0);
+		CHECK(attr_set->get_attribute_value("Health") == 100.0);
+	}
+
+	SUBCASE("Multiplicative Modifiers") {
+		Ref<AbilitySystemAttribute> atk_attr = memnew(AbilitySystemAttribute);
+		atk_attr->set_attribute_name("Attack");
+		atk_attr->set_base_value(50.0f);
+		attr_set->add_attribute_definition(atk_attr);
+
+		// 50 * 1.5 = 75
+		attr_set->add_modifier("Attack", 1.5, AbilitySystemAttributeSet::MODIFIER_MULTIPLY);
+		CHECK(attr_set->get_attribute_value("Attack") == 75.0);
+	}
+}

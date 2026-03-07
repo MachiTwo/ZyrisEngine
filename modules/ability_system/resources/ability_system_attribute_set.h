@@ -30,12 +30,25 @@
 
 #pragma once
 
+#ifdef ABILITY_SYSTEM_MODULE
+#include "modules/ability_system/resources/ability_system_ability.h"
+#include "modules/ability_system/resources/ability_system_attribute.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/resources/ability_system_ability.h"
+#include "src/resources/ability_system_attribute.h"
+#endif
+
+#ifdef ABILITY_SYSTEM_MODULE
 #include "core/io/resource.h"
 #include "core/templates/hash_map.h"
 #include "core/variant/typed_array.h"
-#include "modules/ability_system/resources/ability_system_attribute.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/classes/resource.hpp>
+#include <godot_cpp/templates/hash_map.hpp>
+#include <godot_cpp/variant/typed_array.hpp>
+#endif
 
-class AbilitySystemAbility;
+namespace godot {
 
 /**
  * AbilitySystemAttributeSet
@@ -90,6 +103,16 @@ public:
 	TypedArray<StringName> get_attribute_list() const;
 	void reset_current_values();
 
+	enum ModifierType {
+		MODIFIER_ADD,
+		MODIFIER_MULTIPLY,
+	};
+
+	void add_modifier(const StringName &p_name, float p_value, ModifierType p_type = MODIFIER_ADD);
+	void remove_modifier(const StringName &p_name, float p_value, ModifierType p_type = MODIFIER_ADD);
+
+	float get_attribute_value(const StringName &p_name) const;
+
 	// Signal handlers for attribute changes
 	void _on_attribute_value_changed(float p_old_value, float p_new_value, const StringName &p_name);
 	void _on_attribute_limits_changed(float p_min_value, float p_max_value, const StringName &p_name);
@@ -104,3 +127,7 @@ public:
 	AbilitySystemAttributeSet();
 	~AbilitySystemAttributeSet();
 };
+
+} // namespace godot
+
+VARIANT_ENUM_CAST(godot::AbilitySystemAttributeSet::ModifierType);

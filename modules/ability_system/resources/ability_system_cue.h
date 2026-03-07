@@ -30,28 +30,44 @@
 
 #pragma once
 
+#ifdef ABILITY_SYSTEM_MODULE
+#include "modules/ability_system/core/ability_system_cue_spec.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/core/ability_system_cue_spec.h"
+#endif
+
+#ifdef ABILITY_SYSTEM_MODULE
+#include "core/object/object.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/core/type_info.hpp>
+#endif
+
+#ifdef ABILITY_SYSTEM_MODULE
 #include "core/io/resource.h"
 #include "core/object/gdvirtual.gen.inc"
-// Full include required: GDVIRTUAL1 with Ref<T> needs the complete type
-// to instantiate the Variant template specializations (same pattern as
-// AbilitySystemMagnitudeCalculation including AbilitySystemEffectSpec).
-#include "modules/ability_system/core/ability_system_cue_spec.h"
+#include "core/variant/typed_array.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/classes/resource.hpp>
+#include <godot_cpp/core/gdvirtual.gen.inc>
+#include <godot_cpp/variant/typed_array.hpp>
+#endif
+
+namespace godot {
 
 class AbilitySystemCue : public Resource {
 	GDCLASS(AbilitySystemCue, Resource);
 
 public:
 	enum CueEventType {
-		ON_EXECUTE, // Instant
-		ON_ACTIVE, // Continuous while effect/ability is active
-		ON_REMOVE // When ending
+		ON_EXECUTE, // Instant feedback
+		ON_ACTIVE, // Continuous feedback while effect/ability is active
+		ON_REMOVE // Feedback when effect/ability ends
 	};
 
 protected:
 	static void _bind_methods();
 
-	// Each virtual receives the full CueSpec so the script can inspect
-	// source/target ASC, the triggering EffectSpec, magnitude, extra data, etc.
+	// Script callbacks
 	GDVIRTUAL1(_on_execute, Ref<AbilitySystemCueSpec>)
 	GDVIRTUAL1(_on_active, Ref<AbilitySystemCueSpec>)
 	GDVIRTUAL1(_on_remove, Ref<AbilitySystemCueSpec>)
@@ -61,6 +77,10 @@ protected:
 	StringName cue_tag;
 	StringName node_name;
 
+	// Activation requirements
+	TypedArray<StringName> activation_required_tags;
+	TypedArray<StringName> activation_blocked_tags;
+
 public:
 	void set_cue_name(const String &p_name);
 	String get_cue_name() const { return cue_name; }
@@ -68,17 +88,25 @@ public:
 	void set_event_type(CueEventType p_type) { event_type = p_type; }
 	CueEventType get_event_type() const { return event_type; }
 
-	void set_cue_tag(const StringName &p_tag) { cue_tag = p_tag; }
+	void set_cue_tag(const StringName &p_tag);
 	StringName get_cue_tag() const { return cue_tag; }
 
 	void set_node_name(const StringName &p_name) { node_name = p_name; }
 	StringName get_node_name() const { return node_name; }
 
-	// Base execution - can be overridden by specialized cues
+	void set_activation_required_tags(const TypedArray<StringName> &p_tags);
+	TypedArray<StringName> get_activation_required_tags() const { return activation_required_tags; }
+
+	void set_activation_blocked_tags(const TypedArray<StringName> &p_tags);
+	TypedArray<StringName> get_activation_blocked_tags() const { return activation_blocked_tags; }
+
+	// Execution logic
 	virtual void execute(Ref<AbilitySystemCueSpec> p_spec);
 
 	AbilitySystemCue();
 	~AbilitySystemCue();
 };
 
-VARIANT_ENUM_CAST(AbilitySystemCue::CueEventType);
+} // namespace godot
+
+VARIANT_ENUM_CAST(godot::AbilitySystemCue::CueEventType);

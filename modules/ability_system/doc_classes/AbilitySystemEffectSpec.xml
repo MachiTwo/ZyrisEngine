@@ -1,84 +1,122 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="AbilitySystemEffectSpec" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="AbilitySystemEffectSpec" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
-		Runtime instance of an ability system effect.
+		Runtime instance of an effect.
 	</brief_description>
 	<description>
-		[AbilitySystemEffectSpec] represents an instance of a [AbilitySystemEffect] being applied, storing remaining duration and dynamic magnitudes.
+		[AbilitySystemEffectSpec] represents an active effect. It stores the remaining duration and calculated magnitudes.
 	</description>
 	<tutorials>
 	</tutorials>
 	<methods>
-		<method name="calculate_modifier_magnitude" qualifiers="const">
-			<return type="float" />
-			<param index="0" name="index" type="int" />
-			<description>
-				Calculates the magnitude for the modifier at the given index, considering level and custom calculations.
-			</description>
-		</method>
 		<method name="get_duration_remaining" qualifiers="const">
 			<return type="float" />
 			<description>
-				Returns the remaining duration for this effect spec.
+				Returns time left before effect ends.
 			</description>
 		</method>
 		<method name="get_effect" qualifiers="const">
 			<return type="AbilitySystemEffect" />
 			<description>
-				Returns the effect definition resource for this spec.
+				Returns the effect resource definition.
+			</description>
+		</method>
+		<method name="get_hit_position" qualifiers="const">
+			<return type="Variant" />
+			<description>
+				Returns the position where the effect hit.
 			</description>
 		</method>
 		<method name="get_level" qualifiers="const">
 			<return type="float" />
 			<description>
-				Returns the level of this effect spec.
+				Returns the power level of the effect instance.
 			</description>
 		</method>
 		<method name="get_magnitude" qualifiers="const">
 			<return type="float" />
 			<param index="0" name="name" type="StringName" />
 			<description>
-				Returns the calculated magnitude for the attribute with the given name.
+				Returns the calculated modifier value for an attribute.
+			</description>
+		</method>
+		<method name="get_period_timer" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the time remaining until the next periodic tick.
+			</description>
+		</method>
+		<method name="get_source_attribute_value" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="attribute" type="StringName" />
+			<description>
+				Returns the value of an attribute on the source component.
 			</description>
 		</method>
 		<method name="get_source_component" qualifiers="const">
 			<return type="AbilitySystemComponent" />
 			<description>
-				Returns the source component that applied this effect.
+				Returns the ASC that applied this effect.
 			</description>
 		</method>
-		<method name="get_target_component" qualifiers="const">
-			<return type="AbilitySystemComponent" />
+		<method name="get_stack_count" qualifiers="const">
+			<return type="int" />
 			<description>
-				Returns the target component receiving this effect.
+				Returns the current number of stacks for this effect.
+			</description>
+		</method>
+		<method name="get_target_attribute_value" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="attribute" type="StringName" />
+			<description>
+				Returns the value of an attribute on the target component.
+			</description>
+		</method>
+		<method name="get_target_component">
+			<return type="void" />
+			<description>
+				Returns the destination component where the effect is applied.
+			</description>
+		</method>
+		<method name="get_target_node">
+			<return type="void" />
+			<description>
+				Returns the target object or node.
 			</description>
 		</method>
 		<method name="get_total_duration" qualifiers="const">
 			<return type="float" />
 			<description>
-				Returns the total duration for this effect spec.
+				Returns the initial calculated duration.
 			</description>
 		</method>
 		<method name="init">
 			<return type="void" />
 			<param index="0" name="effect" type="AbilitySystemEffect" />
-			<param index="1" name="level" type="float" default="1.0" />
+			<param index="1" name="level" type="float" />
 			<description>
-				Initializes this spec with an effect resource and level.
+				Initializes the effect specification with a definition and level.
 			</description>
 		</method>
 		<method name="set_duration_remaining">
 			<return type="void" />
 			<param index="0" name="value" type="float" />
 			<description>
-				Sets the remaining duration for this effect spec.
+				Sets the remaining time for the effect.
+			</description>
+		</method>
+		<method name="set_hit_position">
+			<return type="void" />
+			<param index="0" name="position" type="Variant" />
+			<description>
+				Sets the position where the effect was triggered.
 			</description>
 		</method>
 		<method name="set_level">
 			<return type="void" />
 			<param index="0" name="level" type="float" />
 			<description>
-				Sets the level of this effect spec.
+				Sets the power level of this instance.
 			</description>
 		</method>
 		<method name="set_magnitude">
@@ -86,7 +124,35 @@
 			<param index="0" name="name" type="StringName" />
 			<param index="1" name="value" type="float" />
 			<description>
-				Sets the calculated magnitude for the attribute with the given name.
+				Manually sets the calculated magnitude for an attribute.
+			</description>
+		</method>
+		<method name="set_period_timer">
+			<return type="void" />
+			<param index="0" name="timer" type="float" />
+			<description>
+				Sets the internal timer for the next periodic tick.
+			</description>
+		</method>
+		<method name="set_stack_count">
+			<return type="void" />
+			<param index="0" name="count" type="int" />
+			<description>
+				Sets the number of stacks.
+			</description>
+		</method>
+		<method name="set_target_node">
+			<return type="void" />
+			<param index="0" name="node" type="Object" />
+			<description>
+				Sets the target object or node.
+			</description>
+		</method>
+		<method name="set_total_duration">
+			<return type="void" />
+			<param index="0" name="value" type="float" />
+			<description>
+				Sets the total duration.
 			</description>
 		</method>
 	</methods>

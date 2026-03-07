@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="AbilitySystemEditorPlugin" inherits="EditorPlugin" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="AbilitySystemEditorPlugin" inherits="EditorPlugin" version="4.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
-		Editor integration for the Ability System.
+		The main entry point for Editor integrations of the Ability System.
 	</brief_description>
 	<description>
-		[AbilitySystemEditorPlugin] provides custom inspectors and UI for managing Tags and attributes within the Zyris Editor.
+		[AbilitySystemEditorPlugin] is the main Editor Plugin for the Ability System module. It automatically instantiates and registers the [AbilitySystemInspectorPlugin] so that nodes and resources like [AbilitySystemComponent] show customized tag selectors and unique name fields in the Godot Inspector. It also integrates the [AbilitySystemTagsPanel] directly into the Project Settings window for managing the global registry of tags.
 	</description>
 	<tutorials>
 	</tutorials>

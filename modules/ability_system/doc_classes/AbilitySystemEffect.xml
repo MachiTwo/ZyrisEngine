@@ -4,9 +4,7 @@
 		Resource defining modifications to attributes and tags.
 	</brief_description>
 	<description>
-		[AbilitySystemEffect] defines a formal package of attribute and tag modifications.
-		[b]Architectural Note:[/b] Effects are registered in the source actor's [AbilitySystemAbilityContainer] as part of an archetype contract (blueprint).
-		For example, a Sniper character has a "Single Shot" effect in its container, which is then instantiated into a [AbilitySystemEffectSpec] and applied to targets.
+		[AbilitySystemEffect] defines a package of attribute modifiers and tags. Can be instant, have a duration, or be infinite.
 	</description>
 	<tutorials>
 	</tutorials>
@@ -16,117 +14,216 @@
 			<param index="0" name="attribute" type="StringName" />
 			<param index="1" name="operation" type="int" enum="AbilitySystemEffect.ModifierOp" />
 			<param index="2" name="magnitude" type="float" />
-			<param index="3" name="custom_magnitude" type="AbilitySystemMagnitudeCalculation" default="null" />
+			<param index="3" name="use_custom_magnitude" type="bool" default="false" />
 			<description>
-				Adds a new attribute modifier to the effect.
+				Adds an attribute modifier.
+			</description>
+		</method>
+		<method name="get_activation_blocked_tags" qualifiers="const">
+			<return type="StringName[]" />
+			<description>
+				Returns the list of tags that block the application of this effect.
+			</description>
+		</method>
+		<method name="get_activation_required_tags" qualifiers="const">
+			<return type="StringName[]" />
+			<description>
+				Returns the list of tags required to apply this effect.
+			</description>
+		</method>
+		<method name="get_blocked_tags" qualifiers="const">
+			<return type="StringName[]" />
+			<description>
+				Returns the list of tags that are blocked (suppressed) while this effect is active.
+			</description>
+		</method>
+		<method name="get_cues" qualifiers="const">
+			<return type="AbilitySystemCue[]" />
+			<description>
+				Returns the collection of cues triggered by this effect.
+			</description>
+		</method>
+		<method name="get_execute_periodic_tick_on_application" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns true if a periodic tick should execute immediately upon application.
 			</description>
 		</method>
 		<method name="get_modifier_attribute" qualifiers="const">
 			<return type="StringName" />
 			<param index="0" name="index" type="int" />
 			<description>
-				Returns the attribute name modified by the modifier at the given index.
+				Returns the name of the attribute targeted by a modifier at a given index.
 			</description>
 		</method>
 		<method name="get_modifier_count" qualifiers="const">
 			<return type="int" />
 			<description>
-				Returns the number of attribute modifiers in this effect.
-			</description>
-		</method>
-		<method name="get_modifier_custom_magnitude" qualifiers="const">
-			<return type="AbilitySystemMagnitudeCalculation" />
-			<param index="0" name="index" type="int" />
-			<description>
-				Returns the custom magnitude calculation for the modifier at the given index.
+				Returns the number of modifiers defined in this effect.
 			</description>
 		</method>
 		<method name="get_modifier_magnitude" qualifiers="const">
 			<return type="float" />
 			<param index="0" name="index" type="int" />
 			<description>
-				Returns the magnitude value for the modifier at the given index.
+				Returns the base magnitude of a specific modifier by its index.
 			</description>
 		</method>
 		<method name="get_modifier_operation" qualifiers="const">
 			<return type="int" enum="AbilitySystemEffect.ModifierOp" />
 			<param index="0" name="index" type="int" />
 			<description>
-				Returns the operation type for the modifier at the given index.
+				Returns the mathematical operation of a specific modifier.
+			</description>
+		</method>
+		<method name="get_modifiers_count" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the total count of modifiers.
+			</description>
+		</method>
+		<method name="get_period" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the time interval between periodic ticks.
+			</description>
+		</method>
+		<method name="get_removed_tags" qualifiers="const">
+			<return type="StringName[]" />
+			<description>
+				Returns the list of tags that are removed when this effect is applied.
+			</description>
+		</method>
+		<method name="get_stacking_policy" qualifiers="const">
+			<return type="int" enum="AbilitySystemEffect.StackingPolicy" />
+			<description>
+				Returns the stacking behavior policy.
+			</description>
+		</method>
+		<method name="is_modifier_custom" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns true if the specified modifier uses custom calculation logic.
+			</description>
+		</method>
+		<method name="set_activation_blocked_tags">
+			<return type="void" />
+			<param index="0" name="tags" type="Variant" />
+			<description>
+				Sets the list of tags that block the application of this effect.
+			</description>
+		</method>
+		<method name="set_activation_required_tags">
+			<return type="void" />
+			<param index="0" name="tags" type="Variant" />
+			<description>
+				Sets the list of tags required to apply this effect.
+			</description>
+		</method>
+		<method name="set_blocked_tags">
+			<return type="void" />
+			<param index="0" name="tags" type="Variant" />
+			<description>
+				Sets the list of tags that are blocked while this effect is active.
+			</description>
+		</method>
+		<method name="set_cues">
+			<return type="void" />
+			<param index="0" name="cues" type="Variant" />
+			<description>
+				Sets the collection of cues triggered by this effect.
+			</description>
+		</method>
+		<method name="set_execute_periodic_tick_on_application">
+			<return type="void" />
+			<param index="0" name="exec" type="bool" />
+			<description>
+				Enables or disables immediate periodic tick on application.
+			</description>
+		</method>
+		<method name="set_modifiers_count">
+			<return type="void" />
+			<param index="0" name="count" type="int" />
+			<description>
+				Sets the number of modifiers.
+			</description>
+		</method>
+		<method name="set_period">
+			<return type="void" />
+			<param index="0" name="period" type="float" />
+			<description>
+				Sets the interval between periodic ticks.
+			</description>
+		</method>
+		<method name="set_removed_tags">
+			<return type="void" />
+			<param index="0" name="tags" type="Variant" />
+			<description>
+				Sets the list of tags to be removed upon application of the effect.
+			</description>
+		</method>
+		<method name="set_stacking_policy">
+			<return type="void" />
+			<param index="0" name="policy" type="int" />
+			<description>
+				Sets the stacking behavior policy.
 			</description>
 		</method>
 	</methods>
 	<members>
-		<member name="blocked_tags" type="StringName[]" setter="set_blocked_tags" getter="get_blocked_tags" default="[]">
-			Tags that are blocked while this effect is active.
-		</member>
-		<member name="cues" type="AbilitySystemCue[]" setter="set_cues" getter="get_cues" default="[]">
-			List of [AbilitySystemCue] resources to be executed directly when this effect is applied or removed.
-		</member>
 		<member name="duration_magnitude" type="float" setter="set_duration_magnitude" getter="get_duration_magnitude" default="0.0">
-			The duration value (if policy is DURATION).
+			Base duration value.
 		</member>
 		<member name="duration_policy" type="int" setter="set_duration_policy" getter="get_duration_policy" enum="AbilitySystemEffect.DurationPolicy" default="0">
-			How the effect duration is handled (INSTANT, DURATION, INFINITE).
+			INSTANT (0), DURATION (1), INFINITE (2).
 		</member>
 		<member name="effect_name" type="String" setter="set_effect_name" getter="get_effect_name" default="&quot;&quot;">
-			Unique name for this effect resource.
+			Unique name for the effect.
 		</member>
 		<member name="effect_tag" type="StringName" setter="set_effect_tag" getter="get_effect_tag" default="&amp;&quot;&quot;">
-			Unique tag identifying this effect, also used to trigger cues.
-		</member>
-		<member name="execute_periodic_tick_on_application" type="bool" setter="set_execute_periodic_tick_on_application" getter="get_execute_periodic_tick_on_application" default="false">
-			If [code]true[/code], a periodic tick fires immediately when the effect is first applied.
+			Tag identifying this effect.
 		</member>
 		<member name="granted_tags" type="StringName[]" setter="set_granted_tags" getter="get_granted_tags" default="[]">
-			Tags granted to the actor while this effect is active.
+			Tags granted while effect is active.
 		</member>
-		<member name="modifiers" type="int" setter="set_modifiers_count" getter="get_modifiers_count" default="0">
-			The number of attribute modifiers in this effect.
-		</member>
-		<member name="period" type="float" setter="set_period" getter="get_period" default="0.0">
-			If greater than [code]0[/code], the effect's modifiers are applied as instant ticks every [member period] seconds to the base attribute value. Used for Damage-over-Time or Heal-over-Time effects.
-		</member>
-		<member name="removed_tags" type="StringName[]" setter="set_removed_tags" getter="get_removed_tags" default="[]">
-			Tags removed from the actor when this effect is applied.
-		</member>
-		<member name="stacking_policy" type="int" setter="set_stacking_policy" getter="get_stacking_policy" enum="AbilitySystemEffect.StackingPolicy" default="0">
-			Defines behavior when a duplicate effect is applied on the same target. See [enum StackingPolicy].
+		<member name="use_custom_duration" type="bool" setter="set_use_custom_duration" getter="get_use_custom_duration" default="false">
+			If true, duration is calculated via ASC callback (index -1).
 		</member>
 	</members>
 	<constants>
-		<constant name="INSTANT" value="0" enum="DurationPolicy">
-			Effect is applied instantly and has no duration.
+		<constant name="POLICY_INSTANT" value="0" enum="DurationPolicy">
+			Effect is applied once and removed immediately.
 		</constant>
-		<constant name="DURATION" value="1" enum="DurationPolicy">
-			Effect stays active for a specified duration.
+		<constant name="POLICY_DURATION" value="1" enum="DurationPolicy">
+			Effect lasts for a specified duration.
 		</constant>
-		<constant name="INFINITE" value="2" enum="DurationPolicy">
-			Effect stays active until explicitly removed.
+		<constant name="POLICY_INFINITE" value="2" enum="DurationPolicy">
+			Effect lasts indefinitely until removed.
 		</constant>
 		<constant name="STACK_NEW_INSTANCE" value="0" enum="StackingPolicy">
-			Each application is a fully independent effect instance. Default behavior.
+			Each application is independent.
 		</constant>
 		<constant name="STACK_OVERRIDE" value="1" enum="StackingPolicy">
-			The new application replaces the old one, resetting its timer. Ideal for buffs that should not stack, e.g. a speed boost.
+			New application replaces the old (resets timer).
 		</constant>
 		<constant name="STACK_INTENSITY" value="2" enum="StackingPolicy">
-			A [code]stack_count[/code] is incremented and the modifier magnitude is multiplied by it. Ideal for stacking damage buffs.
+			Increases magnitude (adds to stack count).
 		</constant>
 		<constant name="STACK_DURATION" value="3" enum="StackingPolicy">
-			The remaining duration is extended by the new application's full duration. Ideal for refreshable HoT/DoT effects.
+			Extends the remaining duration.
 		</constant>
-		<constant name="ADD" value="0" enum="ModifierOp">
-			Value is added to the attribute.
+		<constant name="OP_ADD" value="0" enum="ModifierOp">
+			Adds the magnitude to the attribute.
 		</constant>
-		<constant name="MULTIPLY" value="1" enum="ModifierOp">
-			Value is multiplied with the attribute.
+		<constant name="OP_MULTIPLY" value="1" enum="ModifierOp">
+			Multiplies the attribute by the magnitude.
 		</constant>
-		<constant name="DIVIDE" value="2" enum="ModifierOp">
-			Value is divided from the attribute.
+		<constant name="OP_DIVIDE" value="2" enum="ModifierOp">
+			Divides the attribute by the magnitude.
 		</constant>
-		<constant name="OVERRIDE" value="3" enum="ModifierOp">
-			Value replaces the current attribute value.
+		<constant name="OP_OVERRIDE" value="3" enum="ModifierOp">
+			Overrides the attribute with the magnitude.
 		</constant>
 	</constants>
 </class>

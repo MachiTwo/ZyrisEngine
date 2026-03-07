@@ -18,23 +18,20 @@
 		<method name="end_task">
 			<return type="void" />
 			<description>
-				Ends the task and emits the signal.
+				Ends the task and emits the [signal completed] signal.
 			</description>
 		</method>
-		<method name="play_montage" qualifiers="static">
-			<return type="AbilitySystemTask" />
-			<param index="0" name="owner" type="AbilitySystemComponent" />
-			<param index="1" name="animation_name" type="StringName" />
+		<method name="is_finished" qualifiers="const">
+			<return type="bool" />
 			<description>
-				Creates a task that plays an animation and completes when it finishes.
+				Returns [code]true[/code] if the task has completed.
 			</description>
 		</method>
-		<method name="wait_delay" qualifiers="static">
-			<return type="AbilitySystemTask" />
+		<method name="set_owner">
+			<return type="void" />
 			<param index="0" name="owner" type="AbilitySystemComponent" />
-			<param index="1" name="delay" type="float" />
 			<description>
-				Creates a task that waits for the specified duration before completing.
+				Assigns the owning [AbilitySystemComponent] to the task.
 			</description>
 		</method>
 	</methods>

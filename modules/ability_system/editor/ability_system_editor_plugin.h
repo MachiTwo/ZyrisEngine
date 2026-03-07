@@ -30,32 +30,29 @@
 
 #pragma once
 
-#include "editor/inspector/editor_inspector.h"
+#ifdef ABILITY_SYSTEM_MODULE
 #include "editor/plugins/editor_plugin.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/classes/editor_plugin.hpp>
+#endif
 
-/**
- * AbilitySystemInspectorPlugin
- * Responsible for intercepting and customizing how Ability System properties
- * are shown in the Inspector.
- */
-class AbilitySystemInspectorPlugin : public EditorInspectorPlugin {
-	GDCLASS(AbilitySystemInspectorPlugin, EditorInspectorPlugin);
+namespace godot {
 
-public:
-	virtual bool can_handle(Object *p_object) override;
-	virtual bool parse_property(Object *p_object, const Variant::Type p_type, const String &p_path, const PropertyHint p_hint, const String &p_hint_text, const BitField<PropertyUsageFlags> p_usage, const bool p_wide = false) override;
-};
-
-/**
- * AbilitySystemEditorPlugin
- * Entry point for all Editor-side customizations of the Ability System.
- */
 class AbilitySystemEditorPlugin : public EditorPlugin {
 	GDCLASS(AbilitySystemEditorPlugin, EditorPlugin);
 
+protected:
+	static void _bind_methods();
+
 public:
+#ifdef ABILITY_SYSTEM_MODULE
 	virtual String get_plugin_name() const override { return "AbilitySystem"; }
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+	virtual String _get_plugin_name() const override { return "AbilitySystem"; }
+#endif
 
 	AbilitySystemEditorPlugin();
 	~AbilitySystemEditorPlugin();
 };
+
+} //namespace godot

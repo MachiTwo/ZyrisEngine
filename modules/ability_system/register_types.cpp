@@ -30,15 +30,16 @@
 
 #include "register_types.h"
 
+#ifdef ABILITY_SYSTEM_MODULE
 #include "core/config/engine.h"
-#include "core/object/class_db.h"
+#include "core/config/project_settings.h"
+#include "core/os/os.h"
+
 #include "modules/ability_system/core/ability_system.h"
 #include "modules/ability_system/core/ability_system_ability_spec.h"
 #include "modules/ability_system/core/ability_system_cue_spec.h"
 #include "modules/ability_system/core/ability_system_effect_spec.h"
-#include "modules/ability_system/core/ability_system_magnitude_calculation.h"
 #include "modules/ability_system/core/ability_system_tag_spec.h"
-#include "modules/ability_system/core/ability_system_target_data.h"
 #include "modules/ability_system/core/ability_system_task.h"
 #include "modules/ability_system/resources/ability_system_ability.h"
 #include "modules/ability_system/resources/ability_system_ability_container.h"
@@ -49,115 +50,130 @@
 #include "modules/ability_system/resources/ability_system_cue_audio.h"
 #include "modules/ability_system/resources/ability_system_effect.h"
 #include "modules/ability_system/scene/ability_system_component.h"
-
 #ifdef TOOLS_ENABLED
-#include "editor/editor_node.h"
 #include "modules/ability_system/editor/ability_system_editor_plugin.h"
-#include "modules/ability_system/editor/ability_system_tags_editor.h"
-#include "modules/ability_system/editor/ability_system_tags_selector.h"
+#include "modules/ability_system/editor/ability_system_editor_property.h"
+#include "modules/ability_system/editor/ability_system_inspector_plugin.h"
+#include "modules/ability_system/editor/ability_system_tags_panel.h"
 #endif
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include <godot_cpp/classes/engine.hpp>
+#include <godot_cpp/classes/os.hpp>
+#include <godot_cpp/classes/project_settings.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 
-static AbilitySystem *ability_system_singleton = nullptr;
-
+#include "src/core/ability_system.h"
+#include "src/core/ability_system_ability_spec.h"
+#include "src/core/ability_system_cue_spec.h"
+#include "src/core/ability_system_effect_spec.h"
+#include "src/core/ability_system_tag_spec.h"
+#include "src/core/ability_system_task.h"
+#include "src/resources/ability_system_ability.h"
+#include "src/resources/ability_system_ability_container.h"
+#include "src/resources/ability_system_attribute.h"
+#include "src/resources/ability_system_attribute_set.h"
+#include "src/resources/ability_system_cue.h"
+#include "src/resources/ability_system_cue_animation.h"
+#include "src/resources/ability_system_cue_audio.h"
+#include "src/resources/ability_system_effect.h"
+#include "src/scene/ability_system_component.h"
 #ifdef TOOLS_ENABLED
-void register_ability_system_script_templates();
+#include "src/editor/ability_system_editor_plugin.h"
+#include "src/editor/ability_system_editor_property.h"
+#include "src/editor/ability_system_inspector_plugin.h"
+#include "src/editor/ability_system_tags_panel.h"
 #endif
+#endif
+
+#ifdef ABILITY_SYSTEM_TESTS_ENABLED
+extern int ability_system_run_tests();
+#endif
+
+#ifdef ABILITY_SYSTEM_MODULE
+static godot::AbilitySystem *ability_system_singleton = nullptr;
 
 void initialize_ability_system_module(ModuleInitializationLevel p_level) {
-	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE) {
-		ClassDB::register_class<AbilitySystem>();
-		ClassDB::register_class<AbilitySystemTagSpec>();
-		ClassDB::register_class<AbilitySystemAttribute>();
-		ClassDB::register_class<AbilitySystemAttributeSet>();
-		ClassDB::register_class<AbilitySystemAbilityContainer>();
-		ClassDB::register_class<AbilitySystemEffect>();
-		ClassDB::register_class<AbilitySystemEffectSpec>();
-		ClassDB::register_class<AbilitySystemAbility>();
-		ClassDB::register_class<AbilitySystemAbilitySpec>();
-		ClassDB::register_class<AbilitySystemComponent>();
-		ClassDB::register_class<AbilitySystemCue>();
-		ClassDB::register_class<AbilitySystemCueAnimation>();
-		ClassDB::register_class<AbilitySystemCueAudio>();
-		ClassDB::register_class<AbilitySystemCueSpec>();
-		ClassDB::register_class<AbilitySystemMagnitudeCalculation>();
-		ClassDB::register_class<AbilitySystemTargetData>();
-		ClassDB::register_class<AbilitySystemTask>();
+#else
+namespace godot {
+static AbilitySystem *ability_system_singleton = nullptr;
 
-		ability_system_singleton = memnew(AbilitySystem);
-		Engine::get_singleton()->add_singleton(Engine::Singleton("AbilitySystem", AbilitySystem::get_singleton()));
+void initialize_ability_system_module(ModuleInitializationLevel p_level) {
+#endif
+	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE) {
+		GDREGISTER_CLASS(godot::AbilitySystem);
+		GDREGISTER_CLASS(godot::AbilitySystemTagSpec);
+		GDREGISTER_CLASS(godot::AbilitySystemTask);
+		GDREGISTER_CLASS(godot::AbilitySystemAbility);
+		GDREGISTER_CLASS(godot::AbilitySystemAbilitySpec);
+		GDREGISTER_CLASS(godot::AbilitySystemAbilityContainer);
+		GDREGISTER_CLASS(godot::AbilitySystemAttribute);
+		GDREGISTER_CLASS(godot::AbilitySystemAttributeSet);
+		GDREGISTER_CLASS(godot::AbilitySystemEffect);
+		GDREGISTER_CLASS(godot::AbilitySystemEffectSpec);
+		GDREGISTER_CLASS(godot::AbilitySystemCue);
+		GDREGISTER_CLASS(godot::AbilitySystemCueSpec);
+		GDREGISTER_CLASS(godot::AbilitySystemCueAnimation);
+		GDREGISTER_CLASS(godot::AbilitySystemCueAudio);
+		GDREGISTER_CLASS(godot::AbilitySystemComponent);
+
+		ability_system_singleton = memnew(godot::AbilitySystem);
+#ifdef ABILITY_SYSTEM_MODULE
+		Engine::get_singleton()->add_singleton(Engine::Singleton("AbilitySystem", ability_system_singleton));
+#else
+		Engine::get_singleton()->register_singleton("AbilitySystem", ability_system_singleton);
+#endif
+
+#ifdef ABILITY_SYSTEM_TESTS_ENABLED
+		PackedStringArray args = OS::get_singleton()->get_cmdline_args();
+		if (args.find("--run-ability-tests") != -1) {
+			exit(ability_system_run_tests());
+		}
+#endif
 	}
+
 #ifdef TOOLS_ENABLED
 	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
-		ClassDB::register_class<AbilitySystemEditorPlugin>();
-		ClassDB::register_class<AbilitySystemTagsEditor>();
-		ClassDB::register_class<AbilitySystemTagsSelector>();
-		EditorPlugins::add_by_type<AbilitySystemEditorPlugin>();
-		register_ability_system_script_templates();
+		GDREGISTER_CLASS(godot::AbilitySystemInspectorPlugin);
+		GDREGISTER_CLASS(godot::AbilitySystemEditorPropertySelector);
+		GDREGISTER_CLASS(godot::AbilitySystemEditorPropertyName);
+		GDREGISTER_CLASS(godot::AbilitySystemEditorPropertyTagSelector);
+		GDREGISTER_CLASS(godot::AbilitySystemTagsPanel);
+
+#ifdef ABILITY_SYSTEM_MODULE
+		EditorPlugins::add_by_type<godot::AbilitySystemEditorPlugin>();
+#endif
 	}
 #endif
 }
-
-#ifdef TOOLS_ENABLED
-#include "core/io/dir_access.h"
-#include "core/io/file_access.h"
-#include "editor/file_system/editor_paths.h"
-#include "editor/settings/editor_settings.h"
-#include "modules/ability_system/editor/script_templates/templates.gen.h"
-
-void register_ability_system_script_templates() {
-	if (!EditorPaths::get_singleton()) {
-		return;
-	}
-
-	String templates_dir = EditorPaths::get_singleton()->get_script_templates_dir();
-
-	Ref<DirAccess> da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM); // Use filesystem access to ensure we can write
-	if (da.is_null()) {
-		return;
-	}
-
-	for (int i = 0; i < ABILITY_SYSTEM_TEMPLATES_ARRAY_SIZE; i++) {
-		const AbilitySystemScriptTemplate &t = ABILITY_SYSTEM_TEMPLATES[i];
-		String inherit = String(t.inherit);
-		String name = String(t.name);
-		String description = String(t.description);
-		String content_str = String(t.content);
-
-		String target_dir = templates_dir.path_join(inherit);
-
-		if (!da->dir_exists(target_dir)) {
-			da->make_dir_recursive(target_dir);
-		}
-
-		String extension = "gd"; // Default
-		if (content_str.contains("using _BINDINGS_NAMESPACE_;")) {
-			extension = "cs";
-		}
-
-		String filename = name.to_snake_case() + "." + extension;
-		String full_path = target_dir.path_join(filename);
-
-		if (!FileAccess::exists(full_path)) {
-			Ref<FileAccess> f = FileAccess::open(full_path, FileAccess::WRITE);
-			if (f.is_valid()) {
-				// We need to restore indentation from _TS_
-				String final_content = content_str.replace("_TS_", "\t");
-
-				// Re-add meta information
-				f->store_line(extension == "cs" ? "// meta-name: " + name : "# meta-name: " + name);
-				f->store_line(extension == "cs" ? "// meta-description: " + description : "# meta-description: " + description);
-				f->store_line("");
-				f->store_string(final_content);
-			}
-		}
-	}
-}
-#endif
 
 void uninitialize_ability_system_module(ModuleInitializationLevel p_level) {
 	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE) {
 		if (ability_system_singleton) {
+#ifdef ABILITY_SYSTEM_MODULE
+			Engine::get_singleton()->remove_singleton("AbilitySystem");
+#else
+			Engine::get_singleton()->unregister_singleton("AbilitySystem");
+#endif
 			memdelete(ability_system_singleton);
+			ability_system_singleton = nullptr;
 		}
 	}
 }
+
+#ifndef ABILITY_SYSTEM_MODULE
+} // namespace godot
+#endif
+
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+extern "C" {
+GDExtensionBool GDE_EXPORT ability_system_library_init(GDExtensionInterfaceGetProcAddress p_get_proc_address, const GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
+	godot::GDExtensionBinding::InitObject init_obj(p_get_proc_address, p_library, r_initialization);
+
+	init_obj.register_initializer(godot::initialize_ability_system_module);
+	init_obj.register_terminator(godot::uninitialize_ability_system_module);
+	init_obj.set_minimum_library_initialization_level(godot::MODULE_INITIALIZATION_LEVEL_SCENE);
+
+	return init_obj.init();
+}
+}
+#endif

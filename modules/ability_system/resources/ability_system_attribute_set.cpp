@@ -28,9 +28,15 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#ifdef ABILITY_SYSTEM_MODULE
 #include "modules/ability_system/resources/ability_system_attribute_set.h"
-
 #include "modules/ability_system/resources/ability_system_ability.h"
+#elif defined(ABILITY_SYSTEM_GDEXTENSION)
+#include "src/resources/ability_system_ability.h"
+#include "src/resources/ability_system_attribute_set.h"
+#endif
+
+namespace godot {
 
 void AbilitySystemAttributeSet::_bind_methods() {
 	// Resource-based API
@@ -52,6 +58,13 @@ void AbilitySystemAttributeSet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("has_attribute", "name"), &AbilitySystemAttributeSet::has_attribute);
 	ClassDB::bind_method(D_METHOD("get_attribute_list"), &AbilitySystemAttributeSet::get_attribute_list);
 	ClassDB::bind_method(D_METHOD("reset_current_values"), &AbilitySystemAttributeSet::reset_current_values);
+
+	ClassDB::bind_method(D_METHOD("add_modifier", "name", "value", "type"), &AbilitySystemAttributeSet::add_modifier, DEFVAL(MODIFIER_ADD));
+	ClassDB::bind_method(D_METHOD("remove_modifier", "name", "value", "type"), &AbilitySystemAttributeSet::remove_modifier, DEFVAL(MODIFIER_ADD));
+	ClassDB::bind_method(D_METHOD("get_attribute_value", "name"), &AbilitySystemAttributeSet::get_attribute_value);
+
+	BIND_ENUM_CONSTANT(MODIFIER_ADD);
+	BIND_ENUM_CONSTANT(MODIFIER_MULTIPLY);
 
 	// Properties — attribute_definitions and granted_abilities at the top for editor visibility.
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "attribute_definitions", PROPERTY_HINT_TYPE_STRING, vformat("%s/%s:%s", Variant::OBJECT, PROPERTY_HINT_RESOURCE_TYPE, "AbilitySystemAttribute")), "set_attribute_definitions", "get_attribute_definitions");
@@ -157,9 +170,8 @@ void AbilitySystemAttributeSet::set_attribute_base_value(const StringName &p_nam
 
 	float validated_value = def->clamp_value(p_value);
 	attributes[p_name].base_value = validated_value;
-
-	// Update the attribute's base value to keep them in sync
-	def->set_base_value(validated_value);
+	// Also sync current_value so instant changes are immediately visible
+	attributes[p_name].current_value = validated_value;
 }
 
 float AbilitySystemAttributeSet::get_attribute_base_value(const StringName &p_name) const {
@@ -187,9 +199,6 @@ void AbilitySystemAttributeSet::set_attribute_current_value(const StringName &p_
 		emit_signal("attribute_pre_change", p_name, old_val, validated_value);
 	}
 	emit_signal("attribute_changed", p_name, old_val, validated_value);
-
-	// Update the attribute's base value to keep them in sync
-	def->set_base_value(validated_value);
 }
 
 float AbilitySystemAttributeSet::get_attribute_current_value(const StringName &p_name) const {
@@ -213,6 +222,47 @@ void AbilitySystemAttributeSet::reset_current_values() {
 	for (KeyValue<StringName, AttributeValue> &E : attributes) {
 		E.value.current_value = E.value.base_value;
 	}
+}
+
+void AbilitySystemAttributeSet::add_modifier(const StringName &p_name, float p_value, ModifierType p_type) {
+	ERR_FAIL_COND_MSG(!attributes.has(p_name), vformat("Attribute '%s' not found in AttributeSet", p_name));
+
+	float old_val = get_attribute_value(p_name);
+
+	if (p_type == MODIFIER_ADD) {
+		attributes[p_name].current_value += p_value;
+	} else if (p_type == MODIFIER_MULTIPLY) {
+		attributes[p_name].current_value *= p_value;
+	}
+
+	float new_val = get_attribute_value(p_name);
+	if (old_val != new_val) {
+		emit_signal("attribute_changed", p_name, old_val, new_val);
+	}
+}
+
+void AbilitySystemAttributeSet::remove_modifier(const StringName &p_name, float p_value, ModifierType p_type) {
+	ERR_FAIL_COND_MSG(!attributes.has(p_name), vformat("Attribute '%s' not found in AttributeSet", p_name));
+
+	float old_val = get_attribute_value(p_name);
+
+	if (p_type == MODIFIER_ADD) {
+		attributes[p_name].current_value -= p_value;
+	} else if (p_type == MODIFIER_MULTIPLY) {
+		if (p_value != 0.0f) {
+			attributes[p_name].current_value /= p_value;
+		}
+	}
+
+	float new_val = get_attribute_value(p_name);
+	if (old_val != new_val) {
+		emit_signal("attribute_changed", p_name, old_val, new_val);
+	}
+}
+
+float AbilitySystemAttributeSet::get_attribute_value(const StringName &p_name) const {
+	ERR_FAIL_COND_V_MSG(!attributes.has(p_name), 0.0f, vformat("Attribute '%s' not found in AttributeSet", p_name));
+	return attributes[p_name].current_value;
 }
 
 AbilitySystemAttributeSet::AbilitySystemAttributeSet() {
@@ -249,3 +299,5 @@ void AbilitySystemAttributeSet::_on_attribute_value_changed(float p_old_value, f
 void AbilitySystemAttributeSet::_on_attribute_limits_changed(float p_min_value, float p_max_value, const StringName &p_name) {
 	// Handle limits changes if needed
 }
+
+} // namespace godot
